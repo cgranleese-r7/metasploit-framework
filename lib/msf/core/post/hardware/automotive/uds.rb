@@ -6,22 +6,6 @@ module Automotive
 
 module UDS
 
-  def initialize(info = {})
-    super(
-      update_info(
-        info,
-        'Compat' => {
-          'Meterpreter' => {
-            'Commands' => %w[
-              automotive_active_bus
-              automotive_send_isotp_and_wait_for_response
-            ]
-          }
-        }
-      )
-    )
-  end
-
   #
   # Helper method to take client.automotive response hashes and return a single array in order, This
   # takes the ISO-TP Packets and assembles them in order, strips out the ISO-TP/UDS related info
