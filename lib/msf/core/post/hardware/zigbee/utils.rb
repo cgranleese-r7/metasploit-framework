@@ -42,6 +42,28 @@ module Utils
   DOT154_CRYPT_ENC_MIC64          = 0x06    #: Encryption, 64-bit MIC
   DOT154_CRYPT_ENC_MIC128         = 0x07    #: Encryption, 128-bit MIC
 
+  def initialize(info = {})
+    super(
+      update_info(
+        info,
+        'Compat' => {
+          'Meterpreter' => {
+            'Commands' => %w[
+              zigbee_set_target_device
+              zigbee_get_target_device
+              zigbee_target_device
+              zigbee_set_channel
+              zigbee_inject
+              zigbee_recv
+              zigbee_sniffer_off
+              zigbee_sniffer_off
+            ]
+          }
+        }
+      )
+    )
+  end
+
   # Infer if the current session is for a ZigBee device.
   # @return [Boolean] true if session is for a ZigBee device, false otherwise
   def is_zigbee_hwbridge_session?

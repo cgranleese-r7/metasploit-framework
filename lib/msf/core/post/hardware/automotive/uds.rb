@@ -6,6 +6,22 @@ module Automotive
 
 module UDS
 
+  def initialize(info = {})
+    super(
+      update_info(
+        info,
+        'Compat' => {
+          'Meterpreter' => {
+            'Commands' => %w[
+              automotive_active_bus
+              automotive_send_isotp_and_wait_for_response
+            ]
+          }
+        }
+      )
+    )
+  end
+
   #
   # Helper method to take client.automotive response hashes and return a single array in order, This
   # takes the ISO-TP Packets and assembles them in order, strips out the ISO-TP/UDS related info
@@ -792,7 +808,7 @@ module UDS
   # @param response_level [Integer] Requested security access level response. Usually level + 1. Default is 2
   # @param opt [Hash] Optional settings. PADDING if set uses this hex value for padding
   #
-  # @return [Hash] packet response from client.automotoive
+  # @return [Hash] packet response from client.automotive
   def send_security_token_response(bus, src_id, dst_id, key, response_level = 2, opt = {})
     unless client.automotive
       print_error("Not an automotive hwbridge session")

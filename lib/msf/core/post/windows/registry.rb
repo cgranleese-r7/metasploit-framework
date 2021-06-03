@@ -49,6 +49,33 @@ module Registry
   HKEY_CURRENT_CONFIG = 0x80000005
   HKEY_DYN_DATA = 0x80000006
 
+  def initialize(info = {})
+    super(
+      update_info(
+        info,
+        'Compat' => {
+          'Meterpreter' => {
+            'Commands' => %w[
+              stdapi_sys_registry_config_getprivs
+              stdapi_sys_registry_load_key
+              stdapi_sys_registry_splitkey
+              stdapi_sys_registry_unload_key
+              stdapi_sys_registry_create_key
+              stdapi_sys_registry_open_key
+              stdapi_sys_registry_delete_key
+              stdapi_sys_registry_enum_key_direct
+              stdapi_sys_registry_enum_value_direct
+              stdapi_sys_registry_query_value_direct
+              stdapi_sys_registry_set_value_direct
+              stdapi_sys_registry_type2str
+              stdapi_sys_registry_check_key_exists
+            ]
+          }
+        }
+      )
+    )
+  end
+
   #
   # Lookup registry hives by key.
   #

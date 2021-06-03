@@ -6,6 +6,21 @@ module RFTransceiver
 
 module RFTransceiver
 
+  def initialize(info = {})
+    super(
+      update_info(
+        info,
+        'Compat' => {
+          'Meterpreter' => {
+            'Commands' => %w[
+              rftransceiver_*
+            ]
+          }
+        }
+      )
+    )
+  end
+
   attr_accessor :index
 
   # Validates success of a function call
