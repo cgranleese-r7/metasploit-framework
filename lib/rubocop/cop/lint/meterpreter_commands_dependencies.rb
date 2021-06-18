@@ -3,6 +3,7 @@ module RuboCop
     module Lint
       class MeterpreterCommandDependencies < Base
         extend AutoCorrector
+        include Alignment
 
         MSG = 'Convert meterpreter api calls into meterpreter command dependencies.'.freeze
 
@@ -39,7 +40,7 @@ module RuboCop
         def on_new_investigation
           super
           @current_commands = [] # TODO: Needed for when the cop has been ran against modules with no offenses && if the list has commands that dont have a corresponding function call
-          @latest_commands = []
+          @identified_commands = []
           @command_array_node = nil
 
           @state = :none
@@ -55,20 +56,21 @@ module RuboCop
         end
 
         def after_def(_node)
-          require "pry"; binding.pry
+          # require "pry"; binding.pry
           @state = :none
         end
 
         def on_pair(node)
           return unless @state == :looking_for_hash_keys
-          require "pry"; binding.pry
+          # require "pry"; binding.pry
           if node.key.value == 'Compat'
             @compat_node = node
           elsif node.key.value == 'Meterpreter'
             @meterpreter_node = node
-          elsif node.key.value == 'commands'
+          elsif node.key.value == 'Commands'
             @command_node = node # TODO: Grab these children again like before.
-            # @current_commands = node.each_child_
+            node.value.each_child_node {|command| @current_commands << command.value}
+            # require "pry"; binding.pry
           end
         end
 
@@ -91,37 +93,107 @@ module RuboCop
 
         def on_send(node)
           if file_rm_call?(node)
-            unless @latest_commands.include?('stdapi_fs_rm')
-              @latest_commands << 'stdapi_fs_rm'
-              # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
-              add_offense(node)
-            end
+            @identified_commands << 'stdapi_fs_rm' unless @identified_commands.include?('stdapi_fs_rm')
+            # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
+            add_offense(node) unless @current_commands.include?('stdapi_fs_rm')
           end
 
           if file_ls_call?(node)
-            unless @latest_commands.include?('stdapi_fs_ls')
-              @latest_commands << 'stdapi_fs_ls'
-              # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
-              add_offense(node)
-            end
+            @identified_commands << 'stdapi_fs_ls' unless @identified_commands.include?('stdapi_fs_ls')
+            # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
+            add_offense(node) unless @current_commands.include?('stdapi_fs_ls')
+
           end
         end
 
         def on_investigation_end
+          # TODO: Add offenses for when the list just needs sorted.
           super
-          if @command_list_node.nil?
-            false
+          # Ensure commands are sorted and unique
+          @identified_commands = @identified_commands.uniq.sort
+
+          # TODO: Need better logic here for scenarios where nodes could be nil, as they may not be present
+          if @compat_node && @meterpreter_node && @command_node && @identified_commands != @current_commands
+            add_offense(@command_node, &autocorrector)
+          elsif @compat_node && @meterpreter_node && @command_node && @identified_commands == @current_commands
+            # TODO: Handle this
+          elsif @compat_node && @meterpreter_node && @command_node.nil?
+            add_offense(@meterpreter_node, &autocorrector)
+          elsif @compat_node && @meterpreter_node.nil? && @command_node.nil?
+            add_offense(@compat_node, &autocorrector)
           else
-            add_offense(@command_list_node, &autocorrector)
+            raise 'Fix this dummy'
           end
         end
 
         def autocorrector
-
           lambda do |corrector|
-            # TODO: Handle if @latest_commands and @current_commands are equal
-            if @command_list_node.nil? || @current_commands == @latest_commands
-              # TODO: Handle this scenario
+            # Handles scenario where we have both compat & meterpreter hashes
+            # but no commands array present within a module
+            if @compat_node && @meterpreter_node && @command_node.nil?
+              meterpreter_hash_node = @meterpreter_node.children[1]
+
+              # White spacing handling based of node offsets
+              meterpreter_whitespace = offset(@meterpreter_node)
+              commands_whitespace = meterpreter_whitespace + "  "
+              array_content_whitespace = commands_whitespace + "  "
+
+              # Formatting to add missing commands node when the method has a compat node & meterpreter node present
+              new_hash =
+                "{\n" \
+                "#{commands_whitespace}'Commands' => %w[" \
+                "\n#{array_content_whitespace}#{@identified_commands.join("\n#{array_content_whitespace}")}\n" \
+                "#{commands_whitespace}]\n" \
+                "#{meterpreter_whitespace}}"
+
+              corrector.replace(meterpreter_hash_node, new_hash)
+
+            # Handles scenario when we have a compats hash, but no meterpreter hash
+            # and compats array present within the array
+            elsif @compat_node && @meterpreter_node.nil? && @command_node.nil?
+              compat_hash_node = @compat_node.children[1]
+
+              # White spacing handling based of node offsets
+              compat_whitespace = offset(@compat_node)
+              meterpreter_whitespace = compat_whitespace + "  "
+              commands_whitespace = meterpreter_whitespace + "  "
+              array_content_whitespace = commands_whitespace + "  "
+
+              # Formatting to add missing commands node when the method has a compat node & meterpreter node present
+              new_hash =
+                "{\n" \
+                "#{meterpreter_whitespace}'Meterpreter' => {\n" \
+                "#{commands_whitespace}'Commands' => %w[" \
+                "\n#{array_content_whitespace}#{@identified_commands.join("\n#{array_content_whitespace}")}\n" \
+                "#{commands_whitespace}]\n" \
+                "#{meterpreter_whitespace}}\n" \
+                "#{compat_whitespace}}"
+
+              corrector.replace(compat_hash_node, new_hash)
+
+            elsif @compat_node.nil? && @meterpreter_node.nil? && @command_node.nil?
+              require "pry"; binding.pry
+              info_node = @compat_node.children[1]
+
+              # White spacing handling based of node offsets
+              info_whitespace = offset(@compat_node)
+              compat_whitespace = offset(@compat_node)
+              meterpreter_whitespace = compat_whitespace + "  "
+              commands_whitespace = meterpreter_whitespace + "  "
+              array_content_whitespace = commands_whitespace + "  "
+
+              # Formatting to add missing commands node when the method has a compat node & meterpreter node present
+              new_hash =
+                "{\n" \
+                "#{meterpreter_whitespace}'Meterpreter' => {\n" \
+                "#{commands_whitespace}'Commands' => %w[" \
+                "\n#{array_content_whitespace}#{@identified_commands.join("\n#{array_content_whitespace}")}\n" \
+                "#{commands_whitespace}]\n" \
+                "#{meterpreter_whitespace}}\n" \
+                "#{compat_whitespace}}"
+
+              corrector.replace(compat_hash_node, new_hash)
+
             else
               # TODO: Need to build out the formatting for adding the full method and another for just the compat section
               method_start = <<~EOS
@@ -142,24 +214,14 @@ module RuboCop
                   )
               EOS
 
-              compat_start = <<~EOS
-                      'Compat' => {
-                        'Meterpreter' => {
-                          'Commands' => %w[
-              EOS
-
-              compat_end = <<~EOS
-                          ]
-                        }
-                      }
-              EOS
-
-              # TODO: Look into using a AST to check if an initialise already exits and then look into more consistent code to anchor off. e.g. adding after 'SessionTypes'
-              @latest_commands = @latest_commands.uniq.sort
-
-              # TODO: WE should replace just the array contents, not the entire array
               # TODO: Need logic to handle if we need to add full method or just compat list
-              corrector.replace(@command_list_node, "#{method_start}#{@latest_commands.join("\n")}\n#{method_end}")
+              require "pry"; binding.pry
+              array_node = @command_node.children[1]
+              commands_whitespace = offset(@command_node)
+              array_whitespace = commands_whitespace + "  "
+
+              new_array = "%w[\n#{array_whitespace}#{@identified_commands.join("\n#{array_whitespace}")}\n#{commands_whitespace}]"
+              corrector.replace(array_node, new_array)
             end
           end
         end
