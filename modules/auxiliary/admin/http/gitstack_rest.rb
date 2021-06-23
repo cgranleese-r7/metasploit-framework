@@ -84,7 +84,14 @@ class MetasploitModule < Msf::Auxiliary
             }
           ]
         ],
-      'DefaultAction' => 'LIST'))
+      'DefaultAction' => 'LIST',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }))
 
     register_options(
       [

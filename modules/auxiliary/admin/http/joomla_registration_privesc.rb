@@ -28,7 +28,14 @@ class MetasploitModule < Msf::Auxiliary
           'Vitor Oliveira <vo[at]integrity.pt>',  # module creation and privilege escalation
         ],
       'License'        => MSF_LICENSE,
-      'DisclosureDate' => '2016-10-25'
+      'DisclosureDate' => '2016-10-25',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options(

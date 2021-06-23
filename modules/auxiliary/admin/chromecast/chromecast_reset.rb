@@ -22,7 +22,14 @@ class MetasploitModule < Msf::Auxiliary
         ['Reset', 'Description' => 'Factory reset'],
         ['Reboot', 'Description' => 'Reboot only']
       ],
-      'DefaultAction' => 'Reset'
+      'DefaultAction' => 'Reset',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options([

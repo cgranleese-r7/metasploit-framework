@@ -21,7 +21,14 @@ class MetasploitModule < Msf::Auxiliary
           ['OSVDB', '60035']
         ],
       'Author'         => 'hdm',
-      'License'        => MSF_LICENSE
+      'License'        => MSF_LICENSE,
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options([

@@ -33,7 +33,14 @@ class MetasploitModule < Msf::Auxiliary
           [ 'BID', '25676'],
           [ 'PACKETSTORM', '59347']
         ],
-      'DisclosureDate' => '2007-09-10'))
+      'DisclosureDate' => '2007-09-10',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }))
 
     register_options(
       [

@@ -28,7 +28,14 @@ class MetasploitModule < Msf::Auxiliary
         ],
       'License'        => MSF_LICENSE,
       'DisclosureDate' => '2017-08-24',
-      'DefaultOptions' => { 'SSL' => true }
+      'DefaultOptions' => { 'SSL' => true },
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options(

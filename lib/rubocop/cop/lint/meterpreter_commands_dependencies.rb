@@ -28,11 +28,15 @@ module RuboCop
         MSG = 'Convert meterpreter api calls into meterpreter command dependencies.'.freeze
 
         def_node_matcher :find_update_info_node, <<~PATTERN
-          (def :initialize _args (begin (super $(send nil? {:update_info :merge_info} (lvar :info) (hash ...))) ...))
+          (def :initialize _args (begin (super (send nil? {:update_info :merge_info} (lvar :info) $(hash ...))) ...))
         PATTERN
 
         def_node_matcher :find_nested_update_info_node, <<~PATTERN
-          (def :initialize _args (super $(send nil? {:update_info :merge_info} (lvar :info) (hash ...)) ...))
+          (def :initialize _args (super (send nil? {:update_info :merge_info} (lvar :info) $(hash ...)) ...))
+        PATTERN
+
+        def_node_matcher :find_info_node, <<~PATTERN
+          (def :initialize _args (super $(hash ...) ...))
         PATTERN
 
         # Matchers for identifying if the code already has an initialise etc.
@@ -105,6 +109,10 @@ module RuboCop
         end
 
         def enter_frame(node)
+          if @current_frame
+            raise "TODO: Can't nest stacks yet"
+          end
+
           @current_frame = StackFrame.new
           nodes[:investigated_node] = node
         end
@@ -122,7 +130,7 @@ module RuboCop
           elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:command_node].nil?
             add_offense(nodes[:compat_node], &autocorrector)
           elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:command_node].nil? && !nodes[:initialize_node].nil?
-            add_offense(nodes[:end_of_info_node], &autocorrector)
+            add_offense(nodes[:info_node].children.last, &autocorrector)
           elsif nodes[:initialize_node].nil?
             add_offense(nodes[:investigated_node].identifier, &autocorrector)
           else
@@ -136,13 +144,16 @@ module RuboCop
           return unless visiting_state == :none
 
           if initialize_present?(node)
+            # require "pry"; binding.pry
             nodes[:initialize_node] = node
           end
 
-          update_info_node = find_update_info_node(node) || find_nested_update_info_node(node)
+          update_info_node = find_update_info_node(node) || find_nested_update_info_node(node) || find_info_node(node)
           return if update_info_node.nil?
+          require "pry"; binding.pry
+          nodes[:info_node] = update_info_node
 
-          self.visiting_state = :looking_for_hash
+          self.visiting_state = :looking_for_hash_keys
         end
 
         def after_def(_node)
@@ -161,13 +172,14 @@ module RuboCop
           @current_frame.nodes
         end
 
-        def on_hash(node)
-          return unless visiting_state == :looking_for_hash
-          if node.parent.children[1] == :update_info
-            nodes[:end_of_info_node] = node.children.last
-            self.visiting_state = :looking_for_hash_keys
-          end
-        end
+        # def on_hash(node)
+        #   return unless visiting_state == :looking_for_hash
+        #   require "pry"; binding.pry
+        #   if node.parent.children[1] == :update_info
+        #     nodes[:end_of_info_node] = node.children.last
+        #     self.visiting_state = :looking_for_hash_keys
+        #   end
+        # end
 
         def on_pair(node)
           return unless visiting_state == :looking_for_hash_keys
@@ -267,13 +279,14 @@ module RuboCop
               # and  no compats array present within the module, but we do have an initialize method present
             elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:command_node].nil? && !nodes[:initialize_node].nil?
               # White spacing handling based of node offsets
-              compat_whitespace = offset(nodes[:end_of_info_node])
+              require "pry"; binding.pry
+              compat_whitespace = offset(nodes[:info_node])
               meterpreter_whitespace = compat_whitespace + "  "
               commands_whitespace = meterpreter_whitespace + "  "
               array_content_whitespace = commands_whitespace + "  "
 
               # Formatting to add missing commands node when the method has a compat node & meterpreter node present
-              test_new_hash =
+              new_hash =
                 ",\n#{compat_whitespace}'Compat' => {\n" \
                 "#{meterpreter_whitespace}'Meterpreter' => {\n" \
                 "#{commands_whitespace}'Commands' => %w[" \
@@ -282,7 +295,7 @@ module RuboCop
                 "#{meterpreter_whitespace}}\n" \
                 "#{compat_whitespace}}"
 
-              corrector.insert_after(nodes[:end_of_info_node], test_new_hash)
+              corrector.insert_after(nodes[:info_node].children.last, new_hash)
 
               # Handles scenario when we have no compats hash, no meterpreter hash
               # and  no compats array present no initialize method present within the module
@@ -315,7 +328,7 @@ module RuboCop
                 "\n#{def_whitespace}end" \
                 "\n  "
 
-              require "pry"; binding.pry
+              # require "pry"; binding.pry
               corrector.insert_before(body, new_hash)
 
             else

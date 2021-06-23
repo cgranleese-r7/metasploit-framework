@@ -31,7 +31,14 @@ class MetasploitModule < Msf::Auxiliary
           'juan vazquez' # Metasploit module
         ],
       'License'        => MSF_LICENSE,
-      'DisclosureDate' => '2013-10-08'
+      'DisclosureDate' => '2013-10-08',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options(

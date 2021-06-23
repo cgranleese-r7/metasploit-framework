@@ -38,7 +38,14 @@ class MetasploitModule < Msf::Auxiliary
         [ 'OSVDB', '110664' ],
         [ 'CVE', '2014-6041' ]
       ],
-      'DefaultAction'  => 'WebServer'
+      'DefaultAction'  => 'WebServer',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options([

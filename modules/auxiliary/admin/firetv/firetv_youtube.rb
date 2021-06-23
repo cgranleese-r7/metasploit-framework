@@ -25,7 +25,14 @@ class MetasploitModule < Msf::Auxiliary
         ['Play', 'Description' => 'Play video'],
         ['Stop', 'Description' => 'Stop video']
       ],
-      'DefaultAction' => 'Play'
+      'DefaultAction' => 'Play',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options([

@@ -34,7 +34,14 @@ class MetasploitModule < Msf::Auxiliary
           ['Delete', { 'Description' => 'Delete remote file' }]
         ],
       'DefaultAction' => 'Read',
-      'DisclosureDate' => '2012-10-31'))
+      'DisclosureDate' => '2012-10-31',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }))
 
     register_options(
       [

@@ -97,6 +97,61 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
+  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                ]
+              }
+            }
+          )
+        end
+        def run_module
+          session.fs.file.rm
+          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end 
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_rm
+                ]
+              }
+            }
+          )
+        end
+        def run_module
+          session.fs.file.rm
+        end 
+      end
+    RUBY
+  end
+
   it 'works with modules' do
     expect_offense(<<~RUBY)
       module Msf::Post::Process

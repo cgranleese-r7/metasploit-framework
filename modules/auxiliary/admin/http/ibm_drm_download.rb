@@ -45,7 +45,14 @@ class MetasploitModule < Msf::Auxiliary
         'Actions' => [
           ['Download', { 'Description' => 'Download arbitrary file' }]
         ],
-        'DefaultAction' => 'Download'
+        'DefaultAction' => 'Download',
+        'Compat' => {
+          'Meterpreter' => {
+            'Commands' => %w[
+              
+            ]
+          }
+        }
       )
     )
 

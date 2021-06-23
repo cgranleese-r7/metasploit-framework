@@ -30,7 +30,14 @@ class MetasploitModule < Msf::Auxiliary
           ['System Information', 'Description' => 'Dump system info (user, owner, OS, CPU...)'],
           ['Create Logon Notice', 'Description' => 'Add a logon notice']
         ],
-      'DefaultAction' => 'System Information'
+      'DefaultAction' => 'System Information',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
       ))
 
       register_options(

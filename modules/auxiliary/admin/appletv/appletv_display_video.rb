@@ -32,7 +32,14 @@ class MetasploitModule < Msf::Auxiliary
           ['URL', 'http://nto.github.io/AirPlay.html']
         ],
       'DefaultOptions' => { 'HttpUsername' => 'AirPlay' },
-      'License'        => MSF_LICENSE
+      'License'        => MSF_LICENSE,
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options([

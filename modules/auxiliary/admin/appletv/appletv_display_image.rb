@@ -25,7 +25,14 @@ class MetasploitModule < Msf::Auxiliary
           ['URL', 'http://nto.github.io/AirPlay.html']
         ],
       'DefaultOptions' => { 'HttpUsername' => 'AirPlay' },
-      'License'        => MSF_LICENSE
+      'License'        => MSF_LICENSE,
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     # Make the PASSWORD option more visible and hope the user is more aware of this option

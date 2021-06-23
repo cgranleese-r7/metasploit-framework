@@ -23,7 +23,14 @@ class MetasploitModule < Msf::Auxiliary
         'References'     => [
           [ 'URL', 'https://drive.google.com/open?id=0B2Ka7F_6TetSNFdfbkI1cnJHUTQ'],
           [ 'URL', 'https://published-prd.lanyonevents.com/published/rsaus17/sessionsFiles/4721/IDY-W10-DevSecOps-on-the-Offense-Automating-Amazon-Web-Services-Account-Takeover.pdf' ]
-        ]
+        ],
+        'Compat' => {
+          'Meterpreter' => {
+            'Commands' => %w[
+              
+            ]
+          }
+        }
       )
     )
     register_options(

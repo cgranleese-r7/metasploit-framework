@@ -25,7 +25,14 @@ class MetasploitModule < Msf::Auxiliary
           [ 'EDB', '24475' ],
           [ 'URL', 'http://www.s3cur1ty.de/m1adv2013-004' ]
         ],
-      'DisclosureDate' => '2013-02-05'))
+      'DisclosureDate' => '2013-02-05',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }))
 
     register_options(
       [

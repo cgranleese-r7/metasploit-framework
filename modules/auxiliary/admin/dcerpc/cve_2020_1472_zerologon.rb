@@ -46,7 +46,14 @@ class MetasploitModule < Msf::Auxiliary
           [ 'URL', 'https://www.secura.com/blog/zero-logon' ],
           [ 'URL', 'https://github.com/SecuraBV/CVE-2020-1472/blob/master/zerologon_tester.py' ],
           [ 'URL', 'https://github.com/dirkjanm/CVE-2020-1472/blob/master/restorepassword.py' ]
-        ]
+        ],
+        'Compat' => {
+          'Meterpreter' => {
+            'Commands' => %w[
+              
+            ]
+          }
+        }
       )
     )
 

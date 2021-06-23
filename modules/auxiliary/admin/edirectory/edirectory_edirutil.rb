@@ -94,7 +94,14 @@ class MetasploitModule < Msf::Auxiliary
             }
           ]
         ],
-      'DefaultAction'  => 'LIST_SERVICES'
+      'DefaultAction'  => 'LIST_SERVICES',
+      'Compat' => {
+        'Meterpreter' => {
+          'Commands' => %w[
+            
+          ]
+        }
+      }
     ))
 
     register_options(
