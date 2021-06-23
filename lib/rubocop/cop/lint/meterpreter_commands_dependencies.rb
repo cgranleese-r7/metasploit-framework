@@ -7,6 +7,13 @@ module RuboCop
 
         # TODO:
         #   - reorder tests so they gradually build up in complexity
+        #   - test for when there is no method calls being made, so nothing bes added in that case
+        #   - scenario where a module has no method calls but the compat was already present within the module
+        #   - handle stripping of whitespace if calls have been removed
+        #   - Make test to handle modules - lib/msf/core/post/process.rb
+        #   - implement a stack to handle multiple instance where we have multiple classes/modules , big hint Array
+        #
+        #  - Potenial problem child - fileformat/mswin_tiff_overflow.rb
         #
         #   List of calls I'm unsure what api needs to be called/I dont believe need to be called :
         #   - session.core.load_library
@@ -47,30 +54,56 @@ module RuboCop
           (send (send (send (send nil? ...) :fs) :file) :ls)
         PATTERN
 
+
+        class StackFrame
+          # Keeps track of nodes of interest
+          attr_accessor :nodes
+          # Keeps track of the visiting state, i.e. what we'll do next when we visit particular nodes
+          attr_accessor :visiting_state
+
+          # The list of commands identified in this stack frame
+          attr_accessor :identified_commands
+
+          def initialize
+            @nodes = {}
+            @visiting_state = :none
+            @identified_commands = []
+          end
+
+          # The currently registered commands
+          def current_commands
+            commands = []
+            return commands unless nodes[:command_node]
+
+            nodes[:command_node].value.each_child_node do |command|
+              commands << command.value
+            end
+            commands
+          end
+        end
+
         def on_new_investigation
           super
-          @current_commands = []
-          @identified_commands = []
-          @command_array_node = nil
 
-          @state = :none
+          @current_frame = StackFrame.new
         end
 
         def on_class(node)
-          @class_body_node = node.body
+          # TODO: Enter into a new stack frame
+          @current_frame.nodes[:class_body_node] = node.body
         end
 
         def on_def(node)
-          return unless @state == :none
+          return unless @current_frame.visiting_state == :none
 
           if initialize_present?(node)
-            @initialize_node = node
+            @current_frame.nodes[:initialize_node] = node
           end
 
           update_info_node = find_update_info_node(node) || find_nested_update_info_node(node)
           return if update_info_node.nil?
 
-          @state = :looking_for_hash
+          @current_frame.visiting_state = :looking_for_hash
         end
 
         def after_def(_node)
@@ -78,22 +111,21 @@ module RuboCop
         end
 
         def on_hash(node)
-          return unless @state == :looking_for_hash
+          return unless @current_frame.visiting_state == :looking_for_hash
           if node.parent.children[1] == :update_info
-            @end_of_info_node = node.children.last
-            @state = :looking_for_hash_keys
+            @current_frame.nodes[:end_of_info_node] = node.children.last
+            @current_frame.visiting_state = :looking_for_hash_keys
           end
         end
 
         def on_pair(node)
-          return unless @state == :looking_for_hash_keys
+          return unless @current_frame.visiting_state == :looking_for_hash_keys
           if node.key.value == 'Compat'
-            @compat_node = node
+            @current_frame.nodes[:compat_node] = node
           elsif node.key.value == 'Meterpreter'
-            @meterpreter_node = node
+            @current_frame.nodes[:meterpreter_node] = node
           elsif node.key.value == 'Commands'
-            @command_node = node
-            node.value.each_child_node {|command| @current_commands << command.value}
+            @current_frame.nodes[:command_node] = node
           end
         end
 
@@ -103,35 +135,39 @@ module RuboCop
 
         def on_send(node)
           if file_rm_call?(node)
-            @identified_commands << 'stdapi_fs_rm' unless @identified_commands.include?('stdapi_fs_rm')
+            @current_frame.identified_commands << 'stdapi_fs_rm' unless @current_frame.identified_commands.include?('stdapi_fs_rm')
             # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
-            add_offense(node) unless @current_commands.include?('stdapi_fs_rm')
+            add_offense(node) unless @current_frame.current_commands.include?('stdapi_fs_rm')
           end
 
           if file_ls_call?(node)
-            @identified_commands << 'stdapi_fs_ls' unless @identified_commands.include?('stdapi_fs_ls')
+            @current_frame.identified_commands << 'stdapi_fs_ls' unless @current_frame.identified_commands.include?('stdapi_fs_ls')
             # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
-            add_offense(node) unless @current_commands.include?('stdapi_fs_ls')
+            add_offense(node) unless @current_frame.current_commands.include?('stdapi_fs_ls')
           end
         end
 
         def on_investigation_end
           super
           # Ensure commands are sorted and unique
-          @identified_commands = @identified_commands.uniq.sort
+          @current_frame.identified_commands = @current_frame.identified_commands.uniq.sort
 
-          if @compat_node && @meterpreter_node && @command_node && @identified_commands == @current_commands
+          if @current_frame.nodes[:compat_node] && @current_frame.nodes[:meterpreter_node] && @current_frame.nodes[:command_node] && @current_frame.identified_commands == @current_frame.current_commands
            # TODO: Handle happy path
-          elsif @compat_node && @meterpreter_node && @command_node && @identified_commands != @current_commands
-            add_offense(@command_node, &autocorrector)
-          elsif @compat_node && @meterpreter_node && @command_node.nil?
-            add_offense(@meterpreter_node, &autocorrector)
-          elsif @compat_node && @meterpreter_node.nil? && @command_node.nil?
-            add_offense(@compat_node, &autocorrector)
-          elsif @compat_node.nil? && @meterpreter_node.nil? && @command_node.nil? && !@initialize_node.nil?
-            add_offense(@end_of_info_node, &autocorrector)
-          elsif @initialize_node.nil?
-            add_offense(@class_body_node, &autocorrector)
+          elsif @current_frame.nodes[:compat_node] && @current_frame.nodes[:meterpreter_node] && @current_frame.nodes[:command_node] && @current_frame.identified_commands != @current_frame.current_commands
+            add_offense(@current_frame.nodes[:command_node], &autocorrector)
+          elsif @current_frame.nodes[:compat_node] && @current_frame.nodes[:meterpreter_node] && @current_frame.nodes[:command_node].nil?
+            add_offense(@current_frame.nodes[:meterpreter_node], &autocorrector)
+          elsif @current_frame.nodes[:compat_node] && @current_frame.nodes[:meterpreter_node].nil? && @current_frame.nodes[:command_node].nil?
+            add_offense(@current_frame.nodes[:compat_node], &autocorrector)
+          elsif @current_frame.nodes[:compat_node].nil? && @current_frame.nodes[:meterpreter_node].nil? && @current_frame.nodes[:command_node].nil? && !@current_frame.nodes[:initialize_node].nil?
+            if @current_frame.nodes[:end_of_info_node].nil?
+              puts 'TODO'
+              return
+            end
+            add_offense(@current_frame.nodes[:end_of_info_node], &autocorrector)
+          elsif @current_frame.nodes[:initialize_node].nil?
+            add_offense(@current_frame.nodes[:class_body_node], &autocorrector)
           else
             raise 'Fix this dummy'
           end
@@ -141,11 +177,11 @@ module RuboCop
           lambda do |corrector|
             # Handles scenario where we have both compat & meterpreter hashes
             # but no commands array present within a module
-            if @compat_node && @meterpreter_node && @command_node.nil?
-              meterpreter_hash_node = @meterpreter_node.children[1]
+            if @current_frame.nodes[:compat_node] && @current_frame.nodes[:meterpreter_node] && @current_frame.nodes[:command_node].nil?
+              meterpreter_hash_node = @current_frame.nodes[:meterpreter_node].children[1]
 
               # White spacing handling based of node offsets
-              meterpreter_whitespace = offset(@meterpreter_node)
+              meterpreter_whitespace = offset(@current_frame.nodes[:meterpreter_node])
               commands_whitespace = meterpreter_whitespace + "  "
               array_content_whitespace = commands_whitespace + "  "
 
@@ -153,7 +189,7 @@ module RuboCop
               new_hash =
                 "{\n" \
                 "#{commands_whitespace}'Commands' => %w[" \
-                "\n#{array_content_whitespace}#{@identified_commands.join("\n#{array_content_whitespace}")}\n" \
+                "\n#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}\n" \
                 "#{commands_whitespace}]\n" \
                 "#{meterpreter_whitespace}}"
 
@@ -161,11 +197,11 @@ module RuboCop
 
             # Handles scenario when we have a compats hash, but no meterpreter hash
             # and compats array present within a module
-            elsif @compat_node && @meterpreter_node.nil? && @command_node.nil?
-              compat_hash_node = @compat_node.children[1]
+            elsif @current_frame.nodes[:compat_node] && @current_frame.nodes[:meterpreter_node].nil? && @current_frame.nodes[:command_node].nil?
+              compat_hash_node = @current_frame.nodes[:compat_node].children[1]
 
               # White spacing handling based of node offsets
-              compat_whitespace = offset(@compat_node)
+              compat_whitespace = offset(@current_frame.nodes[:compat_node])
               meterpreter_whitespace = compat_whitespace + "  "
               commands_whitespace = meterpreter_whitespace + "  "
               array_content_whitespace = commands_whitespace + "  "
@@ -175,7 +211,7 @@ module RuboCop
                 "{\n" \
                 "#{meterpreter_whitespace}'Meterpreter' => {\n" \
                 "#{commands_whitespace}'Commands' => %w[" \
-                "\n#{array_content_whitespace}#{@identified_commands.join("\n#{array_content_whitespace}")}\n" \
+                "\n#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}\n" \
                 "#{commands_whitespace}]\n" \
                 "#{meterpreter_whitespace}}\n" \
                 "#{compat_whitespace}}"
@@ -184,9 +220,9 @@ module RuboCop
 
             # Handles scenario when we have no compats hash, no meterpreter hash
             # and  no compats array present within the module, but we do have an initialize method present
-            elsif @compat_node.nil? && @meterpreter_node.nil? && @command_node.nil? && !@initialize_node.nil?
+            elsif @current_frame.nodes[:compat_node].nil? && @current_frame.nodes[:meterpreter_node].nil? && @current_frame.nodes[:command_node].nil? && !@current_frame.nodes[:initialize_node].nil?
               # White spacing handling based of node offsets
-              compat_whitespace = offset(@end_of_info_node)
+              compat_whitespace = offset(@current_frame.nodes[:end_of_info_node])
               meterpreter_whitespace = compat_whitespace + "  "
               commands_whitespace = meterpreter_whitespace + "  "
               array_content_whitespace = commands_whitespace + "  "
@@ -196,18 +232,18 @@ module RuboCop
                 ",\n#{compat_whitespace}'Compat' => {\n" \
                 "#{meterpreter_whitespace}'Meterpreter' => {\n" \
                 "#{commands_whitespace}'Commands' => %w[" \
-                "\n#{array_content_whitespace}#{@identified_commands.join("\n#{array_content_whitespace}")}\n" \
+                "\n#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}\n" \
                 "#{commands_whitespace}]\n" \
                 "#{meterpreter_whitespace}}\n" \
                 "#{compat_whitespace}}"
 
-              corrector.insert_after(@end_of_info_node, test_new_hash)
+              corrector.insert_after(@current_frame.nodes[:end_of_info_node], test_new_hash)
 
             # Handles scenario when we have no compats hash, no meterpreter hash
             # and  no compats array present no initialize method present within the module
-            elsif @compat_node.nil? && @meterpreter_node.nil? && @command_node.nil? && @initialize_node.nil?
+            elsif @current_frame.nodes[:compat_node].nil? && @current_frame.nodes[:meterpreter_node].nil? && @current_frame.nodes[:command_node].nil? && @current_frame.nodes[:initialize_node].nil?
               # White spacing handling based of node offset
-              def_whitespace = offset(@class_body_node)
+              def_whitespace = offset(@current_frame.nodes[:class_body_node])
               super_whitespace = def_whitespace + "  "
               update_info_whitespace = super_whitespace + "  "
               info_whitespace = update_info_whitespace + "  "
@@ -224,7 +260,7 @@ module RuboCop
                 "\n#{info_whitespace}'Compat' => {" \
                 "\n#{meterpreter_whitespace}'Meterpreter' => {" \
                 "\n#{commands_whitespace}'Commands' => %w[" \
-                "\n#{array_content_whitespace}#{@identified_commands.join("\n#{array_content_whitespace}")}" \
+                "\n#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}" \
                 "\n#{commands_whitespace}]" \
                 "\n#{meterpreter_whitespace}}" \
                 "\n#{info_whitespace}}" \
@@ -233,14 +269,14 @@ module RuboCop
                 "\n#{def_whitespace}end" \
                 "\n  "
 
-              corrector.insert_before(@class_body_node, new_hash)
+              corrector.insert_before(@current_frame.nodes[:class_body_node], new_hash)
 
             else
-              array_node = @command_node.children[1]
-              commands_whitespace = offset(@command_node)
+              array_node = @current_frame.nodes[:command_node].children[1]
+              commands_whitespace = offset(@current_frame.nodes[:command_node])
               array_whitespace = commands_whitespace + "  "
 
-              new_array = "%w[\n#{array_whitespace}#{@identified_commands.join("\n#{array_whitespace}")}\n#{commands_whitespace}]"
+              new_array = "%w[\n#{array_whitespace}#{@current_frame.identified_commands.join("\n#{array_whitespace}")}\n#{commands_whitespace}]"
               corrector.replace(array_node, new_array)
             end
           end
