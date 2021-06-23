@@ -31,15 +31,11 @@ module RuboCop
         # Matchers for identifying if the code already has an initialise etc.
         # TODO: Create matchers to identify where I can add my list of requirements
         def_node_matcher :find_command_array_node, <<~PATTERN
-          (hash
-            (pair
-              (str "Commands")
-              $(array ...)))
+          (hash (pair (str "Commands") $(array ...)))
         PATTERN
 
-        # TODO: Just match on the initialize name __
         def_node_matcher :initialize_present?, <<~PATTERN
-          (def :initialize (args (optarg :info (hash)))...)
+          (def :initialize __)
         PATTERN
 
         # Matchers for meterpreter API calls
@@ -57,22 +53,17 @@ module RuboCop
           @identified_commands = []
           @command_array_node = nil
 
-          # require "pry"; binding.pry
           @state = :none
+        end
+
+        def on_class(node)
+          @class_body_node = node.body
         end
 
         def on_def(node)
           return unless @state == :none
-          # require "pry"; binding.pry
-
-          # TODO: Need a way to find a suitable method to add the initialize method above.
-          # unless initialize_present?(node)
-          #   @initialize_present = true
-          #   @node_after_initialize = node
-          # end
 
           if initialize_present?(node)
-            require "pry"; binding.pry
             @initialize_node = node
           end
 
@@ -88,7 +79,6 @@ module RuboCop
 
         def on_hash(node)
           return unless @state == :looking_for_hash
-          # require "pry"; binding.pry
           if node.parent.children[1] == :update_info
             @end_of_info_node = node.children.last
             @state = :looking_for_hash_keys
@@ -130,8 +120,6 @@ module RuboCop
           # Ensure commands are sorted and unique
           @identified_commands = @identified_commands.uniq.sort
 
-          # require "pry"; binding.pry
-
           if @compat_node && @meterpreter_node && @command_node && @identified_commands == @current_commands
            # TODO: Handle happy path
           elsif @compat_node && @meterpreter_node && @command_node && @identified_commands != @current_commands
@@ -143,7 +131,7 @@ module RuboCop
           elsif @compat_node.nil? && @meterpreter_node.nil? && @command_node.nil? && !@initialize_node.nil?
             add_offense(@end_of_info_node, &autocorrector)
           elsif @initialize_node.nil?
-            add_offense(@node_after_initialize, &autocorrector)
+            add_offense(@class_body_node, &autocorrector)
           else
             raise 'Fix this dummy'
           end
@@ -172,7 +160,7 @@ module RuboCop
               corrector.replace(meterpreter_hash_node, new_hash)
 
             # Handles scenario when we have a compats hash, but no meterpreter hash
-            # and compats array present within the array
+            # and compats array present within a module
             elsif @compat_node && @meterpreter_node.nil? && @command_node.nil?
               compat_hash_node = @compat_node.children[1]
 
@@ -194,8 +182,9 @@ module RuboCop
 
               corrector.replace(compat_hash_node, new_hash)
 
+            # Handles scenario when we have no compats hash, no meterpreter hash
+            # and  no compats array present within the module, but we do have an initialize method present
             elsif @compat_node.nil? && @meterpreter_node.nil? && @command_node.nil? && !@initialize_node.nil?
-              # require "pry"; binding.pry
               # White spacing handling based of node offsets
               compat_whitespace = offset(@end_of_info_node)
               meterpreter_whitespace = compat_whitespace + "  "
@@ -214,9 +203,11 @@ module RuboCop
 
               corrector.insert_after(@end_of_info_node, test_new_hash)
 
+            # Handles scenario when we have no compats hash, no meterpreter hash
+            # and  no compats array present no initialize method present within the module
             elsif @compat_node.nil? && @meterpreter_node.nil? && @command_node.nil? && @initialize_node.nil?
-              # White spacing handling based of node offsets
-              def_whitespace = offset(@node_after_initialize)
+              # White spacing handling based of node offset
+              def_whitespace = offset(@class_body_node)
               super_whitespace = def_whitespace + "  "
               update_info_whitespace = super_whitespace + "  "
               info_whitespace = update_info_whitespace + "  "
@@ -242,7 +233,7 @@ module RuboCop
                 "\n#{def_whitespace}end" \
                 "\n  "
 
-              corrector.insert_before(@node_after_initialize, new_hash)
+              corrector.insert_before(@class_body_node, new_hash)
 
             else
               array_node = @command_node.children[1]

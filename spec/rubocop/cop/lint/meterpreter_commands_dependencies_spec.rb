@@ -461,14 +461,14 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'verifies if a compat hash, meterpreter hash and a commands array is present within the module' do
+  it 'verifies if a meterpreter hash and a commands array is present within the module' do
     expect_offense(<<~RUBY)
       class DummyModule
         def run_module
         ^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end
+        end 
       end
     RUBY
 
@@ -490,7 +490,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         end
         def run_module
           session.fs.file.rm
-        end
+        end 
       end
     RUBY
   end
