@@ -54,10 +54,6 @@ module RuboCop
           (send (send (send (send nil? ...) :fs) :file) :ls)
         PATTERN
 
-        def_node_matcher :file_ls_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :ls)
-        PATTERN
-
         def_node_matcher :sys_get_processes?, <<~PATTERN
           (send
             (send
@@ -189,22 +185,36 @@ module RuboCop
         end
 
         def on_send(node)
-          if file_rm_call?(node)
-            @current_frame.identified_commands << 'stdapi_fs_rm' unless @current_frame.identified_commands.include?('stdapi_fs_rm')
-            # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
-            add_offense(node) unless @current_frame.current_commands.include?('stdapi_fs_rm')
-          end
+          mappings = [
+            {
+              matcher: method(:file_rm_call?),
+              command: 'stdapi_fs_rm'
+            },
+            {
+              matcher: method(:file_ls_call?),
+              command: 'stdapi_fs_ls'
+            },
+            {
+              matcher: method(:sys_get_processes?),
+              command: 'stdapi_sys_process_*'
+            },
+          ]
 
-          if file_ls_call?(node)
-            @current_frame.identified_commands << 'stdapi_fs_ls' unless @current_frame.identified_commands.include?('stdapi_fs_ls')
-            # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
-            add_offense(node) unless @current_frame.current_commands.include?('stdapi_fs_ls')
-          end
+          mappings.each do |mapping|
+            matcher = mapping[:matcher]
+            command = mapping[:command]
+            if matcher.call(node)
+              unless @current_frame.identified_commands.include?(command)
+                @current_frame.identified_commands << command
+              end
+              # Add an offense, but don't provide an autocorrect.
+              # There will be a final autocorrect to fix all issues
+              unless @current_frame.current_commands.include?(command)
+                add_offense(node)
+              end
 
-          if sys_get_processes?(node)
-            @current_frame.identified_commands << 'stdapi_sys_process_*' unless @current_frame.identified_commands.include?('stdapi_sys_process_*')
-            # Add an offense, but don't provide an autocorrect. There will be a final autocorrect to fix all issues
-            add_offense(node) unless @current_frame.current_commands.include?('stdapi_sys_process_*')
+              break
+            end
           end
         end
 
@@ -230,8 +240,8 @@ module RuboCop
 
               corrector.replace(meterpreter_hash_node, new_hash)
 
-            # Handles scenario when we have a compats hash, but no meterpreter hash
-            # and compats array present within a module
+              # Handles scenario when we have a compats hash, but no meterpreter hash
+              # and compats array present within a module
             elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:command_node].nil?
               compat_hash_node = nodes[:compat_node].children[1]
 
@@ -253,8 +263,8 @@ module RuboCop
 
               corrector.replace(compat_hash_node, new_hash)
 
-            # Handles scenario when we have no compats hash, no meterpreter hash
-            # and  no compats array present within the module, but we do have an initialize method present
+              # Handles scenario when we have no compats hash, no meterpreter hash
+              # and  no compats array present within the module, but we do have an initialize method present
             elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:command_node].nil? && !nodes[:initialize_node].nil?
               # White spacing handling based of node offsets
               compat_whitespace = offset(nodes[:end_of_info_node])
@@ -274,8 +284,8 @@ module RuboCop
 
               corrector.insert_after(nodes[:end_of_info_node], test_new_hash)
 
-            # Handles scenario when we have no compats hash, no meterpreter hash
-            # and  no compats array present no initialize method present within the module
+              # Handles scenario when we have no compats hash, no meterpreter hash
+              # and  no compats array present no initialize method present within the module
             elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:command_node].nil? && nodes[:initialize_node].nil?
               # White spacing handling based of node offset
               body = nodes[:investigated_node].body
