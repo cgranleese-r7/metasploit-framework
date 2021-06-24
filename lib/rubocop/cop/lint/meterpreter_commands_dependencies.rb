@@ -116,8 +116,9 @@ module RuboCop
         end
 
         def enter_frame(node)
+          # Frames can't be nested
           if @current_frame
-            raise "TODO: Can't nest stacks yet"
+            return
           end
 
           @current_frame = StackFrame.new
@@ -135,7 +136,11 @@ module RuboCop
           result
         end
 
-        def leave_frame(_node)
+        def leave_frame(node)
+          unless nodes[:investigated_node] == node
+            return
+          end
+
           # Ensure commands are sorted and unique
           @current_frame.identified_commands = @current_frame.identified_commands.uniq.sort
 
@@ -197,7 +202,9 @@ module RuboCop
         end
 
         def after_def(_node)
-          self.visiting_state = :finished
+          if visiting_state == :looking_for_hash_keys
+            self.visiting_state = :finished
+          end
         end
 
         def visiting_state

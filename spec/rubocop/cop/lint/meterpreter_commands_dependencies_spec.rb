@@ -153,6 +153,75 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
   end
 
   it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        class HelperClass
+          def initialize
+            @foo = 123
+          end
+        end
+
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                ]
+              }
+            }
+          )
+        end
+
+        def run
+          session.fs.file.rm
+          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end 
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        class HelperClass
+          def initialize
+            @foo = 123
+          end
+        end
+
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_rm
+                ]
+              }
+            }
+          )
+        end
+
+        def run
+          session.fs.file.rm
+        end 
+      end
+    RUBY
+  end
+
+  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
     expect_no_offenses(<<~RUBY)
       class DummyModule
         def initialize
