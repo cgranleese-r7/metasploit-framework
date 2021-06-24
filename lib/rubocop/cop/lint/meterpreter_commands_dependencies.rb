@@ -7,7 +7,7 @@ module RuboCop
 
         # TODO:
         #   - reorder tests so they gradually build up in complexity
-        #   - test for when there is no method calls being made, so nothing bes added in that case
+        #   - test for when there is no method calls being made, so nothing is added in that case
         #   - scenario where a module has no method calls but the compat was already present within the module
         #   - handle stripping of whitespace if calls have been removed
         #   - Make test to handle modules - lib/msf/core/post/process.rb
@@ -26,17 +26,23 @@ module RuboCop
         #   - session.tunnel_peer.split
 
         MSG = 'Convert meterpreter api calls into meterpreter command dependencies.'.freeze
+        MISSING_METHOD_CALL_FOR_COMMAND_MSG = 'Compatibility command does not have an associated method call.'
+        COMMAND_DUPLICATED_MSG = 'Command duplicated.'
 
-        def_node_matcher :find_update_info_node, <<~PATTERN
+        def_node_matcher :find_nested_update_info_node, <<~PATTERN
           (def :initialize _args (begin (super (send nil? {:update_info :merge_info} (lvar :info) $(hash ...))) ...))
         PATTERN
 
-        def_node_matcher :find_nested_update_info_node, <<~PATTERN
+        def_node_matcher :find_update_info_node, <<~PATTERN
           (def :initialize _args (super (send nil? {:update_info :merge_info} (lvar :info) $(hash ...)) ...))
         PATTERN
 
-        def_node_matcher :find_info_node, <<~PATTERN
+        def_node_matcher :find_nested_info_node, <<~PATTERN
           (def :initialize _args (super $(hash ...) ...))
+        PATTERN
+
+        def_node_matcher :find_info_node, <<~PATTERN
+          (def :initialize _args (begin (super $(hash ...)) ...))
         PATTERN
 
         # Matchers for identifying if the code already has an initialise etc.
@@ -83,11 +89,12 @@ module RuboCop
           # The currently registered commands
           def current_commands
             commands = []
-            return commands unless nodes[:command_node]
+            return commands unless nodes[:commands_node]
 
-            nodes[:command_node].value.each_child_node do |command|
+            nodes[:commands_node].value.each_child_node do |command|
               commands << command.value
             end
+
             commands
           end
         end
@@ -117,19 +124,49 @@ module RuboCop
           nodes[:investigated_node] = node
         end
 
+        def subtract_arrays_and_leave_duplicates(first, second)
+          result = first.clone
+          second.each do |value|
+            index = result.index(value)
+            if index
+              result.delete_at(index)
+            end
+          end
+          result
+        end
+
         def leave_frame(_node)
           # Ensure commands are sorted and unique
           @current_frame.identified_commands = @current_frame.identified_commands.uniq.sort
 
-          if nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:command_node] && @current_frame.identified_commands == @current_frame.current_commands
+          # Calculate invalid values, but leave duplicates around so that they can be highlighted as being invalid
+          invalid_current_commands = subtract_arrays_and_leave_duplicates(@current_frame.current_commands, @current_frame.identified_commands)
+          if invalid_current_commands.any? && nodes[:commands_node]
+            nodes[:commands_node].value.each_child_node do |command_node|
+              command = command_node.source
+              is_missing_call = !@current_frame.identified_commands.include?(command)
+              has_duplicate_calls = (
+                @current_frame.current_commands.select { |c| c == command }.count > 1
+              )
+              if is_missing_call
+                add_offense(command_node, message: MISSING_METHOD_CALL_FOR_COMMAND_MSG)
+              elsif has_duplicate_calls
+                add_offense(command_node, message: COMMAND_DUPLICATED_MSG)
+              end
+            end
+          end
+
+          if @current_frame.identified_commands.empty? && invalid_current_commands.empty?
+            return
+          elsif nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:commands_node] && @current_frame.identified_commands == @current_frame.current_commands
             # TODO: Handle happy path
-          elsif nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:command_node] && @current_frame.identified_commands != @current_frame.current_commands
-            add_offense(nodes[:command_node], &autocorrector)
-          elsif nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:command_node].nil?
+          elsif nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:commands_node] && @current_frame.identified_commands != @current_frame.current_commands
+            add_offense(nodes[:commands_node], &autocorrector)
+          elsif nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:commands_node].nil?
             add_offense(nodes[:meterpreter_node], &autocorrector)
-          elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:command_node].nil?
+          elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil?
             add_offense(nodes[:compat_node], &autocorrector)
-          elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:command_node].nil? && !nodes[:initialize_node].nil?
+          elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil? && !nodes[:initialize_node].nil?
             add_offense(nodes[:info_node].children.last, &autocorrector)
           elsif nodes[:initialize_node].nil?
             add_offense(nodes[:investigated_node].identifier, &autocorrector)
@@ -144,20 +181,23 @@ module RuboCop
           return unless visiting_state == :none
 
           if initialize_present?(node)
-            # require "pry"; binding.pry
             nodes[:initialize_node] = node
           end
 
-          update_info_node = find_update_info_node(node) || find_nested_update_info_node(node) || find_info_node(node)
+          update_info_node = (
+            find_update_info_node(node) ||
+              find_nested_update_info_node(node) ||
+              find_info_node(node) ||
+              find_nested_info_node(node)
+          )
           return if update_info_node.nil?
-          require "pry"; binding.pry
           nodes[:info_node] = update_info_node
 
           self.visiting_state = :looking_for_hash_keys
         end
 
         def after_def(_node)
-          @state = :finished
+          self.visiting_state = :finished
         end
 
         def visiting_state
@@ -172,15 +212,6 @@ module RuboCop
           @current_frame.nodes
         end
 
-        # def on_hash(node)
-        #   return unless visiting_state == :looking_for_hash
-        #   require "pry"; binding.pry
-        #   if node.parent.children[1] == :update_info
-        #     nodes[:end_of_info_node] = node.children.last
-        #     self.visiting_state = :looking_for_hash_keys
-        #   end
-        # end
-
         def on_pair(node)
           return unless visiting_state == :looking_for_hash_keys
           if node.key.value == 'Compat'
@@ -188,7 +219,7 @@ module RuboCop
           elsif node.key.value == 'Meterpreter'
             nodes[:meterpreter_node] = node
           elsif node.key.value == 'Commands'
-            nodes[:command_node] = node
+            nodes[:commands_node] = node
           end
         end
 
@@ -230,11 +261,58 @@ module RuboCop
           end
         end
 
+        # def correction_content(node)
+        #   # Whitespace formatting
+        #   # condition ? if_true : if_false
+        #   body = node.body if node == nodes[:investigated_node]
+        #   def_whitespace = offset(body) if node == nodes[:investigated_node]
+        #   super_whitespace = def_whitespace + "  " if node == nodes[:investigated_node]
+        #   update_info_whitespace = super_whitespace + "  " if node == nodes[:investigated_node]
+        #   info_whitespace = update_info_whitespace + "  " if node == nodes[:investigated_node] || nodes[:info_node]
+        #   meterpreter_whitespace = info_whitespace + "  " if node == nodes[:info_node] || nodes[:compat_node]
+        #   commands_whitespace = meterpreter_whitespace + "  " if node == nodes[:meterpreter_node]
+        #   array_content_whitespace = commands_whitespace + "  " if node == nodes[:commands_node]
+        #
+        #   new_hash = ""
+        #
+        #   new_hash <<= "def initialize(info = {})\n"
+        #   new_hash <<= "#{super_whitespace}super(\n"
+        #   new_hash <<= "#{update_info_whitespace}update_info(\n"
+        #   new_hash <<= "#{info_whitespace}info,\n"
+        #   new_hash <<= "#{info_whitespace}'Compat' => {\n"
+        #   new_hash <<= "#{meterpreter_whitespace}'Meterpreter' => {\n"
+        #   new_hash <<= "#{commands_whitespace}'Commands' => %w[\n"
+        #   new_hash <<= "#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}\n"
+        #   new_hash <<= "#{commands_whitespace}]\n"
+        #   new_hash <<= "#{meterpreter_whitespace}}\n"
+        #   new_hash <<= "#{info_whitespace}}\n"
+        #   new_hash <<= "#{update_info_whitespace})\n"
+        #   new_hash <<= "#{super_whitespace})\n"
+        #   new_hash <<= "#{def_whitespace}end\n"
+        #   new_hash <<= "\n  "
+        #
+        #   new_hash
+        # end
+
         def autocorrector
           lambda do |corrector|
+            # Handles modules that no longer have api calls with the code but have a commands list present
+            if @current_frame.identified_commands.empty? && !@current_frame.current_commands.empty?
+              # White spacing handling based of node offsets
+              commands_whitespace = offset(nodes[:commands_node])
+              array_content_whitespace = commands_whitespace + "  "
+
+              # Formatting to add missing commands node when the method has a compat node & meterpreter node present
+              # TODO: Use this style for the other sections, by introducing a shared method
+              new_hash = "'Commands' => %w[\n"
+              new_hash <<= "#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}\n" unless @current_frame.identified_commands.empty?
+              new_hash <<= "#{commands_whitespace}]"
+
+              corrector.replace(nodes[:commands_node], new_hash)
+
             # Handles scenario where we have both compat & meterpreter hashes
             # but no commands array present within a module
-            if nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:command_node].nil?
+              elsif nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:commands_node].nil?
               meterpreter_hash_node = nodes[:meterpreter_node].children[1]
 
               # White spacing handling based of node offsets
@@ -254,7 +332,7 @@ module RuboCop
 
               # Handles scenario when we have a compats hash, but no meterpreter hash
               # and compats array present within a module
-            elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:command_node].nil?
+            elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil?
               compat_hash_node = nodes[:compat_node].children[1]
 
               # White spacing handling based of node offsets
@@ -277,9 +355,8 @@ module RuboCop
 
               # Handles scenario when we have no compats hash, no meterpreter hash
               # and  no compats array present within the module, but we do have an initialize method present
-            elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:command_node].nil? && !nodes[:initialize_node].nil?
+            elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil? && !nodes[:initialize_node].nil?
               # White spacing handling based of node offsets
-              require "pry"; binding.pry
               compat_whitespace = offset(nodes[:info_node])
               meterpreter_whitespace = compat_whitespace + "  "
               commands_whitespace = meterpreter_whitespace + "  "
@@ -299,7 +376,7 @@ module RuboCop
 
               # Handles scenario when we have no compats hash, no meterpreter hash
               # and  no compats array present no initialize method present within the module
-            elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:command_node].nil? && nodes[:initialize_node].nil?
+            elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil? && nodes[:initialize_node].nil?
               # White spacing handling based of node offset
               body = nodes[:investigated_node].body
               def_whitespace = offset(body)
@@ -328,12 +405,11 @@ module RuboCop
                 "\n#{def_whitespace}end" \
                 "\n  "
 
-              # require "pry"; binding.pry
               corrector.insert_before(body, new_hash)
 
             else
-              array_node = nodes[:command_node].children[1]
-              commands_whitespace = offset(nodes[:command_node])
+              array_node = nodes[:commands_node].children[1]
+              commands_whitespace = offset(nodes[:commands_node])
               array_whitespace = commands_whitespace + "  "
 
               new_array = "%w[\n#{array_whitespace}#{@current_frame.identified_commands.join("\n#{array_whitespace}")}\n#{commands_whitespace}]"

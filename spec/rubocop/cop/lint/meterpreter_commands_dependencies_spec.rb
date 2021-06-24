@@ -29,7 +29,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end 
       end
@@ -60,7 +60,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end 
@@ -90,7 +90,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end 
       end
@@ -118,7 +118,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             }
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end 
@@ -145,7 +145,192 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             }
           )
         end
-        def run_module
+        def run
+          session.fs.file.rm
+        end 
+      end
+    RUBY
+  end
+
+  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+    expect_no_offenses(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+          )
+        end
+      end
+    RUBY
+  end
+
+  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                  stdapi_fs_rm
+                  ^^^^^^^^^^^^ Compatibility command does not have an associated method call.
+                ]
+              }
+            }
+          )
+          register_options([])
+        end
+        def run
+        end 
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ]
+              }
+            }
+          )
+          register_options([])
+        end
+        def run
+        end 
+      end
+    RUBY
+  end
+
+  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                  stdapi_fs_rm
+                  ^^^^^^^^^^^^ Compatibility command does not have an associated method call.
+                ]
+              }
+            }
+          )
+          register_options([])
+        end
+        def run
+        end 
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ]
+              }
+            }
+          )
+          register_options([])
+        end
+        def run
+        end 
+      end
+    RUBY
+  end
+
+  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                ]
+              }
+            }
+          )
+          register_options([])
+        end
+        def run
+          session.fs.file.rm
+          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end 
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_rm
+                ]
+              }
+            }
+          )
+          register_options([])
+        end
+        def run
           session.fs.file.rm
         end 
       end
@@ -213,6 +398,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                   'Commands' => %w[
                   ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
                     stdapi_fs_ls
+                    ^^^^^^^^^^^^ Compatibility command does not have an associated method call.
                     stdapi_fs_rm
                   ]
                 }
@@ -220,7 +406,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end 
       end
@@ -249,7 +435,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end 
       end
@@ -275,16 +461,20 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                   'Commands' => %w[
                   ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
                     stdapi_fs_rm
+                    ^^^^^^^^^^^^ Command duplicated.
                     stdapi_fs_rm
+                    ^^^^^^^^^^^^ Command duplicated.
                     stdapi_fs_ls
+                    ^^^^^^^^^^^^ Command duplicated.
                     stdapi_fs_ls
+                    ^^^^^^^^^^^^ Command duplicated.
                   ]
                 }
               }
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           session.fs.file.ls
         end 
@@ -315,8 +505,74 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
+          session.fs.file.ls
+        end 
+      end
+    RUBY
+  end
+
+  it 'ensures there are not duplicate entries in the commands list' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Name' => 'Simple module name',
+              'Description' => 'Lorem ipsum dolor sit amet',
+              'Author' => [ 'example1', 'example2' ],
+              'License' => MSF_LICENSE,
+              'Platform' => 'win',
+              'Arch' => ARCH_X86,
+              'DisclosureDate' => 'January 5',
+              'Compat' => {
+                'Meterpreter' => {
+                  'Commands' => %w[
+                  ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                    stdapi_fs_ls
+                    ^^^^^^^^^^^^ Command duplicated.
+                    stdapi_fs_ls
+                    ^^^^^^^^^^^^ Command duplicated.
+                    stdapi_fs_ls
+                    ^^^^^^^^^^^^ Command duplicated.
+                  ]
+                }
+              }
+            )
+          )
+        end
+        def run
+          session.fs.file.ls
+        end 
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Name' => 'Simple module name',
+              'Description' => 'Lorem ipsum dolor sit amet',
+              'Author' => [ 'example1', 'example2' ],
+              'License' => MSF_LICENSE,
+              'Platform' => 'win',
+              'Arch' => ARCH_X86,
+              'DisclosureDate' => 'January 5',
+              'Compat' => {
+                'Meterpreter' => {
+                  'Commands' => %w[
+                    stdapi_fs_ls
+                  ]
+                }
+              }
+            )
+          )
+        end
+        def run
           session.fs.file.ls
         end 
       end
@@ -347,7 +603,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           session.fs.file.rm
@@ -379,7 +635,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           session.fs.file.rm
         end 
@@ -409,7 +665,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end 
@@ -439,7 +695,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end 
       end
@@ -466,7 +722,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end 
@@ -496,7 +752,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end 
       end
@@ -524,7 +780,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end 
@@ -548,7 +804,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.ls
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end 
@@ -578,7 +834,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end 
       end
@@ -605,7 +861,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.ls
         end 
       end
@@ -630,7 +886,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end
@@ -660,7 +916,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end
       end
@@ -671,7 +927,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     expect_offense(<<~RUBY)
       class DummyModule
             ^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        def run_module
+        def run
           session.fs.file.rm
           ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end 
@@ -694,7 +950,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
-        def run_module
+        def run
           session.fs.file.rm
         end 
       end
