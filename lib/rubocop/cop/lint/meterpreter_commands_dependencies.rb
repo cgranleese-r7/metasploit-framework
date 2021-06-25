@@ -16,7 +16,7 @@ module RuboCop
         #  - Potenial problem child - fileformat/mswin_tiff_overflow.rb
         #
         #   List of calls I'm unsure what api needs to be called/I dont believe need to be called :
-        #   - session.core.load_library
+        #   - session.core.load_library(
         #   - session.ext.aliases.include
         #   - session.fs.file.open
         #   - session.type.eql
@@ -55,21 +55,84 @@ module RuboCop
           (def :initialize __)
         PATTERN
 
+
         # Matchers for meterpreter API calls
         def_node_matcher :file_rm_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :rm)
+          (send (send (send (send nil? ...) :fs) :file) :rm _)
         PATTERN
 
         def_node_matcher :file_ls_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :ls)
+          (send (send (send (send nil? ...) :fs) :file) :ls _)
         PATTERN
 
         def_node_matcher :sys_get_processes?, <<~PATTERN
           (send
             (send
               (send
-                (send nil? :session) :sys) :process) :get_processes)
+                (send nil? ...) :sys) :process) :get_processes)
         PATTERN
+
+        def_node_matcher :registry_splitkey_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :splitkey _*)
+        PATTERN
+
+        def_node_matcher :registry_config_getprivs_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :getprivs)
+        PATTERN
+
+        def_node_matcher :registry_load_key_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :load_key _*)
+        PATTERN
+
+        def_node_matcher :registry_unload_key_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :unload_key _*)
+        PATTERN
+
+        def_node_matcher :registry_create_key_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :create_key _*)
+        PATTERN
+
+        def_node_matcher :registry_open_key_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :open_key _*)
+        PATTERN
+
+        def_node_matcher :registry_delete_key_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :delete_key _*)
+        PATTERN
+
+        def_node_matcher :registry_enum_key_direct_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :enum_key_direct _*)
+        PATTERN
+
+        def_node_matcher :registry_enum_value_direct_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :enum_value_direct _*)
+        PATTERN
+
+        def_node_matcher :registry_query_value_direct_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :query_value_direct _*)
+        PATTERN
+
+        def_node_matcher :registry_set_value_direct_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :set_value_direct _*)
+        PATTERN
+
+        def_node_matcher :registry_type2str_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :type2str _*)
+        PATTERN
+
+        def_node_matcher :registry_check_key_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :check_key_exists _*)
+        PATTERN
+        #
+        # def_node_matcher :fs_dir_getwd_call?, <<~PATTERN
+        #   (send (send (send (send nil? ...) :fs) :dir) :getwd)
+        # PATTERN
+        #
+        # def_node_matcher :appapi_app_install_call?, <<~PATTERN
+        #   (send (send (send nil? ...) :appapi) :app_install _*)
+        # PATTERN
+
+
 
         class StackFrame
           # Keeps track of nodes of interest
@@ -248,6 +311,66 @@ module RuboCop
               matcher: method(:sys_get_processes?),
               command: 'stdapi_sys_process_*'
             },
+            {
+              matcher: method(:registry_splitkey_call?),
+              command: 'stdapi_registry_splitkey'
+            },
+            {
+              matcher: method(:registry_config_getprivs_call?),
+              command: 'stdapi_registry_config_getprivs'
+            },
+            {
+              matcher: method(:registry_load_key_call?),
+              command: 'stdapi_registry_load_key'
+            },
+            {
+              matcher: method(:registry_unload_key_call?),
+              command: 'stdapi_registry_unload_key'
+            },
+            {
+              matcher: method(:registry_create_key_call?),
+              command: 'stdapi_registry_create_key'
+            },
+            {
+              matcher: method(:registry_open_key_call?),
+              command: 'stdapi_registry_open_key'
+            },
+            {
+              matcher: method(:registry_delete_key_call?),
+              command: 'stdapi_registry_delete_key'
+            },
+            {
+              matcher: method(:registry_enum_key_direct_call?),
+              command: 'stdapi_registry_enum_key_direct'
+            },
+            {
+              matcher: method(:registry_enum_value_direct_call?),
+              command: 'stdapi_registry_enum_value_direct'
+            },
+            {
+              matcher: method(:registry_query_value_direct_call?),
+              command: 'stdapi_registry_query_value_direct'
+            },
+            {
+              matcher: method(:registry_set_value_direct_call?),
+              command: 'stdapi_registry_set_value_direct'
+            },
+            {
+              matcher: method(:registry_type2str_call?),
+              command: 'stdapi_registry_type2str'
+            },
+            {
+              matcher: method(:registry_check_key_call?),
+              command: 'stdapi_registry_check_key_exists'
+            },
+            # {
+            #   matcher: method(:fs_dir_getwd_call?),
+            #   command: 'stdapi_fs_getwd'
+            # },
+            # {
+            #   matcher: method(:appapi_app_install_call),
+            #   command: 'appapi_app_install'
+            # },
           ]
 
           mappings.each do |mapping|
@@ -409,8 +532,9 @@ module RuboCop
                 "\n#{info_whitespace}}" \
                 "\n#{update_info_whitespace})" \
                 "\n#{super_whitespace})" \
-                "\n#{def_whitespace}end" \
-                "\n  "
+                "\n#{def_whitespace}end\n\n" \
+                "#{def_whitespace}"
+              # ^ TODO: We shouldn't need to add whitespace here to accomdoate for the subsequent run method
 
               corrector.insert_before(body, new_hash)
 

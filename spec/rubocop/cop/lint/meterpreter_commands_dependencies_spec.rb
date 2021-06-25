@@ -30,8 +30,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -61,9 +61,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -91,8 +91,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -119,9 +119,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -146,8 +146,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -181,9 +181,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         end
 
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -215,8 +215,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         end
 
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -264,7 +264,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           register_options([])
         end
         def run
-        end 
+        end
       end
     RUBY
 
@@ -289,7 +289,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           register_options([])
         end
         def run
-        end 
+        end
       end
     RUBY
   end
@@ -319,7 +319,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           register_options([])
         end
         def run
-        end 
+        end
       end
     RUBY
 
@@ -344,7 +344,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           register_options([])
         end
         def run
-        end 
+        end
       end
     RUBY
   end
@@ -372,9 +372,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           register_options([])
         end
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -400,8 +400,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           register_options([])
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -437,6 +437,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
+
         def meterpreter_get_processes
           begin
             return session.sys.process.get_processes.map { |p| p.slice('name', 'pid') }
@@ -476,8 +477,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
 
@@ -505,8 +506,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -544,9 +545,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          session.fs.file.ls
-        end 
+          session.fs.file.rm("some_file")
+          session.fs.file.ls("some_file")
+        end
       end
     RUBY
 
@@ -575,9 +576,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          session.fs.file.ls
-        end 
+          session.fs.file.rm("some_file")
+          session.fs.file.ls("some_file")
+        end
       end
     RUBY
   end
@@ -613,8 +614,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.ls
-        end 
+         session.fs.file.ls("some_file")
+        end
       end
     RUBY
 
@@ -642,8 +643,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.ls
-        end 
+         session.fs.file.ls("some_file")
+        end
       end
     RUBY
   end
@@ -673,11 +674,11 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -705,9 +706,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -735,9 +736,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -765,8 +766,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -792,9 +793,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -822,8 +823,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
     RUBY
   end
@@ -850,9 +851,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
 
       class DummyModuleTwo
@@ -874,9 +875,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.ls
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+         session.fs.file.ls("some_file")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -904,8 +905,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
       end
 
       class DummyModuleTwo
@@ -931,8 +932,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.ls
-        end 
+         session.fs.file.ls("some_file")
+        end
       end
     RUBY
   end
@@ -956,8 +957,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end
       end
     RUBY
@@ -986,7 +987,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           )
         end
         def run
-          session.fs.file.rm
+          session.fs.file.rm("some_file")
         end
       end
     RUBY
@@ -997,9 +998,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
       class DummyModule
             ^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         def run
-          session.fs.file.rm
-          ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end 
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
       end
     RUBY
 
@@ -1019,9 +1020,100 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             )
           )
         end
+
         def run
-          session.fs.file.rm
-        end 
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
+  it 'handles lots of examples' do
+    code_snippet_with_errors = <<-EOF
+      session.fs.file.rm(
+      ^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          "some_file"
+      )
+      session.sys.process.get_processes
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.ls("file")
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.splitkey(key)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.load_key(root_key, base_key, file)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.unload_key(root_key,base_key)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.config.getprivs()
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.create_key(root_key, base_key, perms)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.open_key(root_key, base_key, perms)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.delete_key(root_key, base_key, perms)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.enum_key_direct(root_key, base_key, perms)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.enum_value_direct(root_key, base_key, perms)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.query_value_direct(root_key, base_key, valname, perms)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.set_value_direct(root_key, base_key, valname, session.sys.registry.type2str(type), data, perms)
+                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.check_key_exists(root_key, base_key)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+    EOF
+
+
+
+
+    code_snippet_without_error_lines = code_snippet_with_errors.lines.reject { |line| line.lstrip.start_with?("^^^^") }.join
+
+    expect_offense(<<~RUBY)
+      class DummyModule
+            ^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        def run
+#{code_snippet_with_errors}
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Compat' => {
+                'Meterpreter' => {
+                  'Commands' => %w[
+                    stdapi_fs_ls
+                    stdapi_fs_rm
+                    stdapi_registry_check_key_exists
+                    stdapi_registry_config_getprivs
+                    stdapi_registry_create_key
+                    stdapi_registry_delete_key
+                    stdapi_registry_enum_key_direct
+                    stdapi_registry_enum_value_direct
+                    stdapi_registry_load_key
+                    stdapi_registry_open_key
+                    stdapi_registry_query_value_direct
+                    stdapi_registry_set_value_direct
+                    stdapi_registry_splitkey
+                    stdapi_registry_type2str
+                    stdapi_registry_unload_key
+                    stdapi_sys_process_*
+                  ]
+                }
+              }
+            )
+          )
+        end
+
+        def run
+#{code_snippet_without_error_lines}
+        end
       end
     RUBY
   end
