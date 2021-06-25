@@ -1063,10 +1063,48 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
       session.sys.registry.check_key_exists(root_key, base_key)
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.dir.getwd
+      ^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.appapi.app_install(out_apk)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.execute
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.stat(@chown_file)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.config.sysinfo["Computer"]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.get_processes
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.config.getenv('TEMP')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.railgun.memread(@addresses['AcroRd32.exe'] + target['AdobeCollabSyncTrigger'], target['AdobeCollabSyncTriggerSignature'].length)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.process.open
+      ^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.net.socket.create
+      ^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.config.getprivs
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.config.getenv('windir')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.copy("C:\\Windows\\System32\\WSReset.exe", exploit_file)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.config.getdrivers
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.fs.file.md5(d[:filename])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.dir.mkdir(share_dir)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.power.reboot
+      ^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.config.getuid
+      ^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.new(taskfile, "wb")
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.stat(@chown_file).stathash
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
     EOF
-
-
-
 
     code_snippet_without_error_lines = code_snippet_with_errors.lines.reject { |line| line.lstrip.start_with?("^^^^") }.join
 
@@ -1088,8 +1126,16 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
+                    appapi_app_install
+                    net_socket_create
+                    stdapi_fs_copy
+                    stdapi_fs_getwd
                     stdapi_fs_ls
+                    stdapi_fs_md5
+                    stdapi_fs_mkdir
                     stdapi_fs_rm
+                    stdapi_fs_stat
+                    stdapi_railgun_*
                     stdapi_registry_check_key_exists
                     stdapi_registry_config_getprivs
                     stdapi_registry_create_key
@@ -1103,7 +1149,13 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                     stdapi_registry_splitkey
                     stdapi_registry_type2str
                     stdapi_registry_unload_key
+                    stdapi_sys_config_getenv
+                    stdapi_sys_config_sysinfo
+                    stdapi_sys_power_reboot
                     stdapi_sys_process_*
+                    sys_config_getdrivers
+                    sys_config_getuid
+                    sys_fs_new
                   ]
                 }
               }

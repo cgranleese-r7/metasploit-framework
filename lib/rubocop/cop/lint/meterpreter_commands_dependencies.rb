@@ -12,11 +12,14 @@ module RuboCop
         #   - handle stripping of whitespace if calls have been removed
         #   - Make test to handle modules - lib/msf/core/post/process.rb
         #   - implement a stack to handle multiple instance where we have multiple classes/modules , big hint Array
+        #   - fix matcher for file stat - currently have two variations, one for with and without a trailing method call
+        #   - fix matcher for process with a method call without parenthesis
         #
         #  - Potenial problem child - fileformat/mswin_tiff_overflow.rb
         #
         #   List of calls I'm unsure what api needs to be called/I dont believe need to be called :
         #   - session.core.load_library(
+        #   - session.core.use
         #   - session.ext.aliases.include
         #   - session.fs.file.open
         #   - session.type.eql
@@ -65,11 +68,16 @@ module RuboCop
           (send (send (send (send nil? ...) :fs) :file) :ls _)
         PATTERN
 
-        def_node_matcher :sys_get_processes?, <<~PATTERN
-          (send
-            (send
-              (send
-                (send nil? ...) :sys) :process) :get_processes)
+        def_node_matcher :sys_processes_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :process) ...)
+        PATTERN
+
+        def_node_matcher :sys_processes_with_trailing_method_call?, <<~PATTERN
+          (send (send (send (send (send nil? ...) :sys) :process) ...) _*)
+        PATTERN
+
+        def_node_matcher :net_create_socket_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :net) :socket) :create)
         PATTERN
 
         def_node_matcher :registry_splitkey_call?, <<~PATTERN
@@ -123,16 +131,90 @@ module RuboCop
         def_node_matcher :registry_check_key_call?, <<~PATTERN
           (send (send (send (send nil? ...) :sys) :registry) :check_key_exists _*)
         PATTERN
-        #
-        # def_node_matcher :fs_dir_getwd_call?, <<~PATTERN
-        #   (send (send (send (send nil? ...) :fs) :dir) :getwd)
-        # PATTERN
-        #
-        # def_node_matcher :appapi_app_install_call?, <<~PATTERN
-        #   (send (send (send nil? ...) :appapi) :app_install _*)
-        # PATTERN
 
+        def_node_matcher :fs_dir_getwd_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :dir) :getwd)
+        PATTERN
 
+        def_node_matcher :appapi_app_install_call?, <<~PATTERN
+          (send (send (send nil? ...) :appapi) :app_install _*)
+        PATTERN
+
+        def_node_matcher :fs_file_stat_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :stat _*)
+        PATTERN
+
+        def_node_matcher :fs_file_stat_trailing_method_call?, <<~PATTERN
+          (send (send (send (send (send nil? ...) :fs) :file) :stat _*) _)
+        PATTERN
+
+        def_node_matcher :get_sysinfo_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :sysinfo _*)
+        PATTERN
+
+        def_node_matcher :config_getenv_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :getenv _*)
+        PATTERN
+
+        def_node_matcher :fs_file_copy_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :copy _*)
+        PATTERN
+
+        def_node_matcher :railgun_call?, <<~PATTERN
+          (send (send (send nil? ...) :railgun) ...)
+        PATTERN
+
+        def_node_matcher :net_socket_create_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :net) :socket) :create)
+        PATTERN
+
+        def_node_matcher :config_getprivs_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :getprivs)
+        PATTERN
+
+        def_node_matcher :fs_dir_rmdir_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :dir) :rmdir)
+        PATTERN
+
+        def_node_matcher :fs_dir_mkdir_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :dir) :mkdir _*)
+        PATTERN
+
+        def_node_matcher :config_getdrivers_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :getdrivers)
+        PATTERN
+
+        def_node_matcher :config_getuid_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :getuid)
+        PATTERN
+
+        def_node_matcher :fs_file_new_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :new _*)
+        PATTERN
+
+        def_node_matcher :config_getsid_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :getsid)
+        PATTERN
+
+        def_node_matcher :config_is_system_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :is_system)
+        PATTERN
+
+        def_node_matcher :fs_file_md5_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :md5 _*)
+        PATTERN
+
+        def_node_matcher :powershell_execute_string_call?, <<~PATTERN
+          (send (send (send nil? ...) :powershell) :execute_string)
+        PATTERN
+
+        def_node_matcher :power_reboot_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :power) :reboot)
+        PATTERN
+
+        def_node_matcher :lanattacks_dhcp_reset_call?, <<~PATTERN
+          (send (send (send nil? ...) :lanattacks) ...)
+        PATTERN
 
         class StackFrame
           # Keeps track of nodes of interest
@@ -308,8 +390,16 @@ module RuboCop
               command: 'stdapi_fs_ls'
             },
             {
-              matcher: method(:sys_get_processes?),
+              matcher: method(:sys_processes_call?),
               command: 'stdapi_sys_process_*'
+            },
+            {
+              matcher: method(:sys_processes_with_trailing_method_call?),
+              command: 'stdapi_sys_process_*'
+            },
+            {
+              matcher: method(:net_create_socket_call?),
+              command: 'net_socket_create'
             },
             {
               matcher: method(:registry_splitkey_call?),
@@ -363,14 +453,90 @@ module RuboCop
               matcher: method(:registry_check_key_call?),
               command: 'stdapi_registry_check_key_exists'
             },
-            # {
-            #   matcher: method(:fs_dir_getwd_call?),
-            #   command: 'stdapi_fs_getwd'
-            # },
-            # {
-            #   matcher: method(:appapi_app_install_call),
-            #   command: 'appapi_app_install'
-            # },
+            {
+              matcher: method(:fs_dir_getwd_call?),
+              command: 'stdapi_fs_getwd'
+            },
+            {
+              matcher: method(:appapi_app_install_call?),
+              command: 'appapi_app_install'
+            },
+            {
+              matcher: method(:fs_file_stat_call?),
+              command: 'stdapi_fs_stat'
+            },
+            {
+              matcher: method(:fs_file_stat_trailing_method_call?),
+              command: 'stdapi_fs_stat'
+            },
+            {
+              matcher: method(:get_sysinfo_call?),
+              command: 'stdapi_sys_config_sysinfo'
+            },
+            {
+              matcher: method(:config_getenv_call?),
+              command: 'stdapi_sys_config_getenv'
+            },
+            {
+              matcher: method(:fs_file_copy_call?),
+              command: 'stdapi_fs_copy'
+            },
+            {
+              matcher: method(:railgun_call?),
+              command: 'stdapi_railgun_*'
+            },
+            {
+              matcher: method(:net_socket_create_call?),
+              command: 'stdapi_net_create'
+            },
+            {
+              matcher: method(:config_getprivs_call?),
+              command: 'sys_config_getprivs'
+            },
+            {
+              matcher: method(:fs_dir_rmdir_call?),
+              command: 'stdapi_fs_rmdir'
+            },
+            {
+              matcher: method(:fs_dir_mkdir_call?),
+              command: 'stdapi_fs_mkdir'
+            },
+            {
+              matcher: method(:config_getdrivers_call?),
+              command: 'sys_config_getdrivers'
+            },
+            {
+              matcher: method(:config_getuid_call?),
+              command: 'sys_config_getuid'
+            },
+            {
+              matcher: method(:fs_file_new_call?),
+              command: 'sys_fs_new'
+            },
+            {
+              matcher: method(:config_getsid_call?),
+              command: 'sys_config_getsid'
+            },
+            {
+              matcher: method(:config_is_system_call?),
+              command: 'sys_config_is_system'
+            },
+            {
+              matcher: method(:fs_file_md5_call?),
+              command: 'stdapi_fs_md5'
+            },
+            {
+              matcher: method(:powershell_execute_string_call?),
+              command: 'powershell_execute_string'
+            },
+            {
+              matcher: method(:power_reboot_call?),
+              command: 'stdapi_sys_power_reboot'
+            },
+            {
+              matcher: method(:lanattacks_dhcp_reset_call?),
+              command: 'lanattacks_*'
+            },
           ]
 
           mappings.each do |mapping|
