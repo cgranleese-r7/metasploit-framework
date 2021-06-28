@@ -17,16 +17,6 @@ module RuboCop
         #
         #  - Potenial problem child - fileformat/mswin_tiff_overflow.rb
         #
-        #   List of calls I'm unsure what api needs to be called/I dont believe need to be called :
-        #   - session.core.load_library(
-        #   - session.core.use
-        #   - session.ext.aliases.include
-        #   - session.fs.file.open
-        #   - session.type.eql
-        #   - session.ext.aliases.include
-        #   - client.core.use
-        #   - session.fs.file.new
-        #   - session.tunnel_peer.split
 
         MSG = 'Convert meterpreter api calls into meterpreter command dependencies.'.freeze
         MISSING_METHOD_CALL_FOR_COMMAND_MSG = 'Compatibility command does not have an associated method call.'
@@ -214,6 +204,202 @@ module RuboCop
 
         def_node_matcher :lanattacks_dhcp_reset_call?, <<~PATTERN
           (send (send (send nil? ...) :lanattacks) ...)
+        PATTERN
+
+        def_node_matcher :android_activity_start_call?, <<~PATTERN
+          (send (send (send nil? ...) :android) :activity_start _*)
+        PATTERN
+
+        def_node_matcher :fs_download_file_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :download_file _*)
+        PATTERN
+
+        def_node_matcher :net_resolve_host_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :net) :resolve) :resolve_host _*)
+        PATTERN
+
+        def_node_matcher :fs_file_separator_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :separator)
+        PATTERN
+
+        def_node_matcher :fs_file_exist_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :exist? _*)
+        PATTERN
+
+        def_node_matcher :fs_upload_file_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :upload_file _*)
+        PATTERN
+
+        def_node_matcher :fs_file_search_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :search _*)
+        PATTERN
+
+        def_node_matcher :android_wlan_geolocate_call?, <<~PATTERN
+          (send (send (send nil? ...) :android) :wlan_geolocate)
+        PATTERN
+
+        def_node_matcher :net_config_respond_to_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :net) :config) :respond_to? _*)
+        PATTERN
+
+        def_node_matcher :webcam_call?, <<~PATTERN
+          (send (send (send nil? ...) :webcam) ...)
+        PATTERN
+
+        def_node_matcher :espia_image_get_dev_screen_call?, <<~PATTERN
+          (send (send (send nil? ...) :espia) :espia_image_get_dev_screen)
+        PATTERN
+
+        def_node_matcher :android_set_wallpaper_call?, <<~PATTERN
+          (send (send (send nil? ...) :android) :set_wallpaper _*)
+        PATTERN
+
+        def_node_matcher :sys_config_steal_token_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :steal_token _*)
+        PATTERN
+
+        def_node_matcher :sys_config_revert_to_self_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :revert_to_self)
+        PATTERN
+
+        def_node_matcher :net_config_each_route_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :net) :config) :each_route)
+        PATTERN
+
+        def_node_matcher :net_config_each_interface_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :net) :config) :each_interface)
+        PATTERN
+
+        def_node_matcher :fs_foreach_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :dir) :foreach _*)
+        PATTERN
+
+        def_node_matcher :fs_pwd_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :dir) :pwd)
+        PATTERN
+
+        def_node_matcher :priv_getsystem_args_call?, <<~PATTERN
+          (send (send (send nil? ...) :priv) :getsystem _*)
+        PATTERN
+
+        def_node_matcher :kiwi_golden_ticket_create_call?, <<~PATTERN
+          (send (send (send nil? ...) :kiwi) :golden_ticket_create _*)
+        PATTERN
+
+        def_node_matcher :kiwi_kerberos_ticket_use_call?, <<~PATTERN
+          (send (send (send nil? ...) :kiwi) :kerberos_ticket_use _*)
+        PATTERN
+
+        def_node_matcher :priv_sam_hashes_call?, <<~PATTERN
+          (send (send (send nil? ...) :priv) :sam_hashes)
+        PATTERN
+
+        def_node_matcher :incognito_list_tokens_call?, <<~PATTERN
+          (send (send (send nil? ...) :incognito) :incognito_list_tokens _*)
+        PATTERN
+
+        def_node_matcher :fs_entries_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :dir) :entries _*)
+        PATTERN
+
+        def_node_matcher :kiwi_get_debug_privilege_call?, <<~PATTERN
+          (send (send (send nil? ...) :kiwi) :get_debug_privilege)
+        PATTERN
+
+        def_node_matcher :kiwi_creds_all_call?, <<~PATTERN
+          (send (send (send nil? ...) :kiwi) :creds_all)
+        PATTERN
+
+        def_node_matcher :sys_config_is_system_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :is_system?)
+        PATTERN
+
+        def_node_matcher :extapi_wmi_query_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :extapi) :wmi) :query _*)
+        PATTERN
+
+        def_node_matcher :sys_registry_open_remote_key_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :registry) :open_remote_key _*)
+        PATTERN
+
+        def_node_matcher :priv_getsystem_call?, <<~PATTERN
+          (send (send (send nil? ...) :priv) :getsystem)
+        PATTERN
+
+        def_node_matcher :extapi_adsi_domain_query_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :extapi) :adsi) :domain_query _*)
+        PATTERN
+
+        def_node_matcher :priv_fs_get_file_mace_call?, <<~PATTERN
+        (send (send (send (send nil? ...) :priv) :fs) :get_file_mace _*)
+        PATTERN
+
+        def_node_matcher :priv_fs_set_file_mace_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :priv) :fs) :set_file_mace _*)
+        PATTERN
+
+        def_node_matcher :extapi_pageant_forward_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :extapi) :pageant) :forward _*)
+        PATTERN
+
+        def_node_matcher :lanattacks_dhcp_reset_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :lanattacks) :dhcp) :reset)
+        PATTERN
+
+        def_node_matcher :lanattacks_dhcp_load_options_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :lanattacks) :dhcp) :load_options _*)
+        PATTERN
+
+        def_node_matcher :lanattacks_tftp_add_file_call?, <<~PATTERN
+          (send (send (send (send nil :client) :lanattacks) :tftp) :add_file _*)
+        PATTERN
+
+        def_node_matcher :lanattacks_tftp_start_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :lanattacks) :tftp) :start)
+        PATTERN
+
+        def_node_matcher :lanattacks_dhcp_start_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :lanattacks) :dhcp) :start)
+        PATTERN
+
+        def_node_matcher :lanattacks_tftp_stop_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :lanattacks) :tftp) :stop)
+        PATTERN
+
+        def_node_matcher :lanattacks_dhcp_stop_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :lanattacks) :dhcp) :stop)
+        PATTERN
+
+        def_node_matcher :incognito_incognito_impersonate_token_call?, <<~PATTERN
+          (send (send (send nil? ...) :incognito) :incognito_impersonate_token _*)
+        PATTERN
+
+        def_node_matcher :fs_file_expand_path_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :file) :expand_path _*)
+        PATTERN
+
+        def_node_matcher :peinjector_add_thread_x64_call?, <<~PATTERN
+          (send (send (send nil? ...) :peinjector) :add_thread_x64 _*)
+        PATTERN
+
+        def_node_matcher :peinjector_add_thread_x86_call?, <<~PATTERN
+          (send (send (send nil? ...) :peinjector) :add_thread_x86 _*)
+        PATTERN
+
+        def_node_matcher :peinjector_inject_shellcode_call?, <<~PATTERN
+          (send (send (send nil? ...) :peinjector) :inject_shellcode _*)
+        PATTERN
+
+        def_node_matcher :sys_config_getenvs_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :config) :getenvs _*)
+        PATTERN
+
+        def_node_matcher :lanattacks_dhcp_log_each_call?, <<~PATTERN
+          (send (send (send (send (send nil? ...) :lanattacks) :dhcp) :log) :each)
+        PATTERN
+
+        def_node_matcher :fs_dir_rmdir_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :fs) :dir) :rmdir _*)
         PATTERN
 
         class StackFrame
@@ -537,6 +723,202 @@ module RuboCop
               matcher: method(:lanattacks_dhcp_reset_call?),
               command: 'lanattacks_*'
             },
+            {
+              matcher: method(:android_activity_start_call?),
+              command: 'android_activity_start'
+            },
+            {
+              matcher: method(:fs_download_file_call?),
+              command: 'stdapi_fs_download_file'
+            },
+            {
+              matcher: method(:net_resolve_host_call?),
+              command: 'stdapi_net_resolve_host'
+            },
+            {
+              matcher: method(:fs_file_separator_call?),
+              command: 'stdapi_fs_separator'
+            },
+            {
+              matcher: method(:fs_file_exist_call?),
+              command: 'stdapi_fs_exist?'
+            },
+            {
+              matcher: method(:fs_upload_file_call?),
+              command: 'stdapi_fs_upload_file'
+            },
+            {
+              matcher: method(:fs_file_search_call?),
+              command: 'stdapi_fs_search'
+            },
+            {
+              matcher: method(:android_wlan_geolocate_call?),
+              command: 'android_wlan_geolocate'
+            },
+            {
+              matcher: method(:net_config_respond_to_call?),
+              command: 'stdapi_net_respond_to'
+            },
+            {
+              matcher: method(:webcam_call?),
+              command: 'stdapi_webcam_*'
+            },
+            {
+              matcher: method(:espia_image_get_dev_screen_call?),
+              command: 'espia_espia_image_get_dev_screen'
+            },
+            {
+              matcher: method(:android_set_wallpaper_call?),
+              command: 'android_set_wallpaper'
+            },
+            {
+              matcher: method(:sys_config_steal_token_call?),
+              command: 'stdapi_sys_steal_token'
+            },
+            {
+              matcher: method(:sys_config_revert_to_self_call?),
+              command: 'stdapi_sys_reverevert_to_self'
+            },
+            {
+              matcher: method(:net_config_each_route_call?),
+              command: 'stdapi_net_each_route'
+            },
+            {
+              matcher: method(:net_config_each_interface_call?),
+              command: 'stdapi_net_each_interface'
+            },
+            {
+              matcher: method(:fs_foreach_call?),
+              command: 'stdapi_fs_foreach'
+            },
+            {
+              matcher: method(:fs_pwd_call?),
+              command: 'stdapi_fs_pwd'
+            },
+            {
+              matcher: method(:priv_getsystem_call?),
+              command: 'priv_getsystem'
+            },
+            {
+              matcher: method(:kiwi_golden_ticket_create_call?),
+              command: 'kiwi_golden_ticket_create'
+            },
+            {
+              matcher: method(:kiwi_kerberos_ticket_use_call?),
+              command: 'kiwi_kerberos_ticket_use'
+            },
+            {
+              matcher: method(:priv_sam_hashes_call?),
+              command: 'priv_sam_hashes'
+            },
+            {
+              matcher: method(:incognito_list_tokens_call?),
+              command: 'incognito_incognito_list_tokens'
+            },
+            {
+              matcher: method(:fs_entries_call?),
+              command: 'stdapi_fs_entries'
+            },
+            {
+              matcher: method(:kiwi_get_debug_privilege_call?),
+              command: 'kiwi_get_debug_privilege'
+            },
+            {
+              matcher: method(:kiwi_creds_all_call?),
+              command: 'kiwi_creds_all'
+            },
+            {
+              matcher: method(:sys_config_is_system_call?),
+              command: 'stdapi_sys_is_system'
+            },
+            {
+              matcher: method(:extapi_wmi_query_call?),
+              command: 'extapi_wmi_query'
+            },
+            {
+              matcher: method(:sys_registry_open_remote_key_call?),
+              command: 'stdapi_sys_open_remote_key'
+            },
+            {
+              matcher: method(:priv_getsystem_args_call?),
+              command: 'priv_getsystem'
+            },
+            {
+              matcher: method(:extapi_adsi_domain_query_call?),
+              command: 'extapi_adsi_domain_query'
+            },
+            {
+              matcher: method(:priv_fs_get_file_mace_call?),
+              command: 'priv_get_file_mace'
+            },
+            {
+              matcher: method(:priv_fs_set_file_mace_call?),
+              command: 'priv_set_file_mace'
+            },
+            {
+              matcher: method(:extapi_pageant_forward_call?),
+              command: 'extapi_pageant_forward'
+            },
+            {
+              matcher: method(:lanattacks_dhcp_reset_call?),
+              command: 'lanattacks_dhcp_reset'
+            },
+            {
+              matcher: method(:lanattacks_dhcp_load_options_call?),
+              command: 'lanattacks_dhcp_load_options'
+            },
+            {
+              matcher: method(:lanattacks_tftp_add_file_call?),
+              command: 'lanattacks_tftp_add_file'
+            },
+            {
+              matcher: method(:lanattacks_tftp_start_call?),
+              command: 'lanattacks_tftp_start'
+            },
+            {
+              matcher: method(:lanattacks_dhcp_start_call?),
+              command: 'lanattacks_dhcp_start'
+            },
+            {
+              matcher: method(:lanattacks_tftp_stop_call?),
+              command: 'lanattacks_tftp_stop'
+            },
+            {
+              matcher: method(:lanattacks_dhcp_stop_call?),
+              command: 'lanattacks_dhcp_stop'
+            },
+            {
+              matcher: method(:incognito_incognito_impersonate_token_call?),
+              command: 'incognito_incognito_impersonate_token'
+            },
+            {
+              matcher: method(:fs_file_expand_path_call?),
+              command: 'stdapi_fs_expand_path'
+            },
+            {
+              matcher: method(:peinjector_add_thread_x64_call?),
+              command: 'peinjector_add_thread_x64'
+            },
+            {
+              matcher: method(:peinjector_add_thread_x86_call?),
+              command: 'peinjector_add_thread_x86'
+            },
+            {
+              matcher: method(:peinjector_inject_shellcode_call?),
+              command: 'peinjector_inject_shellcode'
+            },
+            {
+              matcher: method(:sys_config_getenvs_call?),
+              command: 'stdapi_sys_getenvs'
+            },
+            {
+              matcher: method(:lanattacks_dhcp_log_each_call?),
+              command: 'lanattacks_dhcp_log'
+            },
+            {
+              matcher: method(:fs_dir_rmdir_call?),
+              command: 'stdapi_fs_rmdir'
+            },
           ]
 
           mappings.each do |mapping|
@@ -626,7 +1008,7 @@ module RuboCop
 
               corrector.replace(meterpreter_hash_node, new_hash)
 
-              # Handles scenario when we have a compats hash, but no meterpreter hash
+              # Handles scenario when we have a compat hash, but no meterpreter hash
               # and compats array present within a module
             elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil?
               compat_hash_node = nodes[:compat_node].children[1]

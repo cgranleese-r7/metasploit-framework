@@ -414,6 +414,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           begin
             return session.sys.process.get_processes.map { |p| p.slice('name', 'pid') }
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           rescue Rex::Post::Meterpreter::RequestError
             shell_get_processes
           end
@@ -1028,6 +1029,56 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
+  it 'verifies if a meterpreter hash and a commands array is present within the module' do
+    skip("not working yet")
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Payload'        => {
+                'Compat'       =>
+              {
+                'PayloadType' => 'cmd'
+              }
+            )
+          )
+        end
+
+        def run
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Payload'        => {
+                'Compat'       =>
+              {
+                'PayloadType' => 'cmd'
+                'Meterpreter' => {
+                  'Commands' => %w[
+                    stdapi_fs_rm
+                  ]
+                }
+              }
+            )
+          )
+        end
+
+        def run
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
   it 'handles lots of examples' do
     code_snippet_with_errors = <<-EOF
       session.fs.file.rm(
@@ -1104,6 +1155,113 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
       session.fs.file.stat(@chown_file).stathash
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.android.activity_start('intent:#Intent;launchFlags=0x8000;component=com.android.settings/.ChooseLockGeneric;i.lockscreen.password_type=0;B.confirm_credentials=false;end')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.net.resolve.resolve_host(name)[:ip]
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.separator
+      ^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.exist?(@paths['ff'] + temp_file) && !session.fs.file.exist?(@paths['ff'] + org_file)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.upload_file(@paths['ff'] + new_file, tmp)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.search(path, "config.xml", true, -1)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.android.wlan_geolocate
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.net.config.respond_to?(:each_route)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.webcam.record_mic(datastore['DURATION'])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.espia.espia_image_get_dev_screen
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.android.set_wallpaper(File.binread(file))
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.config.steal_token(pid)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.config.revert_to_self
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.net.config.each_route
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.net.config.each_interface
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.dir.foreach(program_files)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.dir.pwd
+      ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.priv.getsystem(technique)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.kiwi.golden_ticket_create(ticket)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.kiwi.kerberos_ticket_use(ticket)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.priv.sam_hashes
+      ^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.incognito.incognito_list_tokens(0)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.dir.entries(v)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.kiwi.get_debug_privilege
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.kiwi.creds_all
+      ^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.config.is_system?
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.extapi.wmi.query("SELECT HotFixID, InstalledOn FROM Win32_QuickFixEngineering")
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.registry.open_remote_key(datastore['RHOST'], root_key)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.priv.getsystem
+      ^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.extapi.adsi.domain_query(domain, adsi_filter, 255, 255, adsi_fields)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.priv.fs.get_file_mace(datastore['FILE'])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.priv.fs.set_file_mace(datastore['FILE'], mace["Modified"], mace["Accessed"], mace["Created"], mace["Entry Modified"])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.extapi.pageant.forward(socket_request_data.first, socket_request_data.first.size)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.dhcp.reset
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.dhcp.load_options(datastore)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.tftp.start
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.dhcp.start
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.tftp.stop
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.dhcp.stop
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.webcam.webcam_start(datastore['INDEX'])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.webcam.webcam_get_frame(datastore['QUALITY'])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.webcam.webcam_stop
+      ^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.webcam.webcam_list
+      ^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.incognito.incognito_impersonate_token(domain_user)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.expand_path(path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.peinjector.add_thread_x64(raw)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.peinjector.inject_shellcode(param)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.dhcp.load_options(datastore)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.config.getenvs('SYSTEMDRIVE', 'HOMEDRIVE', 'ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432')
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.exist?(net_sarang_path_5)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.peinjector.add_thread_x86(raw)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.dhcp.log.each
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.dir.rmdir(datastore['PATH'])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
     EOF
 
     code_snippet_without_error_lines = code_snippet_with_errors.lines.reject { |line| line.lstrip.start_with?("^^^^") }.join
@@ -1126,15 +1284,55 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
+                    android_activity_start
+                    android_set_wallpaper
+                    android_wlan_geolocate
                     appapi_app_install
+                    espia_espia_image_get_dev_screen
+                    extapi_adsi_domain_query
+                    extapi_pageant_forward
+                    extapi_wmi_query
+                    incognito_incognito_impersonate_token
+                    incognito_incognito_list_tokens
+                    kiwi_creds_all
+                    kiwi_get_debug_privilege
+                    kiwi_golden_ticket_create
+                    kiwi_kerberos_ticket_use
+                    lanattacks_*
+                    lanattacks_dhcp_load_options
+                    lanattacks_dhcp_log
+                    lanattacks_dhcp_start
+                    lanattacks_dhcp_stop
+                    lanattacks_tftp_start
+                    lanattacks_tftp_stop
                     net_socket_create
+                    peinjector_add_thread_x64
+                    peinjector_add_thread_x86
+                    peinjector_inject_shellcode
+                    priv_get_file_mace
+                    priv_getsystem
+                    priv_sam_hashes
+                    priv_set_file_mace
                     stdapi_fs_copy
+                    stdapi_fs_entries
+                    stdapi_fs_exist?
+                    stdapi_fs_expand_path
+                    stdapi_fs_foreach
                     stdapi_fs_getwd
                     stdapi_fs_ls
                     stdapi_fs_md5
                     stdapi_fs_mkdir
+                    stdapi_fs_pwd
                     stdapi_fs_rm
+                    stdapi_fs_rmdir
+                    stdapi_fs_search
+                    stdapi_fs_separator
                     stdapi_fs_stat
+                    stdapi_fs_upload_file
+                    stdapi_net_each_interface
+                    stdapi_net_each_route
+                    stdapi_net_resolve_host
+                    stdapi_net_respond_to
                     stdapi_railgun_*
                     stdapi_registry_check_key_exists
                     stdapi_registry_config_getprivs
@@ -1151,8 +1349,14 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                     stdapi_registry_unload_key
                     stdapi_sys_config_getenv
                     stdapi_sys_config_sysinfo
+                    stdapi_sys_getenvs
+                    stdapi_sys_is_system
+                    stdapi_sys_open_remote_key
                     stdapi_sys_power_reboot
                     stdapi_sys_process_*
+                    stdapi_sys_reverevert_to_self
+                    stdapi_sys_steal_token
+                    stdapi_webcam_*
                     sys_config_getdrivers
                     sys_config_getuid
                     sys_fs_new

@@ -56,7 +56,7 @@ def scan_file(file_path)
   matches.uniq! { |match| match[:value] }
 
   matches.each do |match|
-    puts "#{(file_path + ':' + match[:line].to_s).ljust(50)} #{match[:value]}\n"
+    puts "\n#{(file_path + ':' + match[:line].to_s).ljust(50)} #{match[:value]}\n"
   end
 end
 
