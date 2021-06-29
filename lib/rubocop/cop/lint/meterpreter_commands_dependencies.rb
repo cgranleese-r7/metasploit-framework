@@ -58,14 +58,6 @@ module RuboCop
           (send (send (send (send nil? ...) :fs) :file) :ls _)
         PATTERN
 
-        def_node_matcher :sys_processes_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :process) ...)
-        PATTERN
-
-        def_node_matcher :sys_processes_with_trailing_method_call?, <<~PATTERN
-          (send (send (send (send (send nil? ...) :sys) :process) ...) _*)
-        PATTERN
-
         def_node_matcher :net_create_socket_call?, <<~PATTERN
           (send (send (send (send nil? ...) :net) :socket) :create)
         PATTERN
@@ -402,6 +394,38 @@ module RuboCop
           (send (send (send (send nil? ...) :fs) :dir) :rmdir _*)
         PATTERN
 
+        def_node_matcher :sys_process_open_call?, <<~PATTERN
+          (send (send (send (send (send nil? ...) :sys) :process) :open) ...)
+        PATTERN
+
+        def_node_matcher :sys_process_get_processes_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :process) :get_processes)
+        PATTERN
+
+        def_node_matcher :sys_process_getpid_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :process) :getpid)
+        PATTERN
+
+        def_node_matcher :sys_process_open_method_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :process) :open _*)
+        PATTERN
+
+        def_node_matcher :sys_process_kill_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :process) :kill _*)
+        PATTERN
+
+        def_node_matcher :sys_process_execute_call?, <<~PATTERN
+          (send (send (send (send nil? ...) :sys) :process) :execute _*)
+        PATTERN
+
+        def_node_matcher :sys_process_execute_without_parentheses_call?, <<~PATTERN
+        (send (send (send (send nil? ...) :sys) :process) :execute)
+        PATTERN
+
+        def_node_matcher :sys_process_each_process_call?, <<~PATTERN
+          (send (send (send (send (send nil? ...) :sys) :process) :each_process) ...)
+        PATTERN
+
         class StackFrame
           # Keeps track of nodes of interest
           attr_accessor :nodes
@@ -576,14 +600,6 @@ module RuboCop
               command: 'stdapi_fs_ls'
             },
             {
-              matcher: method(:sys_processes_call?),
-              command: 'stdapi_sys_process_*'
-            },
-            {
-              matcher: method(:sys_processes_with_trailing_method_call?),
-              command: 'stdapi_sys_process_*'
-            },
-            {
               matcher: method(:net_create_socket_call?),
               command: 'net_socket_create'
             },
@@ -677,7 +693,7 @@ module RuboCop
             },
             {
               matcher: method(:config_getprivs_call?),
-              command: 'sys_config_getprivs'
+              command: 'stdapi_sys_getprivs'
             },
             {
               matcher: method(:fs_dir_rmdir_call?),
@@ -689,23 +705,23 @@ module RuboCop
             },
             {
               matcher: method(:config_getdrivers_call?),
-              command: 'sys_config_getdrivers'
+              command: 'stdapi_sys_getdrivers'
             },
             {
               matcher: method(:config_getuid_call?),
-              command: 'sys_config_getuid'
+              command: 'stdapi_sys_getuid'
             },
             {
               matcher: method(:fs_file_new_call?),
-              command: 'sys_fs_new'
+              command: 'stdapi_fs_new'
             },
             {
               matcher: method(:config_getsid_call?),
-              command: 'sys_config_getsid'
+              command: 'stdapi_sys_config_getsid'
             },
             {
               matcher: method(:config_is_system_call?),
-              command: 'sys_config_is_system'
+              command: 'stdapi_sys_is_system'
             },
             {
               matcher: method(:fs_file_md5_call?),
@@ -918,6 +934,34 @@ module RuboCop
             {
               matcher: method(:fs_dir_rmdir_call?),
               command: 'stdapi_fs_rmdir'
+            },
+            {
+              matcher: method(:sys_process_open_call?),
+              command: 'stdapi_sys_open'
+            },
+            {
+              matcher: method(:sys_process_get_processes_call?),
+              command: 'stdapi_sys_get_processes'
+            },
+            {
+              matcher: method(:sys_process_getpid_call?),
+              command: 'stdapi_sys_getpid'
+            },
+            {
+              matcher: method(:sys_process_open_method_call?),
+              command: 'stdapi_sys_open'
+            },
+            {
+              matcher: method(:sys_process_kill_call?),
+              command: 'stdapi_sys_kill'
+            },
+            {
+              matcher: method(:sys_process_execute_call?),
+              command: 'stdapi_sys_execute'
+            },
+            {
+              matcher: method(:sys_process_each_process_call?),
+              command: 'stdapi_sys_each_process'
             },
           ]
 

@@ -414,7 +414,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           begin
             return session.sys.process.get_processes.map { |p| p.slice('name', 'pid') }
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           rescue Rex::Post::Meterpreter::RequestError
             shell_get_processes
           end
@@ -431,7 +430,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_sys_process_*
+                    stdapi_sys_get_processes
                   ]
                 }
               }
@@ -1262,6 +1261,33 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
       session.fs.dir.rmdir(datastore['PATH'])
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.process.open.name
+      ^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.process.get_processes
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.getpid
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.process.open(pid, PROCESS_ALL_ACCESS)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.sys.process.get_processes()
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.kill(process['pid'])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.execute(cmd, nil, {'Hidden' => true})
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.each_process.find
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.open.pid
+      ^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.execute 'script', "command"
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.fs.file.stat(@chown_file).stathash
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.fs.file.download_file("test", "file", opts)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
     EOF
 
     code_snippet_without_error_lines = code_snippet_with_errors.lines.reject { |line| line.lstrip.start_with?("^^^^") }.join
@@ -1314,6 +1340,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                     priv_sam_hashes
                     priv_set_file_mace
                     stdapi_fs_copy
+                    stdapi_fs_download_file
                     stdapi_fs_entries
                     stdapi_fs_exist?
                     stdapi_fs_expand_path
@@ -1322,6 +1349,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                     stdapi_fs_ls
                     stdapi_fs_md5
                     stdapi_fs_mkdir
+                    stdapi_fs_new
                     stdapi_fs_pwd
                     stdapi_fs_rm
                     stdapi_fs_rmdir
@@ -1349,17 +1377,21 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                     stdapi_registry_unload_key
                     stdapi_sys_config_getenv
                     stdapi_sys_config_sysinfo
+                    stdapi_sys_each_process
+                    stdapi_sys_execute
+                    stdapi_sys_get_processes
+                    stdapi_sys_getdrivers
                     stdapi_sys_getenvs
+                    stdapi_sys_getpid
+                    stdapi_sys_getuid
                     stdapi_sys_is_system
+                    stdapi_sys_kill
+                    stdapi_sys_open
                     stdapi_sys_open_remote_key
                     stdapi_sys_power_reboot
-                    stdapi_sys_process_*
                     stdapi_sys_reverevert_to_self
                     stdapi_sys_steal_token
                     stdapi_webcam_*
-                    sys_config_getdrivers
-                    sys_config_getuid
-                    sys_fs_new
                   ]
                 }
               }
