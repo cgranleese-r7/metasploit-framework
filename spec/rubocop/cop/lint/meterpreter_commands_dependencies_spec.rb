@@ -36,7 +36,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+  it 'verifies that meterpreter method calls are matched and added to the commands array' do
     expect_offense(<<~RUBY)
       class DummyModule
         def initialize(info = {})
@@ -97,7 +97,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+  it 'verifies that if `update_info(` is missing that the method calls are matched and added to the commands array ' do
     expect_offense(<<~RUBY)
       class DummyModule
         def initialize
@@ -152,7 +152,42 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+  it 'verifies that if `update_info(` is missing but initialize has `(info={})` that the method calls are matched and added to the commands array ' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize(info={})
+          super
+          ^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          register_options([])
+        end
+        def run
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info={})
+          super
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_rm
+                ]
+              }
+            }
+          register_options([])
+        end
+        def run
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
+  it 'verifies that if there are two classes, that it will successfully iterate over them and match the method calls in the appropriate class and generate a commands list' do
     expect_offense(<<~RUBY)
       class DummyModule
         class HelperClass
@@ -221,7 +256,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+  it 'verifies that if no compat node is present and no method calls that it will not generate anything/alter the file' do
     expect_no_offenses(<<~RUBY)
       class DummyModule
         def initialize
@@ -235,66 +270,13 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             'DisclosureDate' => 'January 5',
           )
         end
-      end
-    RUBY
-  end
-
-  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
-    expect_offense(<<~RUBY)
-      class DummyModule
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-                  stdapi_fs_rm
-                  ^^^^^^^^^^^^ Compatibility command does not have an associated method call.
-                ]
-              }
-            }
-          )
-          register_options([])
-        end
-        def run
-        end
-      end
-    RUBY
-
-    expect_correction(<<~RUBY)
-      class DummyModule
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                ]
-              }
-            }
-          )
-          register_options([])
-        end
         def run
         end
       end
     RUBY
   end
 
-  it 'generates a list of meterpreter command dependencies based off meterpreter api calls in modules that currently have an empty commands array' do
+  it 'verifies that is the command list has a command present but no corresponding call, the command should be removed' do
     expect_offense(<<~RUBY)
       class DummyModule
         def initialize
@@ -406,7 +388,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'works with modules' do
+  it 'verfies that the cop will also work with modules' do
     expect_offense(<<~RUBY)
       module Msf::Post::Process
              ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
@@ -713,7 +695,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'verifies if a commands array is present within the module' do
+  it 'verifies if a commands array is not present within a module it will be generated and appended appropriately' do
     expect_offense(<<~RUBY)
       class DummyModule
         def initialize(info = {})
@@ -772,7 +754,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'verifies if a meterpreter hash and a commands array is present within the module' do
+  it 'verifies if a meterpreter hash and a commands array is present within the module, if not it should be generated and appended appropriately' do
     expect_offense(<<~RUBY)
       class DummyModule
         def initialize(info = {})
@@ -938,7 +920,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'verifies if a compat hash, meterpreter hash and a commands array is present within the module' do
+  it 'verifies if a compat hash, meterpreter hash and a commands array is present within the module, if not it should be generated and appended appropriately' do
     expect_offense(<<~RUBY)
       class DummyModule
         def initialize(info = {})
@@ -993,7 +975,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'verifies if a meterpreter hash and a commands array is present within the module' do
+  it 'verifies if a there is no initialise method, that it should be generated and appended appropriately' do
     expect_offense(<<~RUBY)
       class DummyModule
             ^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
@@ -1028,8 +1010,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'verifies if a meterpreter hash and a commands array is present within the module' do
-    skip("not working yet")
+  it 'verfies that if compat has another value, that the meterpreter hash will be appended onto it, not replace it' do
     expect_offense(<<~RUBY)
       class DummyModule
         def initialize(info = {})
@@ -1038,8 +1019,10 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               info,
               'Payload'        => {
                 'Compat'       =>
-              {
-                'PayloadType' => 'cmd'
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                {
+                  'PayloadType' => 'cmd'
+                }
               }
             )
           )
@@ -1047,6 +1030,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
 
         def run
           session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end
       end
     RUBY
@@ -1059,16 +1043,232 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               info,
               'Payload'        => {
                 'Compat'       =>
-              {
-                'PayloadType' => 'cmd'
+                {
+                  'PayloadType' => 'cmd'
+                  'Meterpreter' => {
+                    'Commands' => %w[
+                      stdapi_fs_rm
+                    ]
+                  }
+                }
+              }
+            )
+          )
+        end
+
+        def run
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
+  it 'handles `abrt_raceabrt_priv_esc.rb` edge cases that were not being matched for unknown reasons' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+            super(update_info(info,
+              'Name'           => 'ABRT raceabrt Privilege Escalation',
+              'Description'    => %q{
+                This module attempts to gain root privileges on Linux systems with
+                a vulnerable version of Automatic Bug Reporting Tool (ABRT) configured
+                as the crash handler.
+        
+                A race condition allows local users to change ownership of arbitrary
+                files (CVE-2015-3315). This module uses a symlink attack on
+                `/var/tmp/abrt/*/maps` to change the ownership of `/etc/passwd`,
+                then adds a new user with UID=0 GID=0 to gain root privileges.
+                Winning the race could take a few minutes.
+        
+                This module has been tested successfully on:
+        
+                abrt 2.1.11-12.el7 on RHEL 7.0 x86_64;
+                abrt 2.1.5-1.fc19 on Fedora Desktop 19 x86_64;
+                abrt 2.2.1-1.fc19 on Fedora Desktop 19 x86_64;
+                abrt 2.2.2-2.fc20 on Fedora Desktop 20 x86_64;
+                abrt 2.3.0-3.fc21 on Fedora Desktop 21 x86_64.
+              },
+              'License'        => MSF_LICENSE,
+              'Author'         =>
+                [
+                  'Tavis Ormandy', # Discovery and C exploit
+                  'bcoles' # Metasploit
+                ],
+              'DisclosureDate' => '2015-04-14',
+              'Platform'       => [ 'linux' ],
+              'Arch'           => [ ARCH_X86, ARCH_X64 ],
+              'SessionTypes'   => [ 'shell', 'meterpreter' ],
+              'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                  ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                    stdapi_sys_process_*
+                    ^^^^^^^^^^^^^^^^^^^^ Compatibility command does not have an associated method call.
+                    stdapi_fs_stat
                   ]
                 }
               }
             )
           )
+        end
+        def run
+          session.sys.process.execute 'shell', "command"
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          session.fs.file.stat(@chown_file).stathash
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+            super(update_info(info,
+              'Name'           => 'ABRT raceabrt Privilege Escalation',
+              'Description'    => %q{
+                This module attempts to gain root privileges on Linux systems with
+                a vulnerable version of Automatic Bug Reporting Tool (ABRT) configured
+                as the crash handler.
+        
+                A race condition allows local users to change ownership of arbitrary
+                files (CVE-2015-3315). This module uses a symlink attack on
+                `/var/tmp/abrt/*/maps` to change the ownership of `/etc/passwd`,
+                then adds a new user with UID=0 GID=0 to gain root privileges.
+                Winning the race could take a few minutes.
+        
+                This module has been tested successfully on:
+        
+                abrt 2.1.11-12.el7 on RHEL 7.0 x86_64;
+                abrt 2.1.5-1.fc19 on Fedora Desktop 19 x86_64;
+                abrt 2.2.1-1.fc19 on Fedora Desktop 19 x86_64;
+                abrt 2.2.2-2.fc20 on Fedora Desktop 20 x86_64;
+                abrt 2.3.0-3.fc21 on Fedora Desktop 21 x86_64.
+              },
+              'License'        => MSF_LICENSE,
+              'Author'         =>
+                [
+                  'Tavis Ormandy', # Discovery and C exploit
+                  'bcoles' # Metasploit
+                ],
+              'DisclosureDate' => '2015-04-14',
+              'Platform'       => [ 'linux' ],
+              'Arch'           => [ ARCH_X86, ARCH_X64 ],
+              'SessionTypes'   => [ 'shell', 'meterpreter' ],
+              'Compat' => {
+                'Meterpreter' => {
+                  'Commands' => %w[
+                    stdapi_fs_stat
+                    stdapi_sys_execute
+                  ]
+                }
+              }
+            )
+          )
+        end
+        def run
+          session.sys.process.execute 'shell', "command"
+          session.fs.file.stat(@chown_file).stathash
+        end
+      end
+    RUBY
+  end
+
+  it 'handles `abrt_raceabrt_priv_esc.rb` edge cases that were not being matched for unknown reasons' do
+    skip("not working yet")
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(update_info(info,
+            'Name'                 => "Windows Run Command As User",
+            'Description'          => %q{
+              This module will login with the specified username/password and execute the
+              supplied command as a hidden process. Output is not returned by default.
+              Unless targeting a local user either set the DOMAIN, or specify a UPN user
+              format (e.g. user@domain). This uses the CreateProcessWithLogonW WinAPI function.
+      
+              A custom command line can be sent instead of uploading an executable.
+              APPLICAITON_NAME and COMMAND_LINE are passed to lpApplicationName and lpCommandLine
+              respectively. See the MSDN documentation for how these two values interact.
+            },
+            'License'              => MSF_LICENSE,
+            'Platform'             => ['win'],
+            'SessionTypes'         => ['meterpreter'],
+            'Author'               => ['Kx499', 'Ben Campbell'],
+            'Targets'              => [
+              [ 'Automatic', { 'Arch' => [ ARCH_X86, ARCH_X64 ] } ]
+            ],
+            'DefaultTarget'        => 0,
+            'References'           =>
+              [
+                [ 'URL', 'https://msdn.microsoft.com/en-us/library/windows/desktop/ms682431' ]
+              ],
+            'DisclosureDate' => '1999-01-01' # Same as psexec -- a placeholder date for non-vuln 'exploits'
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          ))
+      
+          register_options(
+            [
+              OptString.new('DOMAIN', [false, 'Domain to login with' ]),
+              OptString.new('USER', [true, 'Username to login with' ]),
+              OptString.new('PASSWORD', [true, 'Password to login with' ]),
+              OptString.new('APPLICATION_NAME', [false, 'Application to be executed (lpApplicationName)', nil ]),
+              OptString.new('COMMAND_LINE', [false, 'Command line to execute (lpCommandLine)', nil ]),
+              OptBool.new('USE_CUSTOM_COMMAND', [true, 'Specify custom APPLICATION_NAME and COMMAND_LINE', false ])
+            ])
+        end
+
+        def run
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(update_info(info,
+            'Name'                 => "Windows Run Command As User",
+            'Description'          => %q{
+              This module will login with the specified username/password and execute the
+              supplied command as a hidden process. Output is not returned by default.
+              Unless targeting a local user either set the DOMAIN, or specify a UPN user
+              format (e.g. user@domain). This uses the CreateProcessWithLogonW WinAPI function.
+      
+              A custom command line can be sent instead of uploading an executable.
+              APPLICAITON_NAME and COMMAND_LINE are passed to lpApplicationName and lpCommandLine
+              respectively. See the MSDN documentation for how these two values interact.
+            },
+            'License'              => MSF_LICENSE,
+            'Platform'             => ['win'],
+            'SessionTypes'         => ['meterpreter'],
+            'Author'               => ['Kx499', 'Ben Campbell'],
+            'Targets'              => [
+              [ 'Automatic', { 'Arch' => [ ARCH_X86, ARCH_X64 ] } ]
+            ],
+            'DefaultTarget'        => 0,
+            'References'           =>
+              [
+                [ 'URL', 'https://msdn.microsoft.com/en-us/library/windows/desktop/ms682431' ]
+              ],
+            'DisclosureDate' => '1999-01-01' # Same as psexec -- a placeholder date for non-vuln 'exploits'
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_rm
+                ]
+              }
+            }
+          ))
+      
+          register_options(
+            [
+              OptString.new('DOMAIN', [false, 'Domain to login with' ]),
+              OptString.new('USER', [true, 'Username to login with' ]),
+              OptString.new('PASSWORD', [true, 'Password to login with' ]),
+              OptString.new('APPLICATION_NAME', [false, 'Application to be executed (lpApplicationName)', nil ]),
+              OptString.new('COMMAND_LINE', [false, 'Command line to execute (lpCommandLine)', nil ]),
+              OptBool.new('USE_CUSTOM_COMMAND', [true, 'Specify custom APPLICATION_NAME and COMMAND_LINE', false ])
+            ])
         end
 
         def run
@@ -1288,6 +1488,12 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
       client.fs.file.download_file("test", "file", opts)
       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.lanattacks.tftp.add_file("update_test",contents)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      client.fs.file.download_file("local_path/img", "f_path/img", opts)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+      session.sys.process.execute '/bin/sh', "-c \\"chown root:root \#{@chown_file}\\""
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
     EOF
 
     code_snippet_without_error_lines = code_snippet_with_errors.lines.reject { |line| line.lstrip.start_with?("^^^^") }.join
@@ -1329,6 +1535,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                     lanattacks_dhcp_log
                     lanattacks_dhcp_start
                     lanattacks_dhcp_stop
+                    lanattacks_tftp_add_file
                     lanattacks_tftp_start
                     lanattacks_tftp_stop
                     net_socket_create

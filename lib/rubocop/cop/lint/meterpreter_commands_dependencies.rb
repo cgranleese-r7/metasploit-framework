@@ -14,6 +14,11 @@ module RuboCop
         #   - implement a stack to handle multiple instance where we have multiple classes/modules , big hint Array
         #   - fix matcher for file stat - currently have two variations, one for with and without a trailing method call
         #   - fix matcher for process with a method call without parenthesis
+        #   - ** Fix issues where some commas && comments are being added after compat hash
+        #
+        #   - add tests for modules without info
+        #   - add tests for modules/exploits/linux/local/abrt_raceabrt_priv_esc.rb - calls not being added to compat - ** Working on tests **
+        #   - add tests for modules/exploits/linux/local/bash_profile_persistence.rb - removing an option instead off appending
         #
         #  - Potenial problem child - fileformat/mswin_tiff_overflow.rb
         #
@@ -48,6 +53,9 @@ module RuboCop
           (def :initialize __)
         PATTERN
 
+        def_node_matcher :super_present?, <<~PATTERN
+          (begin (zsuper) ...)
+        PATTERN
 
         # Matchers for meterpreter API calls
         def_node_matcher :file_rm_call?, <<~PATTERN
@@ -343,7 +351,7 @@ module RuboCop
         PATTERN
 
         def_node_matcher :lanattacks_tftp_add_file_call?, <<~PATTERN
-          (send (send (send (send nil :client) :lanattacks) :tftp) :add_file _*)
+          (send (send (send (send nil? ...) :lanattacks) :tftp) :add_file _*)
         PATTERN
 
         def_node_matcher :lanattacks_tftp_start_call?, <<~PATTERN
@@ -526,6 +534,8 @@ module RuboCop
             add_offense(nodes[:meterpreter_node], &autocorrector)
           elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil?
             add_offense(nodes[:compat_node], &autocorrector)
+          elsif  nodes[:initialize_node] && nodes[:super_node] && nodes[:info_node].nil?
+            add_offense(nodes[:super_node].children.first, &autocorrector)
           elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil? && !nodes[:initialize_node].nil?
             add_offense(nodes[:info_node].children.last, &autocorrector)
           elsif nodes[:initialize_node].nil?
@@ -559,6 +569,12 @@ module RuboCop
         def after_def(_node)
           if visiting_state == :looking_for_hash_keys
             self.visiting_state = :finished
+          end
+        end
+
+        def on_begin(node)
+          if super_present?(node)
+            nodes[:super_node] = node
           end
         end
 
@@ -960,6 +976,10 @@ module RuboCop
               command: 'stdapi_sys_execute'
             },
             {
+              matcher: method(:sys_process_execute_without_parentheses_call?),
+              command: 'stdapi_sys_execute'
+            },
+            {
               matcher: method(:sys_process_each_process_call?),
               command: 'stdapi_sys_each_process'
             },
@@ -1055,8 +1075,6 @@ module RuboCop
               # Handles scenario when we have a compat hash, but no meterpreter hash
               # and compats array present within a module
             elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil?
-              compat_hash_node = nodes[:compat_node].children[1]
-
               # White spacing handling based of node offsets
               compat_whitespace = offset(nodes[:compat_node])
               meterpreter_whitespace = compat_whitespace + "  "
@@ -1065,7 +1083,32 @@ module RuboCop
 
               # Formatting to add missing commands node when the method has a compat node & meterpreter node present
               new_hash =
-                "{\n" \
+                "\n" \
+                "#{meterpreter_whitespace}'Meterpreter' => {\n" \
+                "#{commands_whitespace}'Commands' => %w[" \
+                "\n#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}\n" \
+                "#{commands_whitespace}]\n" \
+                "#{meterpreter_whitespace}}" \
+
+              if !nodes[:compat_node].value.children.last.nil?
+                corrector.insert_after(nodes[:compat_node].value.children.last, new_hash)
+              else
+                alt_new_hash = "{"
+                alt_new_hash << new_hash
+                alt_new_hash << "\n#{compat_whitespace}}"
+                corrector.replace(nodes[:compat_node].value, alt_new_hash)
+              end
+
+            elsif !nodes[:initialize_node].nil? && !nodes[:super_node].nil? && nodes[:info_node].nil?
+              super_whitespace = offset(nodes[:super_node])
+              compat_whitespace = super_whitespace + "  "
+              meterpreter_whitespace = compat_whitespace + "  "
+              commands_whitespace = meterpreter_whitespace + "  "
+              array_content_whitespace = commands_whitespace + "  "
+
+              # Formatting to add missing commands node when the method has a compat node & meterpreter node present
+              new_hash =
+                "\n#{compat_whitespace}'Compat' => {\n" \
                 "#{meterpreter_whitespace}'Meterpreter' => {\n" \
                 "#{commands_whitespace}'Commands' => %w[" \
                 "\n#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}\n" \
@@ -1073,7 +1116,7 @@ module RuboCop
                 "#{meterpreter_whitespace}}\n" \
                 "#{compat_whitespace}}"
 
-              corrector.replace(compat_hash_node, new_hash)
+              corrector.insert_after(nodes[:super_node].children.first, new_hash)
 
               # Handles scenario when we have no compats hash, no meterpreter hash
               # and  no compats array present within the module, but we do have an initialize method present
