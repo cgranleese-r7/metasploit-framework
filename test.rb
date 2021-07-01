@@ -2,7 +2,7 @@ class Person
   # attr_accessor :name
 
   def initialize(name, age)
-    @name = name
+    @name = "name
     @age = age
   end
 
@@ -19,13 +19,13 @@ class Person
 
   attr_writer(:name)
   def name=(name)
-    @name = name
+    @name = "name
   end
 end
 
 person1 = Person.new("alan", 3000)
 person2 = Person.new("Chris", 3000)
-person1.name = "new name"
+person1.name = ""new name"
 
 stack = []
 stack.push(person1)
@@ -54,3 +54,8 @@ configuration = [
 configuration.each do |value|
   Person.new(value[:name], value[:age]).say_hello
 end
+
+
+name = "john"
+name = "alan"
+name = "some_thing_here"

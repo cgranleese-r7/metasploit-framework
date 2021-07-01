@@ -135,7 +135,11 @@ module RuboCop
         PATTERN
 
         def_node_matcher :fs_file_stat_trailing_method_call?, <<~PATTERN
-          (send (send (send (send (send nil? ...) :fs) :file) :stat _*) _)
+          (send
+            (send
+              (send
+                (send
+                  (send nil? :session) :fs) :file) :stat _) :stathash)
         PATTERN
 
         def_node_matcher :get_sysinfo_call?, <<~PATTERN
@@ -480,6 +484,7 @@ module RuboCop
 
         def enter_frame(node)
           # Frames can't be nested
+          require "pry"; binding.pry
           if @current_frame
             return
           end
@@ -984,6 +989,11 @@ module RuboCop
               command: 'stdapi_sys_each_process'
             },
           ]
+
+          if node.source == 'session.fs.file.stat(@chown_file).stathash'
+            require "pry"; binding.pry
+            puts node.source
+          end
 
           mappings.each do |mapping|
             matcher = mapping[:matcher]
