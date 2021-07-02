@@ -153,6 +153,9 @@ Layout/ModuleDescriptionIndentation:
 
 Lint/MeterpreterCommandDependencies:
   Enabled: true
+  #TODO
+#  Exclude:
+#    - 'lib/foo/whatever'
 
 Lint/ModuleDisclosureDateFormat:
   Enabled: true

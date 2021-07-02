@@ -27,6 +27,8 @@ module RuboCop
         MISSING_METHOD_CALL_FOR_COMMAND_MSG = 'Compatibility command does not have an associated method call.'
         COMMAND_DUPLICATED_MSG = 'Command duplicated.'
 
+        CLIENT_OR_SESSION = "{(lvar {:session :client}) (send nil? {:session :client})}"
+
         def_node_matcher :find_nested_update_info_node, <<~PATTERN
           (def :initialize _args (begin (super (send nil? {:update_info :merge_info} (lvar :info) $(hash ...))) ...))
         PATTERN
@@ -59,383 +61,375 @@ module RuboCop
 
         # Matchers for meterpreter API calls
         def_node_matcher :file_rm_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :rm _)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :rm _)
         PATTERN
 
         def_node_matcher :file_ls_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :ls _)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :ls _)
         PATTERN
 
         def_node_matcher :net_create_socket_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :net) :socket) :create)
+          (send (send (send #{CLIENT_OR_SESSION} :net) :socket) :create)
         PATTERN
 
         def_node_matcher :registry_splitkey_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :splitkey _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :splitkey _*)
         PATTERN
 
         def_node_matcher :registry_config_getprivs_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :getprivs)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getprivs)
         PATTERN
 
         def_node_matcher :registry_load_key_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :load_key _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :load_key _*)
         PATTERN
 
         def_node_matcher :registry_unload_key_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :unload_key _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :unload_key _*)
         PATTERN
 
         def_node_matcher :registry_create_key_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :create_key _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :create_key _*)
         PATTERN
 
         def_node_matcher :registry_open_key_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :open_key _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :open_key _*)
         PATTERN
 
         def_node_matcher :registry_delete_key_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :delete_key _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :delete_key _*)
         PATTERN
 
         def_node_matcher :registry_enum_key_direct_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :enum_key_direct _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :enum_key_direct _*)
         PATTERN
 
         def_node_matcher :registry_enum_value_direct_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :enum_value_direct _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :enum_value_direct _*)
         PATTERN
 
         def_node_matcher :registry_query_value_direct_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :query_value_direct _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :query_value_direct _*)
         PATTERN
 
         def_node_matcher :registry_set_value_direct_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :set_value_direct _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :set_value_direct _*)
         PATTERN
 
         def_node_matcher :registry_type2str_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :type2str _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :type2str _*)
         PATTERN
 
         def_node_matcher :registry_check_key_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :check_key_exists _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :check_key_exists _*)
         PATTERN
 
         def_node_matcher :fs_dir_getwd_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :dir) :getwd)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :getwd)
         PATTERN
 
         def_node_matcher :appapi_app_install_call?, <<~PATTERN
-          (send (send (send nil? ...) :appapi) :app_install _*)
+          (send (send #{CLIENT_OR_SESSION} :appapi) :app_install _*)
         PATTERN
 
         def_node_matcher :fs_file_stat_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :stat _*)
-        PATTERN
-
-        def_node_matcher :fs_file_stat_trailing_method_call?, <<~PATTERN
-          (send
-            (send
-              (send
-                (send
-                  (send nil? :session) :fs) :file) :stat _) :stathash)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :stat _*)
         PATTERN
 
         def_node_matcher :get_sysinfo_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :sysinfo _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :sysinfo _*)
         PATTERN
 
         def_node_matcher :config_getenv_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :getenv _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getenv _*)
         PATTERN
 
         def_node_matcher :fs_file_copy_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :copy _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :copy _*)
         PATTERN
 
         def_node_matcher :railgun_call?, <<~PATTERN
-          (send (send (send nil? ...) :railgun) ...)
+          (send (send #{CLIENT_OR_SESSION} :railgun) ...)
         PATTERN
 
         def_node_matcher :net_socket_create_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :net) :socket) :create)
+          (send (send (send #{CLIENT_OR_SESSION} :net) :socket) :create)
         PATTERN
 
         def_node_matcher :config_getprivs_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :getprivs)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getprivs)
         PATTERN
 
         def_node_matcher :fs_dir_rmdir_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :dir) :rmdir)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :rmdir)
         PATTERN
 
         def_node_matcher :fs_dir_mkdir_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :dir) :mkdir _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :mkdir _*)
         PATTERN
 
         def_node_matcher :config_getdrivers_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :getdrivers)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getdrivers)
         PATTERN
 
         def_node_matcher :config_getuid_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :getuid)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getuid)
         PATTERN
 
         def_node_matcher :fs_file_new_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :new _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :new _*)
         PATTERN
 
         def_node_matcher :config_getsid_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :getsid)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getsid)
         PATTERN
 
         def_node_matcher :config_is_system_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :is_system)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :is_system)
         PATTERN
 
         def_node_matcher :fs_file_md5_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :md5 _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :md5 _*)
         PATTERN
 
         def_node_matcher :powershell_execute_string_call?, <<~PATTERN
-          (send (send (send nil? ...) :powershell) :execute_string)
+          (send (send #{CLIENT_OR_SESSION} :powershell) :execute_string)
         PATTERN
 
         def_node_matcher :power_reboot_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :power) :reboot)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :power) :reboot)
         PATTERN
 
         def_node_matcher :lanattacks_dhcp_reset_call?, <<~PATTERN
-          (send (send (send nil? ...) :lanattacks) ...)
+          (send (send #{CLIENT_OR_SESSION} :lanattacks) ...)
         PATTERN
 
         def_node_matcher :android_activity_start_call?, <<~PATTERN
-          (send (send (send nil? ...) :android) :activity_start _*)
+          (send (send #{CLIENT_OR_SESSION} :android) :activity_start _*)
         PATTERN
 
         def_node_matcher :fs_download_file_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :download_file _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :download_file _*)
         PATTERN
 
         def_node_matcher :net_resolve_host_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :net) :resolve) :resolve_host _*)
+          (send (send (send #{CLIENT_OR_SESSION} :net) :resolve) :resolve_host _*)
         PATTERN
 
         def_node_matcher :fs_file_separator_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :separator)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :separator)
         PATTERN
 
         def_node_matcher :fs_file_exist_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :exist? _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :exist? _*)
         PATTERN
 
         def_node_matcher :fs_upload_file_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :upload_file _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :upload_file _*)
         PATTERN
 
         def_node_matcher :fs_file_search_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :search _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :search _*)
         PATTERN
 
         def_node_matcher :android_wlan_geolocate_call?, <<~PATTERN
-          (send (send (send nil? ...) :android) :wlan_geolocate)
+          (send (send #{CLIENT_OR_SESSION} :android) :wlan_geolocate)
         PATTERN
 
         def_node_matcher :net_config_respond_to_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :net) :config) :respond_to? _*)
+          (send (send (send #{CLIENT_OR_SESSION} :net) :config) :respond_to? _*)
         PATTERN
 
         def_node_matcher :webcam_call?, <<~PATTERN
-          (send (send (send nil? ...) :webcam) ...)
+          (send (send #{CLIENT_OR_SESSION} :webcam) ...)
         PATTERN
 
         def_node_matcher :espia_image_get_dev_screen_call?, <<~PATTERN
-          (send (send (send nil? ...) :espia) :espia_image_get_dev_screen)
+          (send (send #{CLIENT_OR_SESSION} :espia) :espia_image_get_dev_screen)
         PATTERN
 
         def_node_matcher :android_set_wallpaper_call?, <<~PATTERN
-          (send (send (send nil? ...) :android) :set_wallpaper _*)
+          (send (send #{CLIENT_OR_SESSION} :android) :set_wallpaper _*)
         PATTERN
 
         def_node_matcher :sys_config_steal_token_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :steal_token _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :steal_token _*)
         PATTERN
 
         def_node_matcher :sys_config_revert_to_self_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :revert_to_self)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :revert_to_self)
         PATTERN
 
         def_node_matcher :net_config_each_route_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :net) :config) :each_route)
+          (send (send (send #{CLIENT_OR_SESSION} :net) :config) :each_route)
         PATTERN
 
         def_node_matcher :net_config_each_interface_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :net) :config) :each_interface)
+          (send (send (send #{CLIENT_OR_SESSION} :net) :config) :each_interface)
         PATTERN
 
         def_node_matcher :fs_foreach_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :dir) :foreach _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :foreach _*)
         PATTERN
 
         def_node_matcher :fs_pwd_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :dir) :pwd)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :pwd)
         PATTERN
 
         def_node_matcher :priv_getsystem_args_call?, <<~PATTERN
-          (send (send (send nil? ...) :priv) :getsystem _*)
+          (send (send #{CLIENT_OR_SESSION} :priv) :getsystem _*)
         PATTERN
 
         def_node_matcher :kiwi_golden_ticket_create_call?, <<~PATTERN
-          (send (send (send nil? ...) :kiwi) :golden_ticket_create _*)
+          (send (send #{CLIENT_OR_SESSION} :kiwi) :golden_ticket_create _*)
         PATTERN
 
         def_node_matcher :kiwi_kerberos_ticket_use_call?, <<~PATTERN
-          (send (send (send nil? ...) :kiwi) :kerberos_ticket_use _*)
+          (send (send #{CLIENT_OR_SESSION} :kiwi) :kerberos_ticket_use _*)
         PATTERN
 
         def_node_matcher :priv_sam_hashes_call?, <<~PATTERN
-          (send (send (send nil? ...) :priv) :sam_hashes)
+          (send (send #{CLIENT_OR_SESSION} :priv) :sam_hashes)
         PATTERN
 
         def_node_matcher :incognito_list_tokens_call?, <<~PATTERN
-          (send (send (send nil? ...) :incognito) :incognito_list_tokens _*)
+          (send (send #{CLIENT_OR_SESSION} :incognito) :incognito_list_tokens _*)
         PATTERN
 
         def_node_matcher :fs_entries_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :dir) :entries _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :entries _*)
         PATTERN
 
         def_node_matcher :kiwi_get_debug_privilege_call?, <<~PATTERN
-          (send (send (send nil? ...) :kiwi) :get_debug_privilege)
+          (send (send #{CLIENT_OR_SESSION} :kiwi) :get_debug_privilege)
         PATTERN
 
         def_node_matcher :kiwi_creds_all_call?, <<~PATTERN
-          (send (send (send nil? ...) :kiwi) :creds_all)
+          (send (send #{CLIENT_OR_SESSION} :kiwi) :creds_all)
         PATTERN
 
         def_node_matcher :sys_config_is_system_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :is_system?)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :is_system?)
         PATTERN
 
         def_node_matcher :extapi_wmi_query_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :extapi) :wmi) :query _*)
+          (send (send (send #{CLIENT_OR_SESSION} :extapi) :wmi) :query _*)
         PATTERN
 
         def_node_matcher :sys_registry_open_remote_key_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :registry) :open_remote_key _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :open_remote_key _*)
         PATTERN
 
         def_node_matcher :priv_getsystem_call?, <<~PATTERN
-          (send (send (send nil? ...) :priv) :getsystem)
+          (send (send #{CLIENT_OR_SESSION} :priv) :getsystem)
         PATTERN
 
         def_node_matcher :extapi_adsi_domain_query_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :extapi) :adsi) :domain_query _*)
+          (send (send (send #{CLIENT_OR_SESSION} :extapi) :adsi) :domain_query _*)
         PATTERN
 
         def_node_matcher :priv_fs_get_file_mace_call?, <<~PATTERN
-        (send (send (send (send nil? ...) :priv) :fs) :get_file_mace _*)
+        (send (send (send #{CLIENT_OR_SESSION} :priv) :fs) :get_file_mace _*)
         PATTERN
 
         def_node_matcher :priv_fs_set_file_mace_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :priv) :fs) :set_file_mace _*)
+          (send (send (send #{CLIENT_OR_SESSION} :priv) :fs) :set_file_mace _*)
         PATTERN
 
         def_node_matcher :extapi_pageant_forward_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :extapi) :pageant) :forward _*)
+          (send (send (send #{CLIENT_OR_SESSION} :extapi) :pageant) :forward _*)
         PATTERN
 
         def_node_matcher :lanattacks_dhcp_reset_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :lanattacks) :dhcp) :reset)
+          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :reset)
         PATTERN
 
         def_node_matcher :lanattacks_dhcp_load_options_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :lanattacks) :dhcp) :load_options _*)
+          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :load_options _*)
         PATTERN
 
         def_node_matcher :lanattacks_tftp_add_file_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :lanattacks) :tftp) :add_file _*)
+          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :tftp) :add_file _*)
         PATTERN
 
         def_node_matcher :lanattacks_tftp_start_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :lanattacks) :tftp) :start)
+          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :tftp) :start)
         PATTERN
 
         def_node_matcher :lanattacks_dhcp_start_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :lanattacks) :dhcp) :start)
+          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :start)
         PATTERN
 
         def_node_matcher :lanattacks_tftp_stop_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :lanattacks) :tftp) :stop)
+          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :tftp) :stop)
         PATTERN
 
         def_node_matcher :lanattacks_dhcp_stop_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :lanattacks) :dhcp) :stop)
+          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :stop)
         PATTERN
 
         def_node_matcher :incognito_incognito_impersonate_token_call?, <<~PATTERN
-          (send (send (send nil? ...) :incognito) :incognito_impersonate_token _*)
+          (send (send #{CLIENT_OR_SESSION} :incognito) :incognito_impersonate_token _*)
         PATTERN
 
         def_node_matcher :fs_file_expand_path_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :file) :expand_path _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :expand_path _*)
         PATTERN
 
         def_node_matcher :peinjector_add_thread_x64_call?, <<~PATTERN
-          (send (send (send nil? ...) :peinjector) :add_thread_x64 _*)
+          (send (send #{CLIENT_OR_SESSION} :peinjector) :add_thread_x64 _*)
         PATTERN
 
         def_node_matcher :peinjector_add_thread_x86_call?, <<~PATTERN
-          (send (send (send nil? ...) :peinjector) :add_thread_x86 _*)
+          (send (send #{CLIENT_OR_SESSION} :peinjector) :add_thread_x86 _*)
         PATTERN
 
         def_node_matcher :peinjector_inject_shellcode_call?, <<~PATTERN
-          (send (send (send nil? ...) :peinjector) :inject_shellcode _*)
+          (send (send #{CLIENT_OR_SESSION} :peinjector) :inject_shellcode _*)
         PATTERN
 
         def_node_matcher :sys_config_getenvs_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :config) :getenvs _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getenvs _*)
         PATTERN
 
         def_node_matcher :lanattacks_dhcp_log_each_call?, <<~PATTERN
-          (send (send (send (send (send nil? ...) :lanattacks) :dhcp) :log) :each)
+          (send (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :log) :each)
         PATTERN
 
         def_node_matcher :fs_dir_rmdir_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :fs) :dir) :rmdir _*)
+          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :rmdir _*)
         PATTERN
 
         def_node_matcher :sys_process_open_call?, <<~PATTERN
-          (send (send (send (send (send nil? ...) :sys) :process) :open) ...)
+          (send (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :open) ...)
         PATTERN
 
         def_node_matcher :sys_process_get_processes_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :process) :get_processes)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :get_processes)
         PATTERN
 
         def_node_matcher :sys_process_getpid_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :process) :getpid)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :getpid)
         PATTERN
 
         def_node_matcher :sys_process_open_method_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :process) :open _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :open _*)
         PATTERN
 
         def_node_matcher :sys_process_kill_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :process) :kill _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :kill _*)
         PATTERN
 
         def_node_matcher :sys_process_execute_call?, <<~PATTERN
-          (send (send (send (send nil? ...) :sys) :process) :execute _*)
+          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :execute _*)
         PATTERN
 
         def_node_matcher :sys_process_execute_without_parentheses_call?, <<~PATTERN
-        (send (send (send (send nil? ...) :sys) :process) :execute)
+        (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :execute)
         PATTERN
 
         def_node_matcher :sys_process_each_process_call?, <<~PATTERN
-          (send (send (send (send (send nil? ...) :sys) :process) :each_process) ...)
+          (send (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :each_process) ...)
         PATTERN
 
         class StackFrame
@@ -484,7 +478,6 @@ module RuboCop
 
         def enter_frame(node)
           # Frames can't be nested
-          require "pry"; binding.pry
           if @current_frame
             return
           end
@@ -686,10 +679,6 @@ module RuboCop
             },
             {
               matcher: method(:fs_file_stat_call?),
-              command: 'stdapi_fs_stat'
-            },
-            {
-              matcher: method(:fs_file_stat_trailing_method_call?),
               command: 'stdapi_fs_stat'
             },
             {
@@ -989,11 +978,6 @@ module RuboCop
               command: 'stdapi_sys_each_process'
             },
           ]
-
-          if node.source == 'session.fs.file.stat(@chown_file).stathash'
-            require "pry"; binding.pry
-            puts node.source
-          end
 
           mappings.each do |mapping|
             matcher = mapping[:matcher]
