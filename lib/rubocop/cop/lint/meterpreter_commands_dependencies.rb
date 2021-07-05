@@ -1,3 +1,5 @@
+require 'rex/post/meterpreter/command_mapper'
+
 module RuboCop
   module Cop
     module Lint
@@ -603,11 +605,11 @@ module RuboCop
           node.type == :hash
         end
 
-        def on_send(node)
+        def mappings
           mappings = [
             {
               matcher: method(:file_rm_call?),
-              command: 'stdapi_fs_rm'
+              command: 'stdapi_fs_delete_file'
             },
             {
               matcher: method(:file_ls_call?),
@@ -678,7 +680,7 @@ module RuboCop
               command: 'appapi_app_install'
             },
             {
-              matcher: method(:fs_file_stat_call?),
+              matcher: method(:fs_file_stat_call?), # UNSURE
               command: 'stdapi_fs_stat'
             },
             {
@@ -691,7 +693,7 @@ module RuboCop
             },
             {
               matcher: method(:fs_file_copy_call?),
-              command: 'stdapi_fs_copy'
+              command: 'stdapi_fs_file_copy'
             },
             {
               matcher: method(:railgun_call?),
@@ -703,11 +705,11 @@ module RuboCop
             },
             {
               matcher: method(:config_getprivs_call?),
-              command: 'stdapi_sys_getprivs'
+              command: 'stdapi_sys_config_getprivs'
             },
             {
               matcher: method(:fs_dir_rmdir_call?),
-              command: 'stdapi_fs_rmdir'
+              command: 'stdapi_fs_delete_dir'
             },
             {
               matcher: method(:fs_dir_mkdir_call?),
@@ -719,7 +721,7 @@ module RuboCop
             },
             {
               matcher: method(:config_getuid_call?),
-              command: 'stdapi_sys_getuid'
+              command: 'stdapi_sys_config_getuid'
             },
             {
               matcher: method(:fs_file_new_call?),
@@ -754,7 +756,7 @@ module RuboCop
               command: 'android_activity_start'
             },
             {
-              matcher: method(:fs_download_file_call?),
+              matcher: method(:fs_download_file_call?), # UNSURE
               command: 'stdapi_fs_download_file'
             },
             {
@@ -766,11 +768,11 @@ module RuboCop
               command: 'stdapi_fs_separator'
             },
             {
-              matcher: method(:fs_file_exist_call?),
-              command: 'stdapi_fs_exist?'
+              matcher: method(:fs_file_exist_call?), # UNSURE
+              command: 'stdapi_fs_stat'
             },
             {
-              matcher: method(:fs_upload_file_call?),
+              matcher: method(:fs_upload_file_call?), # UNSURE
               command: 'stdapi_fs_upload_file'
             },
             {
@@ -819,11 +821,11 @@ module RuboCop
             },
             {
               matcher: method(:fs_pwd_call?),
-              command: 'stdapi_fs_pwd'
+              command: 'stdapi_fs_getwd'
             },
             {
               matcher: method(:priv_getsystem_call?),
-              command: 'priv_getsystem'
+              command: 'priv_elevate_getsystem'
             },
             {
               matcher: method(:kiwi_golden_ticket_create_call?),
@@ -843,7 +845,7 @@ module RuboCop
             },
             {
               matcher: method(:fs_entries_call?),
-              command: 'stdapi_fs_entries'
+              command: 'stdapi_fs_ls'
             },
             {
               matcher: method(:kiwi_get_debug_privilege_call?),
@@ -867,7 +869,7 @@ module RuboCop
             },
             {
               matcher: method(:priv_getsystem_args_call?),
-              command: 'priv_getsystem'
+              command: 'priv_elevate_getsystem'
             },
             {
               matcher: method(:extapi_adsi_domain_query_call?),
@@ -915,11 +917,11 @@ module RuboCop
             },
             {
               matcher: method(:incognito_incognito_impersonate_token_call?),
-              command: 'incognito_incognito_impersonate_token'
+              command: 'incognito_impersonate_token'
             },
             {
               matcher: method(:fs_file_expand_path_call?),
-              command: 'stdapi_fs_expand_path'
+              command: 'stdapi_fs_file_expand_path'
             },
             {
               matcher: method(:peinjector_add_thread_x64_call?),
@@ -951,7 +953,7 @@ module RuboCop
             },
             {
               matcher: method(:sys_process_get_processes_call?),
-              command: 'stdapi_sys_get_processes'
+              command: 'stdapi_sys_process_get_processes'
             },
             {
               matcher: method(:sys_process_getpid_call?),
@@ -978,7 +980,9 @@ module RuboCop
               command: 'stdapi_sys_each_process'
             },
           ]
+        end
 
+        def on_send(node)
           mappings.each do |mapping|
             matcher = mapping[:matcher]
             command = mapping[:command]
@@ -996,39 +1000,6 @@ module RuboCop
             end
           end
         end
-
-        # def correction_content(node)
-        #   # Whitespace formatting
-        #   # condition ? if_true : if_false
-        #   body = node.body if node == nodes[:investigated_node]
-        #   def_whitespace = offset(body) if node == nodes[:investigated_node]
-        #   super_whitespace = def_whitespace + "  " if node == nodes[:investigated_node]
-        #   update_info_whitespace = super_whitespace + "  " if node == nodes[:investigated_node]
-        #   info_whitespace = update_info_whitespace + "  " if node == nodes[:investigated_node] || nodes[:info_node]
-        #   meterpreter_whitespace = info_whitespace + "  " if node == nodes[:info_node] || nodes[:compat_node]
-        #   commands_whitespace = meterpreter_whitespace + "  " if node == nodes[:meterpreter_node]
-        #   array_content_whitespace = commands_whitespace + "  " if node == nodes[:commands_node]
-        #
-        #   new_hash = ""
-        #
-        #   new_hash <<= "def initialize(info = {})\n"
-        #   new_hash <<= "#{super_whitespace}super(\n"
-        #   new_hash <<= "#{update_info_whitespace}update_info(\n"
-        #   new_hash <<= "#{info_whitespace}info,\n"
-        #   new_hash <<= "#{info_whitespace}'Compat' => {\n"
-        #   new_hash <<= "#{meterpreter_whitespace}'Meterpreter' => {\n"
-        #   new_hash <<= "#{commands_whitespace}'Commands' => %w[\n"
-        #   new_hash <<= "#{array_content_whitespace}#{@current_frame.identified_commands.join("\n#{array_content_whitespace}")}\n"
-        #   new_hash <<= "#{commands_whitespace}]\n"
-        #   new_hash <<= "#{meterpreter_whitespace}}\n"
-        #   new_hash <<= "#{info_whitespace}}\n"
-        #   new_hash <<= "#{update_info_whitespace})\n"
-        #   new_hash <<= "#{super_whitespace})\n"
-        #   new_hash <<= "#{def_whitespace}end\n"
-        #   new_hash <<= "\n  "
-        #
-        #   new_hash
-        # end
 
         def autocorrector
           lambda do |corrector|

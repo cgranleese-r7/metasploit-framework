@@ -1,5 +1,5 @@
 # -*- coding: binary -*-
-
+require 'rex/post/meterpreter/extension'
 require 'rex/post/meterpreter/extensions/sniffer/tlv'
 require 'rex/post/meterpreter/extensions/sniffer/command_ids'
 

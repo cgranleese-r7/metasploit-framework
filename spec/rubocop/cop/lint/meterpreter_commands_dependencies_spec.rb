@@ -22,7 +22,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -83,7 +83,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -139,7 +139,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             'Compat' => {
               'Meterpreter' => {
                 'Commands' => %w[
-                  stdapi_fs_rm
+                  stdapi_fs_delete_file
                 ]
               }
             }
@@ -200,7 +200,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             'Compat' => {
               'Meterpreter' => {
                 'Commands' => %w[
-                  stdapi_fs_rm
+                  stdapi_fs_delete_file
                 ]
               }
             }
@@ -240,7 +240,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             'Compat' => {
               'Meterpreter' => {
                 'Commands' => %w[
-                  stdapi_fs_rm
+                  stdapi_fs_delete_file
                 ]
               }
             }
@@ -308,7 +308,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             'Compat' => {
               'Meterpreter' => {
                 'Commands' => %w[
-                  stdapi_fs_rm
+                  stdapi_fs_delete_file
                 ]
               }
             }
@@ -358,8 +358,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Meterpreter' => {
                 'Commands' => %w[
                 ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-                  stdapi_fs_rm
-                  ^^^^^^^^^^^^ Compatibility command does not have an associated method call.
+                  stdapi_fs_delete_file
+                  ^^^^^^^^^^^^^^^^^^^^^ Compatibility command does not have an associated method call.
                 ]
               }
             }
@@ -440,7 +440,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             'Compat' => {
               'Meterpreter' => {
                 'Commands' => %w[
-                  stdapi_fs_rm
+                  stdapi_fs_delete_file
                 ]
               }
             }
@@ -478,7 +478,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_sys_get_processes
+                    stdapi_sys_process_get_processes
                   ]
                 }
               }
@@ -517,7 +517,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                   ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
                     stdapi_fs_ls
                     ^^^^^^^^^^^^ Compatibility command does not have an associated method call.
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -546,7 +546,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -578,10 +578,10 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                 'Meterpreter' => {
                   'Commands' => %w[
                   ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-                    stdapi_fs_rm
-                    ^^^^^^^^^^^^ Command duplicated.
-                    stdapi_fs_rm
-                    ^^^^^^^^^^^^ Command duplicated.
+                    stdapi_fs_delete_file
+                    ^^^^^^^^^^^^^^^^^^^^^ Command duplicated.
+                    stdapi_fs_delete_file
+                    ^^^^^^^^^^^^^^^^^^^^^ Command duplicated.
                     stdapi_fs_ls
                     ^^^^^^^^^^^^ Command duplicated.
                     stdapi_fs_ls
@@ -615,8 +615,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
+                    stdapi_fs_delete_file
                     stdapi_fs_ls
-                    stdapi_fs_rm
                   ]
                 }
               }
@@ -746,7 +746,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -806,7 +806,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -863,7 +863,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -945,7 +945,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -1027,7 +1027,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -1061,7 +1061,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    stdapi_fs_rm
+                    stdapi_fs_delete_file
                   ]
                 }
               }
@@ -1113,7 +1113,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                   'PayloadType' => 'cmd'
                   'Meterpreter' => {
                     'Commands' => %w[
-                      stdapi_fs_rm
+                      stdapi_fs_delete_file
                     ]
                   }
                 }
@@ -1233,112 +1233,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         def run
           session.sys.process.execute 'shell', "command"
           passwd_stat = session.fs.file.stat(@chown_file).stathash
-        end
-      end
-    RUBY
-  end
-
-  it 'handles `abrt_raceabrt_priv_esc.rb` edge cases that were not being matched for unknown reasons' do
-    skip("not working yet")
-    expect_offense(<<~RUBY)
-      class DummyModule
-        def initialize(info = {})
-          super(update_info(info,
-            'Name'                 => "Windows Run Command As User",
-            'Description'          => %q{
-              This module will login with the specified username/password and execute the
-              supplied command as a hidden process. Output is not returned by default.
-              Unless targeting a local user either set the DOMAIN, or specify a UPN user
-              format (e.g. user@domain). This uses the CreateProcessWithLogonW WinAPI function.
-      
-              A custom command line can be sent instead of uploading an executable.
-              APPLICAITON_NAME and COMMAND_LINE are passed to lpApplicationName and lpCommandLine
-              respectively. See the MSDN documentation for how these two values interact.
-            },
-            'License'              => MSF_LICENSE,
-            'Platform'             => ['win'],
-            'SessionTypes'         => ['meterpreter'],
-            'Author'               => ['Kx499', 'Ben Campbell'],
-            'Targets'              => [
-              [ 'Automatic', { 'Arch' => [ ARCH_X86, ARCH_X64 ] } ]
-            ],
-            'DefaultTarget'        => 0,
-            'References'           =>
-              [
-                [ 'URL', 'https://msdn.microsoft.com/en-us/library/windows/desktop/ms682431' ]
-              ],
-            'DisclosureDate' => '1999-01-01' # Same as psexec -- a placeholder date for non-vuln 'exploits'
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-          ))
-      
-          register_options(
-            [
-              OptString.new('DOMAIN', [false, 'Domain to login with' ]),
-              OptString.new('USER', [true, 'Username to login with' ]),
-              OptString.new('PASSWORD', [true, 'Password to login with' ]),
-              OptString.new('APPLICATION_NAME', [false, 'Application to be executed (lpApplicationName)', nil ]),
-              OptString.new('COMMAND_LINE', [false, 'Command line to execute (lpCommandLine)', nil ]),
-              OptBool.new('USE_CUSTOM_COMMAND', [true, 'Specify custom APPLICATION_NAME and COMMAND_LINE', false ])
-            ])
-        end
-
-        def run
-          session.fs.file.rm("some_file")
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end
-      end
-    RUBY
-
-    expect_correction(<<~RUBY)
-      class DummyModule
-        def initialize(info = {})
-          super(update_info(info,
-            'Name'                 => "Windows Run Command As User",
-            'Description'          => %q{
-              This module will login with the specified username/password and execute the
-              supplied command as a hidden process. Output is not returned by default.
-              Unless targeting a local user either set the DOMAIN, or specify a UPN user
-              format (e.g. user@domain). This uses the CreateProcessWithLogonW WinAPI function.
-      
-              A custom command line can be sent instead of uploading an executable.
-              APPLICAITON_NAME and COMMAND_LINE are passed to lpApplicationName and lpCommandLine
-              respectively. See the MSDN documentation for how these two values interact.
-            },
-            'License'              => MSF_LICENSE,
-            'Platform'             => ['win'],
-            'SessionTypes'         => ['meterpreter'],
-            'Author'               => ['Kx499', 'Ben Campbell'],
-            'Targets'              => [
-              [ 'Automatic', { 'Arch' => [ ARCH_X86, ARCH_X64 ] } ]
-            ],
-            'DefaultTarget'        => 0,
-            'References'           =>
-              [
-                [ 'URL', 'https://msdn.microsoft.com/en-us/library/windows/desktop/ms682431' ]
-              ],
-            'DisclosureDate' => '1999-01-01' # Same as psexec -- a placeholder date for non-vuln 'exploits'
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                  stdapi_fs_rm
-                ]
-              }
-            }
-          ))
-      
-          register_options(
-            [
-              OptString.new('DOMAIN', [false, 'Domain to login with' ]),
-              OptString.new('USER', [true, 'Username to login with' ]),
-              OptString.new('PASSWORD', [true, 'Password to login with' ]),
-              OptString.new('APPLICATION_NAME', [false, 'Application to be executed (lpApplicationName)', nil ]),
-              OptString.new('COMMAND_LINE', [false, 'Command line to execute (lpCommandLine)', nil ]),
-              OptBool.new('USE_CUSTOM_COMMAND', [true, 'Specify custom APPLICATION_NAME and COMMAND_LINE', false ])
-            ])
-        end
-
-        def run
-          session.fs.file.rm("some_file")
         end
       end
     RUBY
@@ -1593,7 +1487,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                       extapi_adsi_domain_query
                       extapi_pageant_forward
                       extapi_wmi_query
-                      incognito_incognito_impersonate_token
+                      incognito_impersonate_token
                       incognito_incognito_list_tokens
                       kiwi_creds_all
                       kiwi_get_debug_privilege
@@ -1611,24 +1505,21 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                       peinjector_add_thread_x64
                       peinjector_add_thread_x86
                       peinjector_inject_shellcode
+                      priv_elevate_getsystem
                       priv_get_file_mace
-                      priv_getsystem
                       priv_sam_hashes
                       priv_set_file_mace
-                      stdapi_fs_copy
+                      stdapi_fs_delete_dir
+                      stdapi_fs_delete_file
                       stdapi_fs_download_file
-                      stdapi_fs_entries
-                      stdapi_fs_exist?
-                      stdapi_fs_expand_path
+                      stdapi_fs_file_copy
+                      stdapi_fs_file_expand_path
                       stdapi_fs_foreach
                       stdapi_fs_getwd
                       stdapi_fs_ls
                       stdapi_fs_md5
                       stdapi_fs_mkdir
                       stdapi_fs_new
-                      stdapi_fs_pwd
-                      stdapi_fs_rm
-                      stdapi_fs_rmdir
                       stdapi_fs_search
                       stdapi_fs_separator
                       stdapi_fs_stat
@@ -1652,19 +1543,19 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                       stdapi_registry_type2str
                       stdapi_registry_unload_key
                       stdapi_sys_config_getenv
+                      stdapi_sys_config_getuid
                       stdapi_sys_config_sysinfo
                       stdapi_sys_each_process
                       stdapi_sys_execute
-                      stdapi_sys_get_processes
                       stdapi_sys_getdrivers
                       stdapi_sys_getenvs
                       stdapi_sys_getpid
-                      stdapi_sys_getuid
                       stdapi_sys_is_system
                       stdapi_sys_kill
                       stdapi_sys_open
                       stdapi_sys_open_remote_key
                       stdapi_sys_power_reboot
+                      stdapi_sys_process_get_processes
                       stdapi_sys_reverevert_to_self
                       stdapi_sys_steal_token
                       stdapi_webcam_*
@@ -1681,6 +1572,42 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         end
       RUBY
     end
+  end
+
+  it 'verifies that commands being added to the meterpreter commands list are valid commands match a corresponding command ID' do
+    skip("not working yet")
+    def valid_commands
+      @matcher_commands = []
+      @commands_ids = []
+      count = 0
+      RuboCop::Cop::Lint::MeterpreterCommandDependencies.mappings.each do |pair|
+        pair.each do |_matcher, command|
+          if _matcher == :command
+            @matcher_commands << command
+          end
+        end
+      end
+
+      Rex::Post::Meterpreter::CommandMapper.get_commands.each do |command, _id|
+        @commands_ids << command
+      end
+
+      @matcher_commands.each do |command|
+        unless @commands_ids.include?(command)
+          count += 1
+          puts "#{count}\t#{command}"
+        end
+      end
+      require "pry"; binding.pry
+      puts 123
+    end
+
+
+    expect_offense(<<~RUBY)
+    RUBY
+
+    expect_correction(<<~RUBY)
+    RUBY
   end
 end
 
