@@ -78,10 +78,6 @@ module RuboCop
           (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :splitkey _*)
         PATTERN
 
-        def_node_matcher :registry_config_getprivs_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getprivs)
-        PATTERN
-
         def_node_matcher :registry_load_key_call?, <<~PATTERN
           (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :load_key _*)
         PATTERN
@@ -268,10 +264,6 @@ module RuboCop
 
         def_node_matcher :net_config_each_interface_call?, <<~PATTERN
           (send (send (send #{CLIENT_OR_SESSION} :net) :config) :each_interface)
-        PATTERN
-
-        def_node_matcher :fs_foreach_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :foreach _*)
         PATTERN
 
         def_node_matcher :fs_pwd_call?, <<~PATTERN
@@ -617,15 +609,11 @@ module RuboCop
             },
             {
               matcher: method(:net_create_socket_call?),
-              command: 'net_socket_create'
+              command: 'net_socket_create' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/net/socket.rb#L86
             },
             {
               matcher: method(:registry_splitkey_call?),
-              command: 'stdapi_registry_splitkey'
-            },
-            {
-              matcher: method(:registry_config_getprivs_call?),
-              command: 'stdapi_registry_config_getprivs'
+              command: 'stdapi_registry_splitkey' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/sys/registry.rb#L420
             },
             {
               matcher: method(:registry_load_key_call?),
@@ -665,7 +653,7 @@ module RuboCop
             },
             {
               matcher: method(:registry_type2str_call?),
-              command: 'stdapi_registry_type2str'
+              command: 'stdapi_registry_type2str' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/sys/registry.rb#L402
             },
             {
               matcher: method(:registry_check_key_call?),
@@ -680,7 +668,7 @@ module RuboCop
               command: 'appapi_app_install'
             },
             {
-              matcher: method(:fs_file_stat_call?), # UNSURE
+              matcher: method(:fs_file_stat_call?),
               command: 'stdapi_fs_stat'
             },
             {
@@ -700,10 +688,6 @@ module RuboCop
               command: 'stdapi_railgun_*'
             },
             {
-              matcher: method(:net_socket_create_call?),
-              command: 'stdapi_net_create'
-            },
-            {
               matcher: method(:config_getprivs_call?),
               command: 'stdapi_sys_config_getprivs'
             },
@@ -717,7 +701,7 @@ module RuboCop
             },
             {
               matcher: method(:config_getdrivers_call?),
-              command: 'stdapi_sys_getdrivers'
+              command: 'stdapi_sys_config_driver_list'
             },
             {
               matcher: method(:config_getuid_call?),
@@ -725,7 +709,7 @@ module RuboCop
             },
             {
               matcher: method(:fs_file_new_call?),
-              command: 'stdapi_fs_new'
+              command: 'stdapi_fs_new' #UNSURE
             },
             {
               matcher: method(:config_getsid_call?),
@@ -733,7 +717,7 @@ module RuboCop
             },
             {
               matcher: method(:config_is_system_call?),
-              command: 'stdapi_sys_is_system'
+              command: 'stdapi_sys_config_getsid'
             },
             {
               matcher: method(:fs_file_md5_call?),
@@ -741,22 +725,18 @@ module RuboCop
             },
             {
               matcher: method(:powershell_execute_string_call?),
-              command: 'powershell_execute_string'
+              command: 'powershell_execute'
             },
             {
               matcher: method(:power_reboot_call?),
-              command: 'stdapi_sys_power_reboot'
-            },
-            {
-              matcher: method(:lanattacks_dhcp_reset_call?),
-              command: 'lanattacks_*'
+              command: 'stdapi_sys_power_exitwindows'
             },
             {
               matcher: method(:android_activity_start_call?),
               command: 'android_activity_start'
             },
             {
-              matcher: method(:fs_download_file_call?), # UNSURE
+              matcher: method(:fs_download_file_call?), # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/fs/file.rb#L349
               command: 'stdapi_fs_download_file'
             },
             {
@@ -768,11 +748,11 @@ module RuboCop
               command: 'stdapi_fs_separator'
             },
             {
-              matcher: method(:fs_file_exist_call?), # UNSURE
+              matcher: method(:fs_file_exist_call?),
               command: 'stdapi_fs_stat'
             },
             {
-              matcher: method(:fs_upload_file_call?), # UNSURE
+              matcher: method(:fs_upload_file_call?), # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/fs/file.rb#L288
               command: 'stdapi_fs_upload_file'
             },
             {
@@ -785,7 +765,7 @@ module RuboCop
             },
             {
               matcher: method(:net_config_respond_to_call?),
-              command: 'stdapi_net_respond_to'
+              command: 'stdapi_net_config_get_routes'
             },
             {
               matcher: method(:webcam_call?),
@@ -793,7 +773,7 @@ module RuboCop
             },
             {
               matcher: method(:espia_image_get_dev_screen_call?),
-              command: 'espia_espia_image_get_dev_screen'
+              command: 'espia_image_get_dev_screen'
             },
             {
               matcher: method(:android_set_wallpaper_call?),
@@ -801,23 +781,19 @@ module RuboCop
             },
             {
               matcher: method(:sys_config_steal_token_call?),
-              command: 'stdapi_sys_steal_token'
+              command: 'stdapi_sys_config_steal_token'
             },
             {
               matcher: method(:sys_config_revert_to_self_call?),
-              command: 'stdapi_sys_reverevert_to_self'
+              command: 'stdapi_sys_config_rev2self'
             },
             {
               matcher: method(:net_config_each_route_call?),
-              command: 'stdapi_net_each_route'
+              command: 'stdapi_net_config_get_routes'
             },
             {
               matcher: method(:net_config_each_interface_call?),
-              command: 'stdapi_net_each_interface'
-            },
-            {
-              matcher: method(:fs_foreach_call?),
-              command: 'stdapi_fs_foreach'
+              command: 'stdapi_net_config_get_interfaces'
             },
             {
               matcher: method(:fs_pwd_call?),
@@ -829,19 +805,19 @@ module RuboCop
             },
             {
               matcher: method(:kiwi_golden_ticket_create_call?),
-              command: 'kiwi_golden_ticket_create'
+              command: 'kiwi_exec_cmd'
             },
             {
               matcher: method(:kiwi_kerberos_ticket_use_call?),
-              command: 'kiwi_kerberos_ticket_use'
+              command: 'kiwi_exec_cmd'
             },
             {
               matcher: method(:priv_sam_hashes_call?),
-              command: 'priv_sam_hashes'
+              command: 'priv_passwd_get_sam_hashes'
             },
             {
               matcher: method(:incognito_list_tokens_call?),
-              command: 'incognito_incognito_list_tokens'
+              command: 'incognito_list_tokens'
             },
             {
               matcher: method(:fs_entries_call?),
@@ -849,15 +825,15 @@ module RuboCop
             },
             {
               matcher: method(:kiwi_get_debug_privilege_call?),
-              command: 'kiwi_get_debug_privilege'
+              command: 'kiwi_exec_cmd'
             },
             {
               matcher: method(:kiwi_creds_all_call?),
-              command: 'kiwi_creds_all'
+              command: 'kiwi_exec_cmd'
             },
             {
               matcher: method(:sys_config_is_system_call?),
-              command: 'stdapi_sys_is_system'
+              command: 'stdapi_sys_config_getsid'
             },
             {
               matcher: method(:extapi_wmi_query_call?),
@@ -865,7 +841,7 @@ module RuboCop
             },
             {
               matcher: method(:sys_registry_open_remote_key_call?),
-              command: 'stdapi_sys_open_remote_key'
+              command: 'stdapi_registry_open_remote_key'
             },
             {
               matcher: method(:priv_getsystem_args_call?),
@@ -877,43 +853,43 @@ module RuboCop
             },
             {
               matcher: method(:priv_fs_get_file_mace_call?),
-              command: 'priv_get_file_mace'
+              command: 'priv_fs_get_file_mace'
             },
             {
               matcher: method(:priv_fs_set_file_mace_call?),
-              command: 'priv_set_file_mace'
+              command: 'priv_fs_set_file_mace'
             },
             {
               matcher: method(:extapi_pageant_forward_call?),
-              command: 'extapi_pageant_forward'
+              command: 'extapi_pageant_send_query'
             },
             {
               matcher: method(:lanattacks_dhcp_reset_call?),
-              command: 'lanattacks_dhcp_reset'
+              command: 'lanattacks_reset_dhcp'
             },
             {
               matcher: method(:lanattacks_dhcp_load_options_call?),
-              command: 'lanattacks_dhcp_load_options'
+              command: 'lanattacks_set_dhcp_option'
             },
             {
               matcher: method(:lanattacks_tftp_add_file_call?),
-              command: 'lanattacks_tftp_add_file'
+              command: 'lanattacks_add_tftp_file'
             },
             {
               matcher: method(:lanattacks_tftp_start_call?),
-              command: 'lanattacks_tftp_start'
+              command: 'lanattacks_start_tftp'
             },
             {
               matcher: method(:lanattacks_dhcp_start_call?),
-              command: 'lanattacks_dhcp_start'
+              command: 'lanattacks_start_dhcp'
             },
             {
               matcher: method(:lanattacks_tftp_stop_call?),
-              command: 'lanattacks_tftp_stop'
+              command: 'lanattacks_stop_tftp'
             },
             {
               matcher: method(:lanattacks_dhcp_stop_call?),
-              command: 'lanattacks_dhcp_stop'
+              command: 'lanattacks_stop_dhcp'
             },
             {
               matcher: method(:incognito_incognito_impersonate_token_call?),
@@ -925,11 +901,11 @@ module RuboCop
             },
             {
               matcher: method(:peinjector_add_thread_x64_call?),
-              command: 'peinjector_add_thread_x64'
+              command: 'peinjector_inject_shellcode' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/peinjector/peinjector.rb#L34
             },
             {
               matcher: method(:peinjector_add_thread_x86_call?),
-              command: 'peinjector_add_thread_x86'
+              command: 'peinjector_inject_shellcode' #UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/peinjector/peinjector.rb#L34
             },
             {
               matcher: method(:peinjector_inject_shellcode_call?),
@@ -937,7 +913,7 @@ module RuboCop
             },
             {
               matcher: method(:sys_config_getenvs_call?),
-              command: 'stdapi_sys_getenvs'
+              command: 'stdapi_sys_config_getenv'
             },
             {
               matcher: method(:lanattacks_dhcp_log_each_call?),
@@ -945,11 +921,11 @@ module RuboCop
             },
             {
               matcher: method(:fs_dir_rmdir_call?),
-              command: 'stdapi_fs_rmdir'
+              command: 'stdapi_fs_delete_dir'
             },
             {
               matcher: method(:sys_process_open_call?),
-              command: 'stdapi_sys_open'
+              command: 'stdapi_sys_process_attach'
             },
             {
               matcher: method(:sys_process_get_processes_call?),
@@ -957,27 +933,27 @@ module RuboCop
             },
             {
               matcher: method(:sys_process_getpid_call?),
-              command: 'stdapi_sys_getpid'
+              command: 'stdapi_sys_process_getpid'
             },
             {
               matcher: method(:sys_process_open_method_call?),
-              command: 'stdapi_sys_open'
+              command: 'stdapi_sys_process_attach'
             },
             {
               matcher: method(:sys_process_kill_call?),
-              command: 'stdapi_sys_kill'
+              command: 'stdapi_sys_process_kill'
             },
             {
               matcher: method(:sys_process_execute_call?),
-              command: 'stdapi_sys_execute'
+              command: 'stdapi_sys_process_execute'
             },
             {
               matcher: method(:sys_process_execute_without_parentheses_call?),
-              command: 'stdapi_sys_execute'
+              command: 'stdapi_sys_process_execute'
             },
             {
               matcher: method(:sys_process_each_process_call?),
-              command: 'stdapi_sys_each_process'
+              command: 'stdapi_sys_process_get_processes'
             },
           ]
         end

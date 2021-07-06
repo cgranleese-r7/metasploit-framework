@@ -1223,7 +1223,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                 'Meterpreter' => {
                   'Commands' => %w[
                     stdapi_fs_stat
-                    stdapi_sys_execute
+                    stdapi_sys_process_execute
                   ]
                 }
               }
@@ -1345,8 +1345,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.net.config.each_interface
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        %{keyword}.fs.dir.foreach(program_files)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.dir.pwd
         ^{keyword}^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.priv.getsystem(technique)
@@ -1462,152 +1460,129 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
       )
 
       expect_offense(<<~RUBY, keyword: keyword)
-        class DummyModule
-              ^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-          def run
-  #{code_snippet_with_errors}
-          end
-        end
+              class DummyModule
+                    ^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                def run
+        #{code_snippet_with_errors}
+                end
+              end
       RUBY
 
       expect_correction(<<~RUBY)
-        class DummyModule
-          def initialize(info = {})
-            super(
-              update_info(
-                info,
-                'Compat' => {
-                  'Meterpreter' => {
-                    'Commands' => %w[
-                      android_activity_start
-                      android_set_wallpaper
-                      android_wlan_geolocate
-                      appapi_app_install
-                      espia_espia_image_get_dev_screen
-                      extapi_adsi_domain_query
-                      extapi_pageant_forward
-                      extapi_wmi_query
-                      incognito_impersonate_token
-                      incognito_incognito_list_tokens
-                      kiwi_creds_all
-                      kiwi_get_debug_privilege
-                      kiwi_golden_ticket_create
-                      kiwi_kerberos_ticket_use
-                      lanattacks_*
-                      lanattacks_dhcp_load_options
-                      lanattacks_dhcp_log
-                      lanattacks_dhcp_start
-                      lanattacks_dhcp_stop
-                      lanattacks_tftp_add_file
-                      lanattacks_tftp_start
-                      lanattacks_tftp_stop
-                      net_socket_create
-                      peinjector_add_thread_x64
-                      peinjector_add_thread_x86
-                      peinjector_inject_shellcode
-                      priv_elevate_getsystem
-                      priv_get_file_mace
-                      priv_sam_hashes
-                      priv_set_file_mace
-                      stdapi_fs_delete_dir
-                      stdapi_fs_delete_file
-                      stdapi_fs_download_file
-                      stdapi_fs_file_copy
-                      stdapi_fs_file_expand_path
-                      stdapi_fs_foreach
-                      stdapi_fs_getwd
-                      stdapi_fs_ls
-                      stdapi_fs_md5
-                      stdapi_fs_mkdir
-                      stdapi_fs_new
-                      stdapi_fs_search
-                      stdapi_fs_separator
-                      stdapi_fs_stat
-                      stdapi_fs_upload_file
-                      stdapi_net_each_interface
-                      stdapi_net_each_route
-                      stdapi_net_resolve_host
-                      stdapi_net_respond_to
-                      stdapi_railgun_*
-                      stdapi_registry_check_key_exists
-                      stdapi_registry_config_getprivs
-                      stdapi_registry_create_key
-                      stdapi_registry_delete_key
-                      stdapi_registry_enum_key_direct
-                      stdapi_registry_enum_value_direct
-                      stdapi_registry_load_key
-                      stdapi_registry_open_key
-                      stdapi_registry_query_value_direct
-                      stdapi_registry_set_value_direct
-                      stdapi_registry_splitkey
-                      stdapi_registry_type2str
-                      stdapi_registry_unload_key
-                      stdapi_sys_config_getenv
-                      stdapi_sys_config_getuid
-                      stdapi_sys_config_sysinfo
-                      stdapi_sys_each_process
-                      stdapi_sys_execute
-                      stdapi_sys_getdrivers
-                      stdapi_sys_getenvs
-                      stdapi_sys_getpid
-                      stdapi_sys_is_system
-                      stdapi_sys_kill
-                      stdapi_sys_open
-                      stdapi_sys_open_remote_key
-                      stdapi_sys_power_reboot
-                      stdapi_sys_process_get_processes
-                      stdapi_sys_reverevert_to_self
-                      stdapi_sys_steal_token
-                      stdapi_webcam_*
-                    ]
-                  }
-                }
-              )
-            )
-          end
-  
-          def run
-  #{code_snippet_without_error_lines}
-          end
-        end
+              class DummyModule
+                def initialize(info = {})
+                  super(
+                    update_info(
+                      info,
+                      'Compat' => {
+                        'Meterpreter' => {
+                          'Commands' => %w[
+                            android_activity_start
+                            android_set_wallpaper
+                            android_wlan_geolocate
+                            appapi_app_install
+                            espia_image_get_dev_screen
+                            extapi_adsi_domain_query
+                            extapi_pageant_send_query
+                            extapi_wmi_query
+                            incognito_impersonate_token
+                            incognito_list_tokens
+                            kiwi_exec_cmd
+                            lanattacks_add_tftp_file
+                            lanattacks_dhcp_log
+                            lanattacks_reset_dhcp
+                            lanattacks_set_dhcp_option
+                            lanattacks_start_dhcp
+                            lanattacks_start_tftp
+                            lanattacks_stop_dhcp
+                            lanattacks_stop_tftp
+                            net_socket_create
+                            peinjector_inject_shellcode
+                            priv_elevate_getsystem
+                            priv_fs_get_file_mace
+                            priv_fs_set_file_mace
+                            priv_passwd_get_sam_hashes
+                            stdapi_fs_delete_dir
+                            stdapi_fs_delete_file
+                            stdapi_fs_download_file
+                            stdapi_fs_file_copy
+                            stdapi_fs_file_expand_path
+                            stdapi_fs_getwd
+                            stdapi_fs_ls
+                            stdapi_fs_md5
+                            stdapi_fs_mkdir
+                            stdapi_fs_new
+                            stdapi_fs_search
+                            stdapi_fs_separator
+                            stdapi_fs_stat
+                            stdapi_fs_upload_file
+                            stdapi_net_config_get_interfaces
+                            stdapi_net_config_get_routes
+                            stdapi_net_resolve_host
+                            stdapi_railgun_*
+                            stdapi_registry_check_key_exists
+                            stdapi_registry_create_key
+                            stdapi_registry_delete_key
+                            stdapi_registry_enum_key_direct
+                            stdapi_registry_enum_value_direct
+                            stdapi_registry_load_key
+                            stdapi_registry_open_key
+                            stdapi_registry_open_remote_key
+                            stdapi_registry_query_value_direct
+                            stdapi_registry_set_value_direct
+                            stdapi_registry_splitkey
+                            stdapi_registry_type2str
+                            stdapi_registry_unload_key
+                            stdapi_sys_config_driver_list
+                            stdapi_sys_config_getenv
+                            stdapi_sys_config_getprivs
+                            stdapi_sys_config_getsid
+                            stdapi_sys_config_getuid
+                            stdapi_sys_config_rev2self
+                            stdapi_sys_config_steal_token
+                            stdapi_sys_config_sysinfo
+                            stdapi_sys_power_exitwindows
+                            stdapi_sys_process_attach
+                            stdapi_sys_process_execute
+                            stdapi_sys_process_get_processes
+                            stdapi_sys_process_getpid
+                            stdapi_sys_process_kill
+                            stdapi_webcam_*
+                          ]
+                        }
+                      }
+                    )
+                  )
+                end
+
+                def run
+        #{code_snippet_without_error_lines}
+                end
+              end
       RUBY
     end
   end
 
-  it 'verifies that commands being added to the meterpreter commands list are valid commands match a corresponding command ID' do
+  it 'autocorrects only valid meterpreter commands' do
     skip("not working yet")
-    def valid_commands
-      @matcher_commands = []
-      @commands_ids = []
-      count = 0
-      RuboCop::Cop::Lint::MeterpreterCommandDependencies.mappings.each do |pair|
-        pair.each do |_matcher, command|
-          if _matcher == :command
-            @matcher_commands << command
-          end
-        end
-      end
+    ignored_commands = []
+    valid_meterpreter_command_names = Rex::Post::Meterpreter::CommandMapper.get_command_names
+    autocorrected_meterpreter_command_names = RuboCop::Cop::Lint::MeterpreterCommandDependencies.new.mappings.map { |mapping| mapping[:command] }
+    autocorrected_meterpreter_command_names.each { |command| ignored_commands << command if command.end_with?('_*') } # This allows us to ignore commands that call an entire library
 
-      Rex::Post::Meterpreter::CommandMapper.get_commands.each do |command, _id|
-        @commands_ids << command
-      end
+    invalid_autocorrected_command_names = autocorrected_meterpreter_command_names - valid_meterpreter_command_names - ignored_commands
 
-      @matcher_commands.each do |command|
-        unless @commands_ids.include?(command)
-          count += 1
-          puts "#{count}\t#{command}"
-        end
-      end
-      require "pry"; binding.pry
-      puts 123
-    end
+    expect(invalid_autocorrected_command_names).to be_empty
+  end
 
+  it 'verifies that each command ID has an associated matcher' do
+    # skip("not working yet")
+    valid_meterpreter_command_names = Rex::Post::Meterpreter::CommandMapper.get_command_names
+    autocorrected_meterpreter_command_names = RuboCop::Cop::Lint::MeterpreterCommandDependencies.new.mappings.map { |mapping| mapping[:command] }
 
-    expect_offense(<<~RUBY)
-    RUBY
-
-    expect_correction(<<~RUBY)
-    RUBY
+    api_commands_without_matchers = valid_meterpreter_command_names - autocorrected_meterpreter_command_names
+    require "pry"; binding.pry
+    expect(api_commands_without_matchers).to be_empty
   end
 end
 
