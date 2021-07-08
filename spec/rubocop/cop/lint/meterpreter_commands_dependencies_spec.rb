@@ -1289,7 +1289,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.sys.config.getenv('TEMP')
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.railgun.memread(@addresses['AcroRd32.exe'] + target['AdobeCollabSyncTrigger'], target['AdobeCollabSyncTriggerSignature'].length)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.process.open
         ^{keyword}^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.net.socket.create
@@ -1332,7 +1332,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.net.config.respond_to?(:each_route)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.webcam.record_mic(datastore['DURATION'])
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.espia.espia_image_get_dev_screen
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.android.set_wallpaper(File.binread(file))
@@ -1392,13 +1392,13 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.lanattacks.dhcp.stop
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.webcam.webcam_start(datastore['INDEX'])
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.webcam.webcam_get_frame(datastore['QUALITY'])
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.webcam.webcam_stop
-        ^{keyword}^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.webcam.webcam_list
-        ^{keyword}^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.incognito.incognito_impersonate_token(domain_user)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.expand_path(path)

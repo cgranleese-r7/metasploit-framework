@@ -227,407 +227,396 @@ module RuboCop
         end
 
         def node_matcher_for(api_call)
-          api_call_elements = api_call.split('.')
-          matcher_builder = '(send ' * (api_call_elements.length - 1)
-          matcher_builder << CLIENT_OR_SESSION
-          api_call_elements = api_call_elements - %w[session client]
+          api_call_split = api_call.split('.')
+          node_matcher = '(send ' * (api_call_split.length - 1)
 
-          api_call_elements.each do |value|
-            if value == api_call_elements.last
-              matcher_builder << ' :' + value + ' _*)'
+          if api_call_split.first == 'session' || 'client'
+            api_call_split.shift
+          end
+
+          api_call_elements = api_call_split
+          node_matcher << CLIENT_OR_SESSION
+
+          api_call_elements.each_with_index do |element, index|
+            if index == api_call_elements.size - 1
+              node_matcher << ' :' + element + ' _*)'
             else
-              matcher_builder << ' :' + value + ')'
+              node_matcher << ' :' + element + ')'
             end
           end
 
-          NodePattern.new(matcher_builder)
+          NodePattern.new(node_matcher)
         end
 
         def mappings
           @mappings ||= [
             {
               matcher: node_matcher_for('session.fs.file.rm'),
-              command: 'stdapi_fs_delete_file'
+              command: ['stdapi_fs_delete_file']
             },
             {
               matcher: node_matcher_for('session.fs.file.ls'),
-              command: 'stdapi_fs_ls'
+              command: ['stdapi_fs_ls']
             },
             {
               matcher: node_matcher_for('client.fs.file.exist?'),
-              command: 'stdapi_fs_stat'
+              command: ['stdapi_fs_stat']
             },
             {
               matcher: node_matcher_for('client.sys.config.is_system?'),
-              command: 'stdapi_sys_config_getsid' #UNSURE
+              command: ['stdapi_sys_config_getsid'] #UNSURE
             },
             {
               matcher: node_matcher_for('client.fs.dir.entries'),
-              command: 'stdapi_fs_ls' #UNSURE
+              command: ['stdapi_fs_ls'] #UNSURE
             },
             {
               matcher: node_matcher_for('client.net.socket.create'),
-              command: 'net_socket_create' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/net/socket.rb#L86
+              command: ['net_socket_create'] # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/net/socket.rb#L86
             },
             {
               matcher: node_matcher_for('client.sys.registry.splitkey'),
-              command: 'stdapi_registry_splitkey' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/sys/registry.rb#L420
+              command: ['stdapi_registry_splitkey'] # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/sys/registry.rb#L420
             },
             {
               matcher: node_matcher_for('session.sys.registry.load_key'),
-              command: 'stdapi_registry_load_key'
+              command: ['stdapi_registry_load_key']
             },
             {
               matcher: node_matcher_for('client.sys.registry.unload_key'),
-              command: 'stdapi_registry_unload_key'
+              command: ['stdapi_registry_unload_key']
             },
             {
               matcher: node_matcher_for('session.sys.registry.create_key'),
-              command: 'stdapi_registry_create_key'
+              command: ['stdapi_registry_create_key']
             },
             {
               matcher: node_matcher_for('client.sys.registry.open_key'),
-              command: 'stdapi_registry_open_key'
+              command: ['stdapi_registry_open_key']
             },
             {
               matcher: node_matcher_for('session.sys.registry.delete_key'),
-              command: 'stdapi_registry_delete_key'
+              command: ['stdapi_registry_delete_key']
             },
             {
               matcher: node_matcher_for('client.sys.registry.enum_key_direct'),
-              command: 'stdapi_registry_enum_key_direct'
+              command: ['stdapi_registry_enum_key_direct']
             },
             {
               matcher: node_matcher_for('session.sys.registry.enum_value_direct'),
-              command: 'stdapi_registry_enum_value_direct'
+              command: ['stdapi_registry_enum_value_direct']
             },
             {
               matcher: node_matcher_for('client.sys.registry.query_value_direct'),
-              command: 'stdapi_registry_query_value_direct'
+              command: ['stdapi_registry_query_value_direct']
             },
             {
               matcher: node_matcher_for('session.sys.registry.set_value_direct'),
-              command: 'stdapi_registry_set_value_direct'
+              command: ['stdapi_registry_set_value_direct']
             },
             {
               matcher: node_matcher_for('session.sys.registry.type2str'),
-              command: 'stdapi_registry_type2str' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/sys/registry.rb#L402
+              command: ['stdapi_registry_type2str'] # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/sys/registry.rb#L402
             },
             {
               matcher: node_matcher_for('client.sys.registry.check_key_exists'),
-              command: 'stdapi_registry_check_key_exists'
+              command: ['stdapi_registry_check_key_exists']
             },
             {
               matcher: node_matcher_for('session.fs.dir.getwd'),
-              command: 'stdapi_fs_getwd'
+              command: ['stdapi_fs_getwd']
             },
             {
               matcher: node_matcher_for('client.appapi.app_install'),
-              command: 'appapi_app_install'
+              command: ['appapi_app_install']
             },
             {
               matcher: node_matcher_for('session.fs.file.stat'),
-              command: 'stdapi_fs_stat'
+              command: ['stdapi_fs_stat']
             },
             {
               matcher: node_matcher_for('client.sys.config.sysinfo'),
-              command: 'stdapi_sys_config_sysinfo'
+              command: ['stdapi_sys_config_sysinfo']
             },
             {
               matcher: node_matcher_for("session.sys.config.getenv"),
-              command: 'stdapi_sys_config_getenv'
+              command: ['stdapi_sys_config_getenv']
             },
             {
               matcher: node_matcher_for("client.sys.config.getenvs"),
-              command: 'stdapi_sys_config_getenv'
+              command: ['stdapi_sys_config_getenv']
             },
             {
               matcher: node_matcher_for('session.fs.file.copy'),
-              command: 'stdapi_fs_file_copy'
+              command: ['stdapi_fs_file_copy']
             },
             {
-              matcher: node_matcher_for("session.railgun.memread"),
-              command: 'stdapi_railgun_*'
+              matcher: node_matcher_for("client.railgun"),
+              command: ['stdapi_railgun_*']
             },
             {
               matcher: node_matcher_for('client.sys.config.getprivs'),
-              command: 'stdapi_sys_config_getprivs'
+              command: ['stdapi_sys_config_getprivs']
             },
             {
               matcher: node_matcher_for("session.fs.dir.rmdir"),
-              command: 'stdapi_fs_delete_dir'
+              command: ['stdapi_fs_delete_dir']
             },
             {
               matcher: node_matcher_for('client.fs.dir.mkdir'),
-              command: 'stdapi_fs_mkdir'
+              command: ['stdapi_fs_mkdir']
             },
             {
               matcher: node_matcher_for('session.sys.config.getdrivers'),
-              command: 'stdapi_sys_config_driver_list'
+              command: ['stdapi_sys_config_driver_list']
             },
             {
               matcher: node_matcher_for('client.sys.config.getuid'),
-              command: 'stdapi_sys_config_getuid'
+              command: ['stdapi_sys_config_getuid']
             },
             {
               matcher: node_matcher_for('session.fs.file.new'),
-              command: 'stdapi_fs_new' #UNSURE
+              command: ['stdapi_fs_new'] #UNSURE
             },
             {
               matcher: node_matcher_for('session.sys.config.getsid'),
-              command: 'stdapi_sys_config_getsid'
+              command: ['stdapi_sys_config_getsid']
             },
             {
               matcher: node_matcher_for('client.fs.file.md5'),
-              command: 'stdapi_fs_md5'
+              command: ['stdapi_fs_md5']
             },
             {
               matcher: node_matcher_for('session.powershell.execute_string'),
-              command: 'powershell_execute'
+              command: ['powershell_execute']
             },
             {
               matcher: node_matcher_for('client.sys.power.reboot'),
-              command: 'stdapi_sys_power_exitwindows'
+              command: ['stdapi_sys_power_exitwindows']
             },
             {
               matcher: node_matcher_for("session.android.activity_start"),
-              command: 'android_activity_start'
+              command: ['android_activity_start']
             },
             {
               matcher: node_matcher_for('session.fs.file.download_file'), # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/fs/file.rb#L349
-              command: 'stdapi_fs_download_file'
+              command: ['stdapi_fs_download_file']
             },
             {
               matcher: node_matcher_for('client.net.resolve.resolve_host'),
-              command: 'stdapi_net_resolve_host'
+              command: ['stdapi_net_resolve_host']
             },
             {
               matcher: node_matcher_for('session.fs.file.separator'),
-              command: 'stdapi_fs_separator'
+              command: ['stdapi_fs_separator']
             },
             {
               matcher: node_matcher_for('session.fs.file.stat'),
-              command: 'stdapi_fs_stat'
+              command: ['stdapi_fs_stat']
             },
             {
               matcher: node_matcher_for("session.fs.file.upload_file"), # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/fs/file.rb#L288
-              command: 'stdapi_fs_upload_file'
+              command: ['stdapi_fs_upload_file']
             },
             {
               matcher: node_matcher_for('client.fs.file.search'),
-              command: 'stdapi_fs_search'
+              command: ['stdapi_fs_search']
             },
             {
               matcher: node_matcher_for('session.android.wlan_geolocate'),
-              command: 'android_wlan_geolocate'
+              command: ['android_wlan_geolocate']
             },
             {
               matcher: node_matcher_for('client.net.config.each_route'),
-              command: 'stdapi_net_config_get_routes'
+              command: ['stdapi_net_config_get_routes']
             },
             {
               matcher: node_matcher_for('session.net.config.respond_to?(:each_route)'),
-              command: 'stdapi_net_config_get_routes' # UNSURE
+              command: ['stdapi_net_config_get_routes'] # UNSURE
             },
             {
-              matcher: node_matcher_for("session.webcam.webcam_start"),
-              command: 'stdapi_webcam_*'
-            },
-            {
-              matcher: node_matcher_for("client.webcam.webcam_get_frame"),
-              command: 'stdapi_webcam_*'
-            },
-            {
-              matcher: node_matcher_for("client.webcam.webcam_stop"),
-              command: 'stdapi_webcam_*'
-            },
-            {
-              matcher: node_matcher_for("client.webcam.webcam_list"),
-              command: 'stdapi_webcam_*'
-            },
-            {
-              matcher: node_matcher_for("client.webcam.record_mic"),
-              command: 'stdapi_webcam_*'
+              matcher: node_matcher_for("session.webcam"),
+              command: ['stdapi_webcam_*']
             },
             {
               matcher: node_matcher_for('client.espia.espia_image_get_dev_screen'),
-              command: 'espia_image_get_dev_screen'
+              command: ['espia_image_get_dev_screen']
             },
             {
               matcher: node_matcher_for('session.android.set_wallpaper'),
-              command: 'android_set_wallpaper'
+              command: ['android_set_wallpaper']
             },
             {
               matcher: node_matcher_for('client.sys.config.steal_token'),
-              command: 'stdapi_sys_config_steal_token'
+              command: ['stdapi_sys_config_steal_token']
             },
             {
               matcher: node_matcher_for('session.sys.config.revert_to_self'),
-              command: 'stdapi_sys_config_rev2self'
+              command: ['stdapi_sys_config_rev2self']
             },
             {
               matcher: node_matcher_for('session.net.config.each_interface'),
-              command: 'stdapi_net_config_get_interfaces'
+              command: ['stdapi_net_config_get_interfaces']
             },
             {
               matcher: node_matcher_for('session.net.config.respond_to?'),
-              command: 'stdapi_net_config_get_interfaces' #UNSURE
+              command: ['stdapi_net_config_get_interfaces'] #UNSURE
             },
             {
               matcher: node_matcher_for('client.fs.dir.getwd'),
-              command: 'stdapi_fs_getwd'
+              command: ['stdapi_fs_getwd']
             },
             {
               matcher: node_matcher_for('client.fs.dir.pwd'),
-              command: 'stdapi_fs_getwd'
+              command: ['stdapi_fs_getwd']
             },
             {
               matcher: node_matcher_for('session.priv.getsystem'),
-              command: 'priv_elevate_getsystem'
+              command: ['priv_elevate_getsystem']
             },
             {
               matcher: node_matcher_for('session.kiwi.golden_ticket_create'),
-              command: 'kiwi_exec_cmd'
+              command: ['kiwi_exec_cmd']
             },
             {
               matcher: node_matcher_for('session.kiwi.kerberos_ticket_use'),
-              command: 'kiwi_exec_cmd'
+              command: ['kiwi_exec_cmd']
             },
             {
               matcher: node_matcher_for('client.priv.sam_hashes'),
-              command: 'priv_passwd_get_sam_hashes'
+              command: ['priv_passwd_get_sam_hashes']
             },
             {
               matcher: node_matcher_for('session.incognito.incognito_list_tokens'),
-              command: 'incognito_list_tokens'
+              command: ['incognito_list_tokens']
             },
             {
               matcher: node_matcher_for('session.fs.file.ls'),
-              command: 'stdapi_fs_ls'
+              command: ['stdapi_fs_ls']
             },
             {
               matcher: node_matcher_for('client.kiwi.get_debug_privilege'),
-              command: 'kiwi_exec_cmd'
+              command: ['kiwi_exec_cmd']
             },
             {
               matcher: node_matcher_for('client.kiwi.creds_all'),
-              command: 'kiwi_exec_cmd'
+              command: ['kiwi_exec_cmd']
             },
             {
               matcher: node_matcher_for('client.extapi.wmi.query'),
-              command: 'extapi_wmi_query'
+              command: ['extapi_wmi_query']
             },
             {
               matcher: node_matcher_for("session.sys.registry.open_remote_key"),
-              command: 'stdapi_registry_open_remote_key'
+              command: ['stdapi_registry_open_remote_key']
             },
             {
               matcher: node_matcher_for('client.priv.getsystem'),
-              command: 'priv_elevate_getsystem'
+              command: ['priv_elevate_getsystem']
             },
             {
               matcher: node_matcher_for('session.extapi.adsi.domain_query'),
-              command: 'extapi_adsi_domain_query'
+              command: ['extapi_adsi_domain_query']
             },
             {
               matcher: node_matcher_for("client.priv.fs.get_file_mace"),
-              command: 'priv_fs_get_file_mace'
+              command: ['priv_fs_get_file_mace']
             },
             {
               matcher: node_matcher_for("session.priv.fs.set_file_mace"),
-              command: 'priv_fs_set_file_mace'
+              command: ['priv_fs_set_file_mace']
             },
             {
               matcher: node_matcher_for('client.extapi.pageant.forward'),
-              command: 'extapi_pageant_send_query'
+              command: ['extapi_pageant_send_query']
             },
             {
               matcher: node_matcher_for('client.lanattacks.dhcp.reset'),
-              command: 'lanattacks_reset_dhcp'
+              command: ['lanattacks_reset_dhcp']
             },
             {
               matcher: node_matcher_for('client.lanattacks.dhcp.load_options'),
-              command: 'lanattacks_set_dhcp_option'
+              command: ['lanattacks_set_dhcp_option']
             },
             {
               matcher: node_matcher_for('session.lanattacks.tftp.add_file'),
-              command: 'lanattacks_add_tftp_file'
+              command: ['lanattacks_add_tftp_file']
             },
             {
               matcher: node_matcher_for('client.lanattacks.tftp.start'),
-              command: 'lanattacks_start_tftp'
+              command: ['lanattacks_start_tftp']
             },
             {
               matcher: node_matcher_for('client.lanattacks.dhcp.start'),
-              command: 'lanattacks_start_dhcp'
+              command: ['lanattacks_start_dhcp']
             },
             {
               matcher: node_matcher_for('client.lanattacks.tftp.stop'),
-              command: 'lanattacks_stop_tftp'
+              command: ['lanattacks_stop_tftp']
             },
             {
               matcher: node_matcher_for('client.lanattacks.dhcp.stop'),
-              command: 'lanattacks_stop_dhcp'
+              command: ['lanattacks_stop_dhcp']
             },
             {
               matcher: node_matcher_for('session.incognito.incognito_impersonate_token'),
-              command: 'incognito_impersonate_token'
+              command: ['incognito_impersonate_token']
             },
             {
               matcher: node_matcher_for('client.fs.file.expand_path'),
-              command: 'stdapi_fs_file_expand_path'
+              command: ['stdapi_fs_file_expand_path']
             },
             {
               matcher: node_matcher_for('client.peinjector.add_thread_x64'),
-              command: 'peinjector_inject_shellcode' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/peinjector/peinjector.rb#L34
+              command: ['peinjector_inject_shellcode'] # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/peinjector/peinjector.rb#L34
             },
             {
               matcher: node_matcher_for('client.peinjector.add_thread_x86'),
-              command: 'peinjector_inject_shellcode' #UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/peinjector/peinjector.rb#L34
+              command: ['peinjector_inject_shellcode'] #UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/peinjector/peinjector.rb#L34
             },
             {
               matcher: node_matcher_for('client.peinjector.inject_shellcode'),
-              command: 'peinjector_inject_shellcode'
+              command: ['peinjector_inject_shellcode']
             },
             {
               matcher: node_matcher_for("session.sys.config.getenv"),
-              command: 'stdapi_sys_config_getenv'
+              command: ['stdapi_sys_config_getenv']
             },
             {
               matcher: node_matcher_for('session.lanattacks.dhcp.log.each'),
-              command: 'lanattacks_dhcp_log'
+              command: ['lanattacks_dhcp_log']
             },
             {
               matcher: node_matcher_for("client.fs.dir.rmdir"),
-              command: 'stdapi_fs_delete_dir'
+              command: ['stdapi_fs_delete_dir']
             },
             {
               matcher: node_matcher_for('session.sys.process.open'),
-              command: 'stdapi_sys_process_attach'
+              command: ['stdapi_sys_process_attach']
             },
             {
               matcher: node_matcher_for('client.sys.process.get_processes'),
-              command: 'stdapi_sys_process_get_processes'
+              command: ['stdapi_sys_process_get_processes']
             },
             {
               matcher: node_matcher_for('session.sys.process.getpid'),
-              command: 'stdapi_sys_process_getpid'
+              command: ['stdapi_sys_process_getpid']
             },
             {
               matcher: node_matcher_for("session.sys.process.kill"),
-              command: 'stdapi_sys_process_kill'
+              command: ['stdapi_sys_process_kill']
             },
             {
               matcher: node_matcher_for('session.sys.process.execute'),
-              command: 'stdapi_sys_process_execute'
+              command: ['stdapi_sys_process_execute']
             },
             {
               matcher: node_matcher_for('session.sys.process.execute'),
-              command: 'stdapi_sys_process_execute'
+              command: ['stdapi_sys_process_execute']
             },
             {
               matcher: node_matcher_for('session.sys.process.each_process.find'),
-              command: 'stdapi_sys_process_get_processes'
+              command: ['stdapi_sys_process_get_processes']
             },
           ]
         end
@@ -635,15 +624,19 @@ module RuboCop
         def on_send(node)
           mappings.each do |mapping|
             matcher = mapping[:matcher]
-            command = mapping[:command]
+            commands = mapping[:command]
             if matcher.match(node)
-              unless @current_frame.identified_commands.include?(command)
-                @current_frame.identified_commands << command
+              commands.each do |command|
+                unless @current_frame.identified_commands.include?(command)
+                  @current_frame.identified_commands << command
+                end
               end
               # Add an offense, but don't provide an autocorrect.
               # There will be a final autocorrect to fix all issues
-              unless @current_frame.current_commands.include?(command)
-                add_offense(node)
+              commands.each do |command|
+                unless @current_frame.current_commands.include?(command)
+                  add_offense(node)
+                end
               end
 
               break
