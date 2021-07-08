@@ -16,14 +16,8 @@ module RuboCop
         #   - implement a stack to handle multiple instance where we have multiple classes/modules , big hint Array
         #   - fix matcher for file stat - currently have two variations, one for with and without a trailing method call
         #   - fix matcher for process with a method call without parenthesis
-        #   - ** Fix issues where some commas && comments are being added after compat hash
-        #
-        #   - add tests for modules without info
-        #   - add tests for modules/exploits/linux/local/abrt_raceabrt_priv_esc.rb - calls not being added to compat - ** Working on tests **
-        #   - add tests for modules/exploits/linux/local/bash_profile_persistence.rb - removing an option instead off appending
         #
         #  - Potenial problem child - fileformat/mswin_tiff_overflow.rb
-        #
 
         MSG = 'Convert meterpreter api calls into meterpreter command dependencies.'.freeze
         MISSING_METHOD_CALL_FOR_COMMAND_MSG = 'Compatibility command does not have an associated method call.'
@@ -59,371 +53,6 @@ module RuboCop
 
         def_node_matcher :super_present?, <<~PATTERN
           (begin (zsuper) ...)
-        PATTERN
-
-        # Matchers for meterpreter API calls
-        def_node_matcher :file_rm_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :rm _)
-        PATTERN
-
-        def_node_matcher :file_ls_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :ls _)
-        PATTERN
-
-        def_node_matcher :net_create_socket_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :net) :socket) :create)
-        PATTERN
-
-        def_node_matcher :registry_splitkey_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :splitkey _*)
-        PATTERN
-
-        def_node_matcher :registry_load_key_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :load_key _*)
-        PATTERN
-
-        def_node_matcher :registry_unload_key_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :unload_key _*)
-        PATTERN
-
-        def_node_matcher :registry_create_key_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :create_key _*)
-        PATTERN
-
-        def_node_matcher :registry_open_key_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :open_key _*)
-        PATTERN
-
-        def_node_matcher :registry_delete_key_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :delete_key _*)
-        PATTERN
-
-        def_node_matcher :registry_enum_key_direct_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :enum_key_direct _*)
-        PATTERN
-
-        def_node_matcher :registry_enum_value_direct_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :enum_value_direct _*)
-        PATTERN
-
-        def_node_matcher :registry_query_value_direct_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :query_value_direct _*)
-        PATTERN
-
-        def_node_matcher :registry_set_value_direct_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :set_value_direct _*)
-        PATTERN
-
-        def_node_matcher :registry_type2str_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :type2str _*)
-        PATTERN
-
-        def_node_matcher :registry_check_key_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :check_key_exists _*)
-        PATTERN
-
-        def_node_matcher :fs_dir_getwd_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :getwd)
-        PATTERN
-
-        def_node_matcher :appapi_app_install_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :appapi) :app_install _*)
-        PATTERN
-
-        def_node_matcher :fs_file_stat_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :stat _*)
-        PATTERN
-
-        def_node_matcher :get_sysinfo_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :sysinfo _*)
-        PATTERN
-
-        def_node_matcher :config_getenv_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getenv _*)
-        PATTERN
-
-        def_node_matcher :fs_file_copy_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :copy _*)
-        PATTERN
-
-        def_node_matcher :railgun_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :railgun) ...)
-        PATTERN
-
-        def_node_matcher :net_socket_create_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :net) :socket) :create)
-        PATTERN
-
-        def_node_matcher :config_getprivs_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getprivs)
-        PATTERN
-
-        def_node_matcher :fs_dir_rmdir_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :rmdir)
-        PATTERN
-
-        def_node_matcher :fs_dir_mkdir_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :mkdir _*)
-        PATTERN
-
-        def_node_matcher :config_getdrivers_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getdrivers)
-        PATTERN
-
-        def_node_matcher :config_getuid_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getuid)
-        PATTERN
-
-        def_node_matcher :fs_file_new_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :new _*)
-        PATTERN
-
-        def_node_matcher :config_getsid_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getsid)
-        PATTERN
-
-        def_node_matcher :config_is_system_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :is_system)
-        PATTERN
-
-        def_node_matcher :fs_file_md5_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :md5 _*)
-        PATTERN
-
-        def_node_matcher :powershell_execute_string_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :powershell) :execute_string)
-        PATTERN
-
-        def_node_matcher :power_reboot_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :power) :reboot)
-        PATTERN
-
-        def_node_matcher :lanattacks_dhcp_reset_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :lanattacks) ...)
-        PATTERN
-
-        def_node_matcher :android_activity_start_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :android) :activity_start _*)
-        PATTERN
-
-        def_node_matcher :fs_download_file_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :download_file _*)
-        PATTERN
-
-        def_node_matcher :net_resolve_host_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :net) :resolve) :resolve_host _*)
-        PATTERN
-
-        def_node_matcher :fs_file_separator_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :separator)
-        PATTERN
-
-        def_node_matcher :fs_file_exist_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :exist? _*)
-        PATTERN
-
-        def_node_matcher :fs_upload_file_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :upload_file _*)
-        PATTERN
-
-        def_node_matcher :fs_file_search_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :search _*)
-        PATTERN
-
-        def_node_matcher :android_wlan_geolocate_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :android) :wlan_geolocate)
-        PATTERN
-
-        def_node_matcher :net_config_respond_to_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :net) :config) :respond_to? _*)
-        PATTERN
-
-        def_node_matcher :webcam_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :webcam) ...)
-        PATTERN
-
-        def_node_matcher :espia_image_get_dev_screen_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :espia) :espia_image_get_dev_screen)
-        PATTERN
-
-        def_node_matcher :android_set_wallpaper_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :android) :set_wallpaper _*)
-        PATTERN
-
-        def_node_matcher :sys_config_steal_token_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :steal_token _*)
-        PATTERN
-
-        def_node_matcher :sys_config_revert_to_self_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :revert_to_self)
-        PATTERN
-
-        def_node_matcher :net_config_each_route_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :net) :config) :each_route)
-        PATTERN
-
-        def_node_matcher :net_config_each_interface_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :net) :config) :each_interface)
-        PATTERN
-
-        def_node_matcher :fs_pwd_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :pwd)
-        PATTERN
-
-        def_node_matcher :priv_getsystem_args_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :priv) :getsystem _*)
-        PATTERN
-
-        def_node_matcher :kiwi_golden_ticket_create_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :kiwi) :golden_ticket_create _*)
-        PATTERN
-
-        def_node_matcher :kiwi_kerberos_ticket_use_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :kiwi) :kerberos_ticket_use _*)
-        PATTERN
-
-        def_node_matcher :priv_sam_hashes_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :priv) :sam_hashes)
-        PATTERN
-
-        def_node_matcher :incognito_list_tokens_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :incognito) :incognito_list_tokens _*)
-        PATTERN
-
-        def_node_matcher :fs_entries_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :entries _*)
-        PATTERN
-
-        def_node_matcher :kiwi_get_debug_privilege_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :kiwi) :get_debug_privilege)
-        PATTERN
-
-        def_node_matcher :kiwi_creds_all_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :kiwi) :creds_all)
-        PATTERN
-
-        def_node_matcher :sys_config_is_system_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :is_system?)
-        PATTERN
-
-        def_node_matcher :extapi_wmi_query_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :extapi) :wmi) :query _*)
-        PATTERN
-
-        def_node_matcher :sys_registry_open_remote_key_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :registry) :open_remote_key _*)
-        PATTERN
-
-        def_node_matcher :priv_getsystem_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :priv) :getsystem)
-        PATTERN
-
-        def_node_matcher :extapi_adsi_domain_query_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :extapi) :adsi) :domain_query _*)
-        PATTERN
-
-        def_node_matcher :priv_fs_get_file_mace_call?, <<~PATTERN
-        (send (send (send #{CLIENT_OR_SESSION} :priv) :fs) :get_file_mace _*)
-        PATTERN
-
-        def_node_matcher :priv_fs_set_file_mace_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :priv) :fs) :set_file_mace _*)
-        PATTERN
-
-        def_node_matcher :extapi_pageant_forward_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :extapi) :pageant) :forward _*)
-        PATTERN
-
-        def_node_matcher :lanattacks_dhcp_reset_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :reset)
-        PATTERN
-
-        def_node_matcher :lanattacks_dhcp_load_options_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :load_options _*)
-        PATTERN
-
-        def_node_matcher :lanattacks_tftp_add_file_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :tftp) :add_file _*)
-        PATTERN
-
-        def_node_matcher :lanattacks_tftp_start_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :tftp) :start)
-        PATTERN
-
-        def_node_matcher :lanattacks_dhcp_start_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :start)
-        PATTERN
-
-        def_node_matcher :lanattacks_tftp_stop_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :tftp) :stop)
-        PATTERN
-
-        def_node_matcher :lanattacks_dhcp_stop_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :stop)
-        PATTERN
-
-        def_node_matcher :incognito_incognito_impersonate_token_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :incognito) :incognito_impersonate_token _*)
-        PATTERN
-
-        def_node_matcher :fs_file_expand_path_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :file) :expand_path _*)
-        PATTERN
-
-        def_node_matcher :peinjector_add_thread_x64_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :peinjector) :add_thread_x64 _*)
-        PATTERN
-
-        def_node_matcher :peinjector_add_thread_x86_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :peinjector) :add_thread_x86 _*)
-        PATTERN
-
-        def_node_matcher :peinjector_inject_shellcode_call?, <<~PATTERN
-          (send (send #{CLIENT_OR_SESSION} :peinjector) :inject_shellcode _*)
-        PATTERN
-
-        def_node_matcher :sys_config_getenvs_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :config) :getenvs _*)
-        PATTERN
-
-        def_node_matcher :lanattacks_dhcp_log_each_call?, <<~PATTERN
-          (send (send (send (send #{CLIENT_OR_SESSION} :lanattacks) :dhcp) :log) :each)
-        PATTERN
-
-        def_node_matcher :fs_dir_rmdir_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :fs) :dir) :rmdir _*)
-        PATTERN
-
-        def_node_matcher :sys_process_open_call?, <<~PATTERN
-          (send (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :open) ...)
-        PATTERN
-
-        def_node_matcher :sys_process_get_processes_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :get_processes)
-        PATTERN
-
-        def_node_matcher :sys_process_getpid_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :getpid)
-        PATTERN
-
-        def_node_matcher :sys_process_open_method_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :open _*)
-        PATTERN
-
-        def_node_matcher :sys_process_kill_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :kill _*)
-        PATTERN
-
-        def_node_matcher :sys_process_execute_call?, <<~PATTERN
-          (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :execute _*)
-        PATTERN
-
-        def_node_matcher :sys_process_execute_without_parentheses_call?, <<~PATTERN
-        (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :execute)
-        PATTERN
-
-        def_node_matcher :sys_process_each_process_call?, <<~PATTERN
-          (send (send (send (send #{CLIENT_OR_SESSION} :sys) :process) :each_process) ...)
         PATTERN
 
         class StackFrame
@@ -597,362 +226,407 @@ module RuboCop
           node.type == :hash
         end
 
+        def node_matcher_for(api_call)
+          api_call_elements = api_call.split('.')
+          matcher_builder = '(send ' * (api_call_elements.length - 1)
+          matcher_builder << CLIENT_OR_SESSION
+          api_call_elements = api_call_elements - %w[session client]
+
+          api_call_elements.each do |value|
+            if value == api_call_elements.last
+              matcher_builder << ' :' + value + ' _*)'
+            else
+              matcher_builder << ' :' + value + ')'
+            end
+          end
+
+          NodePattern.new(matcher_builder)
+        end
+
         def mappings
-          mappings = [
+          @mappings ||= [
             {
-              matcher: method(:file_rm_call?),
+              matcher: node_matcher_for('session.fs.file.rm'),
               command: 'stdapi_fs_delete_file'
             },
             {
-              matcher: method(:file_ls_call?),
+              matcher: node_matcher_for('session.fs.file.ls'),
               command: 'stdapi_fs_ls'
             },
             {
-              matcher: method(:net_create_socket_call?),
+              matcher: node_matcher_for('client.fs.file.exist?'),
+              command: 'stdapi_fs_stat'
+            },
+            {
+              matcher: node_matcher_for('client.sys.config.is_system?'),
+              command: 'stdapi_sys_config_getsid' #UNSURE
+            },
+            {
+              matcher: node_matcher_for('client.fs.dir.entries'),
+              command: 'stdapi_fs_ls' #UNSURE
+            },
+            {
+              matcher: node_matcher_for('client.net.socket.create'),
               command: 'net_socket_create' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/net/socket.rb#L86
             },
             {
-              matcher: method(:registry_splitkey_call?),
+              matcher: node_matcher_for('client.sys.registry.splitkey'),
               command: 'stdapi_registry_splitkey' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/sys/registry.rb#L420
             },
             {
-              matcher: method(:registry_load_key_call?),
+              matcher: node_matcher_for('session.sys.registry.load_key'),
               command: 'stdapi_registry_load_key'
             },
             {
-              matcher: method(:registry_unload_key_call?),
+              matcher: node_matcher_for('client.sys.registry.unload_key'),
               command: 'stdapi_registry_unload_key'
             },
             {
-              matcher: method(:registry_create_key_call?),
+              matcher: node_matcher_for('session.sys.registry.create_key'),
               command: 'stdapi_registry_create_key'
             },
             {
-              matcher: method(:registry_open_key_call?),
+              matcher: node_matcher_for('client.sys.registry.open_key'),
               command: 'stdapi_registry_open_key'
             },
             {
-              matcher: method(:registry_delete_key_call?),
+              matcher: node_matcher_for('session.sys.registry.delete_key'),
               command: 'stdapi_registry_delete_key'
             },
             {
-              matcher: method(:registry_enum_key_direct_call?),
+              matcher: node_matcher_for('client.sys.registry.enum_key_direct'),
               command: 'stdapi_registry_enum_key_direct'
             },
             {
-              matcher: method(:registry_enum_value_direct_call?),
+              matcher: node_matcher_for('session.sys.registry.enum_value_direct'),
               command: 'stdapi_registry_enum_value_direct'
             },
             {
-              matcher: method(:registry_query_value_direct_call?),
+              matcher: node_matcher_for('client.sys.registry.query_value_direct'),
               command: 'stdapi_registry_query_value_direct'
             },
             {
-              matcher: method(:registry_set_value_direct_call?),
+              matcher: node_matcher_for('session.sys.registry.set_value_direct'),
               command: 'stdapi_registry_set_value_direct'
             },
             {
-              matcher: method(:registry_type2str_call?),
+              matcher: node_matcher_for('session.sys.registry.type2str'),
               command: 'stdapi_registry_type2str' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/sys/registry.rb#L402
             },
             {
-              matcher: method(:registry_check_key_call?),
+              matcher: node_matcher_for('client.sys.registry.check_key_exists'),
               command: 'stdapi_registry_check_key_exists'
             },
             {
-              matcher: method(:fs_dir_getwd_call?),
+              matcher: node_matcher_for('session.fs.dir.getwd'),
               command: 'stdapi_fs_getwd'
             },
             {
-              matcher: method(:appapi_app_install_call?),
+              matcher: node_matcher_for('client.appapi.app_install'),
               command: 'appapi_app_install'
             },
             {
-              matcher: method(:fs_file_stat_call?),
+              matcher: node_matcher_for('session.fs.file.stat'),
               command: 'stdapi_fs_stat'
             },
             {
-              matcher: method(:get_sysinfo_call?),
+              matcher: node_matcher_for('client.sys.config.sysinfo'),
               command: 'stdapi_sys_config_sysinfo'
             },
             {
-              matcher: method(:config_getenv_call?),
+              matcher: node_matcher_for("session.sys.config.getenv"),
               command: 'stdapi_sys_config_getenv'
             },
             {
-              matcher: method(:fs_file_copy_call?),
+              matcher: node_matcher_for("client.sys.config.getenvs"),
+              command: 'stdapi_sys_config_getenv'
+            },
+            {
+              matcher: node_matcher_for('session.fs.file.copy'),
               command: 'stdapi_fs_file_copy'
             },
             {
-              matcher: method(:railgun_call?),
+              matcher: node_matcher_for("session.railgun.memread"),
               command: 'stdapi_railgun_*'
             },
             {
-              matcher: method(:config_getprivs_call?),
+              matcher: node_matcher_for('client.sys.config.getprivs'),
               command: 'stdapi_sys_config_getprivs'
             },
             {
-              matcher: method(:fs_dir_rmdir_call?),
+              matcher: node_matcher_for("session.fs.dir.rmdir"),
               command: 'stdapi_fs_delete_dir'
             },
             {
-              matcher: method(:fs_dir_mkdir_call?),
+              matcher: node_matcher_for('client.fs.dir.mkdir'),
               command: 'stdapi_fs_mkdir'
             },
             {
-              matcher: method(:config_getdrivers_call?),
+              matcher: node_matcher_for('session.sys.config.getdrivers'),
               command: 'stdapi_sys_config_driver_list'
             },
             {
-              matcher: method(:config_getuid_call?),
+              matcher: node_matcher_for('client.sys.config.getuid'),
               command: 'stdapi_sys_config_getuid'
             },
             {
-              matcher: method(:fs_file_new_call?),
+              matcher: node_matcher_for('session.fs.file.new'),
               command: 'stdapi_fs_new' #UNSURE
             },
             {
-              matcher: method(:config_getsid_call?),
+              matcher: node_matcher_for('session.sys.config.getsid'),
               command: 'stdapi_sys_config_getsid'
             },
             {
-              matcher: method(:config_is_system_call?),
-              command: 'stdapi_sys_config_getsid'
-            },
-            {
-              matcher: method(:fs_file_md5_call?),
+              matcher: node_matcher_for('client.fs.file.md5'),
               command: 'stdapi_fs_md5'
             },
             {
-              matcher: method(:powershell_execute_string_call?),
+              matcher: node_matcher_for('session.powershell.execute_string'),
               command: 'powershell_execute'
             },
             {
-              matcher: method(:power_reboot_call?),
+              matcher: node_matcher_for('client.sys.power.reboot'),
               command: 'stdapi_sys_power_exitwindows'
             },
             {
-              matcher: method(:android_activity_start_call?),
+              matcher: node_matcher_for("session.android.activity_start"),
               command: 'android_activity_start'
             },
             {
-              matcher: method(:fs_download_file_call?), # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/fs/file.rb#L349
+              matcher: node_matcher_for('session.fs.file.download_file'), # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/fs/file.rb#L349
               command: 'stdapi_fs_download_file'
             },
             {
-              matcher: method(:net_resolve_host_call?),
+              matcher: node_matcher_for('client.net.resolve.resolve_host'),
               command: 'stdapi_net_resolve_host'
             },
             {
-              matcher: method(:fs_file_separator_call?),
+              matcher: node_matcher_for('session.fs.file.separator'),
               command: 'stdapi_fs_separator'
             },
             {
-              matcher: method(:fs_file_exist_call?),
+              matcher: node_matcher_for('session.fs.file.stat'),
               command: 'stdapi_fs_stat'
             },
             {
-              matcher: method(:fs_upload_file_call?), # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/fs/file.rb#L288
+              matcher: node_matcher_for("session.fs.file.upload_file"), # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/stdapi/fs/file.rb#L288
               command: 'stdapi_fs_upload_file'
             },
             {
-              matcher: method(:fs_file_search_call?),
+              matcher: node_matcher_for('client.fs.file.search'),
               command: 'stdapi_fs_search'
             },
             {
-              matcher: method(:android_wlan_geolocate_call?),
+              matcher: node_matcher_for('session.android.wlan_geolocate'),
               command: 'android_wlan_geolocate'
             },
             {
-              matcher: method(:net_config_respond_to_call?),
+              matcher: node_matcher_for('client.net.config.each_route'),
               command: 'stdapi_net_config_get_routes'
             },
             {
-              matcher: method(:webcam_call?),
+              matcher: node_matcher_for('session.net.config.respond_to?(:each_route)'),
+              command: 'stdapi_net_config_get_routes' # UNSURE
+            },
+            {
+              matcher: node_matcher_for("session.webcam.webcam_start"),
               command: 'stdapi_webcam_*'
             },
             {
-              matcher: method(:espia_image_get_dev_screen_call?),
+              matcher: node_matcher_for("client.webcam.webcam_get_frame"),
+              command: 'stdapi_webcam_*'
+            },
+            {
+              matcher: node_matcher_for("client.webcam.webcam_stop"),
+              command: 'stdapi_webcam_*'
+            },
+            {
+              matcher: node_matcher_for("client.webcam.webcam_list"),
+              command: 'stdapi_webcam_*'
+            },
+            {
+              matcher: node_matcher_for("client.webcam.record_mic"),
+              command: 'stdapi_webcam_*'
+            },
+            {
+              matcher: node_matcher_for('client.espia.espia_image_get_dev_screen'),
               command: 'espia_image_get_dev_screen'
             },
             {
-              matcher: method(:android_set_wallpaper_call?),
+              matcher: node_matcher_for('session.android.set_wallpaper'),
               command: 'android_set_wallpaper'
             },
             {
-              matcher: method(:sys_config_steal_token_call?),
+              matcher: node_matcher_for('client.sys.config.steal_token'),
               command: 'stdapi_sys_config_steal_token'
             },
             {
-              matcher: method(:sys_config_revert_to_self_call?),
+              matcher: node_matcher_for('session.sys.config.revert_to_self'),
               command: 'stdapi_sys_config_rev2self'
             },
             {
-              matcher: method(:net_config_each_route_call?),
-              command: 'stdapi_net_config_get_routes'
-            },
-            {
-              matcher: method(:net_config_each_interface_call?),
+              matcher: node_matcher_for('session.net.config.each_interface'),
               command: 'stdapi_net_config_get_interfaces'
             },
             {
-              matcher: method(:fs_pwd_call?),
+              matcher: node_matcher_for('session.net.config.respond_to?'),
+              command: 'stdapi_net_config_get_interfaces' #UNSURE
+            },
+            {
+              matcher: node_matcher_for('client.fs.dir.getwd'),
               command: 'stdapi_fs_getwd'
             },
             {
-              matcher: method(:priv_getsystem_call?),
+              matcher: node_matcher_for('client.fs.dir.pwd'),
+              command: 'stdapi_fs_getwd'
+            },
+            {
+              matcher: node_matcher_for('session.priv.getsystem'),
               command: 'priv_elevate_getsystem'
             },
             {
-              matcher: method(:kiwi_golden_ticket_create_call?),
+              matcher: node_matcher_for('session.kiwi.golden_ticket_create'),
               command: 'kiwi_exec_cmd'
             },
             {
-              matcher: method(:kiwi_kerberos_ticket_use_call?),
+              matcher: node_matcher_for('session.kiwi.kerberos_ticket_use'),
               command: 'kiwi_exec_cmd'
             },
             {
-              matcher: method(:priv_sam_hashes_call?),
+              matcher: node_matcher_for('client.priv.sam_hashes'),
               command: 'priv_passwd_get_sam_hashes'
             },
             {
-              matcher: method(:incognito_list_tokens_call?),
+              matcher: node_matcher_for('session.incognito.incognito_list_tokens'),
               command: 'incognito_list_tokens'
             },
             {
-              matcher: method(:fs_entries_call?),
+              matcher: node_matcher_for('session.fs.file.ls'),
               command: 'stdapi_fs_ls'
             },
             {
-              matcher: method(:kiwi_get_debug_privilege_call?),
+              matcher: node_matcher_for('client.kiwi.get_debug_privilege'),
               command: 'kiwi_exec_cmd'
             },
             {
-              matcher: method(:kiwi_creds_all_call?),
+              matcher: node_matcher_for('client.kiwi.creds_all'),
               command: 'kiwi_exec_cmd'
             },
             {
-              matcher: method(:sys_config_is_system_call?),
-              command: 'stdapi_sys_config_getsid'
-            },
-            {
-              matcher: method(:extapi_wmi_query_call?),
+              matcher: node_matcher_for('client.extapi.wmi.query'),
               command: 'extapi_wmi_query'
             },
             {
-              matcher: method(:sys_registry_open_remote_key_call?),
+              matcher: node_matcher_for("session.sys.registry.open_remote_key"),
               command: 'stdapi_registry_open_remote_key'
             },
             {
-              matcher: method(:priv_getsystem_args_call?),
+              matcher: node_matcher_for('client.priv.getsystem'),
               command: 'priv_elevate_getsystem'
             },
             {
-              matcher: method(:extapi_adsi_domain_query_call?),
+              matcher: node_matcher_for('session.extapi.adsi.domain_query'),
               command: 'extapi_adsi_domain_query'
             },
             {
-              matcher: method(:priv_fs_get_file_mace_call?),
+              matcher: node_matcher_for("client.priv.fs.get_file_mace"),
               command: 'priv_fs_get_file_mace'
             },
             {
-              matcher: method(:priv_fs_set_file_mace_call?),
+              matcher: node_matcher_for("session.priv.fs.set_file_mace"),
               command: 'priv_fs_set_file_mace'
             },
             {
-              matcher: method(:extapi_pageant_forward_call?),
+              matcher: node_matcher_for('client.extapi.pageant.forward'),
               command: 'extapi_pageant_send_query'
             },
             {
-              matcher: method(:lanattacks_dhcp_reset_call?),
+              matcher: node_matcher_for('client.lanattacks.dhcp.reset'),
               command: 'lanattacks_reset_dhcp'
             },
             {
-              matcher: method(:lanattacks_dhcp_load_options_call?),
+              matcher: node_matcher_for('client.lanattacks.dhcp.load_options'),
               command: 'lanattacks_set_dhcp_option'
             },
             {
-              matcher: method(:lanattacks_tftp_add_file_call?),
+              matcher: node_matcher_for('session.lanattacks.tftp.add_file'),
               command: 'lanattacks_add_tftp_file'
             },
             {
-              matcher: method(:lanattacks_tftp_start_call?),
+              matcher: node_matcher_for('client.lanattacks.tftp.start'),
               command: 'lanattacks_start_tftp'
             },
             {
-              matcher: method(:lanattacks_dhcp_start_call?),
+              matcher: node_matcher_for('client.lanattacks.dhcp.start'),
               command: 'lanattacks_start_dhcp'
             },
             {
-              matcher: method(:lanattacks_tftp_stop_call?),
+              matcher: node_matcher_for('client.lanattacks.tftp.stop'),
               command: 'lanattacks_stop_tftp'
             },
             {
-              matcher: method(:lanattacks_dhcp_stop_call?),
+              matcher: node_matcher_for('client.lanattacks.dhcp.stop'),
               command: 'lanattacks_stop_dhcp'
             },
             {
-              matcher: method(:incognito_incognito_impersonate_token_call?),
+              matcher: node_matcher_for('session.incognito.incognito_impersonate_token'),
               command: 'incognito_impersonate_token'
             },
             {
-              matcher: method(:fs_file_expand_path_call?),
+              matcher: node_matcher_for('client.fs.file.expand_path'),
               command: 'stdapi_fs_file_expand_path'
             },
             {
-              matcher: method(:peinjector_add_thread_x64_call?),
+              matcher: node_matcher_for('client.peinjector.add_thread_x64'),
               command: 'peinjector_inject_shellcode' # UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/peinjector/peinjector.rb#L34
             },
             {
-              matcher: method(:peinjector_add_thread_x86_call?),
+              matcher: node_matcher_for('client.peinjector.add_thread_x86'),
               command: 'peinjector_inject_shellcode' #UNSURE - https://github.com/rapid7/metasploit-framework/blob/3fa688e8db831cd363bc3e6d06d90ead20c2a6fd/lib/rex/post/meterpreter/extensions/peinjector/peinjector.rb#L34
             },
             {
-              matcher: method(:peinjector_inject_shellcode_call?),
+              matcher: node_matcher_for('client.peinjector.inject_shellcode'),
               command: 'peinjector_inject_shellcode'
             },
             {
-              matcher: method(:sys_config_getenvs_call?),
+              matcher: node_matcher_for("session.sys.config.getenv"),
               command: 'stdapi_sys_config_getenv'
             },
             {
-              matcher: method(:lanattacks_dhcp_log_each_call?),
+              matcher: node_matcher_for('session.lanattacks.dhcp.log.each'),
               command: 'lanattacks_dhcp_log'
             },
             {
-              matcher: method(:fs_dir_rmdir_call?),
+              matcher: node_matcher_for("client.fs.dir.rmdir"),
               command: 'stdapi_fs_delete_dir'
             },
             {
-              matcher: method(:sys_process_open_call?),
+              matcher: node_matcher_for('session.sys.process.open'),
               command: 'stdapi_sys_process_attach'
             },
             {
-              matcher: method(:sys_process_get_processes_call?),
+              matcher: node_matcher_for('client.sys.process.get_processes'),
               command: 'stdapi_sys_process_get_processes'
             },
             {
-              matcher: method(:sys_process_getpid_call?),
+              matcher: node_matcher_for('session.sys.process.getpid'),
               command: 'stdapi_sys_process_getpid'
             },
             {
-              matcher: method(:sys_process_open_method_call?),
-              command: 'stdapi_sys_process_attach'
-            },
-            {
-              matcher: method(:sys_process_kill_call?),
+              matcher: node_matcher_for("session.sys.process.kill"),
               command: 'stdapi_sys_process_kill'
             },
             {
-              matcher: method(:sys_process_execute_call?),
+              matcher: node_matcher_for('session.sys.process.execute'),
               command: 'stdapi_sys_process_execute'
             },
             {
-              matcher: method(:sys_process_execute_without_parentheses_call?),
+              matcher: node_matcher_for('session.sys.process.execute'),
               command: 'stdapi_sys_process_execute'
             },
             {
-              matcher: method(:sys_process_each_process_call?),
+              matcher: node_matcher_for('session.sys.process.each_process.find'),
               command: 'stdapi_sys_process_get_processes'
             },
           ]
@@ -962,7 +636,7 @@ module RuboCop
           mappings.each do |mapping|
             matcher = mapping[:matcher]
             command = mapping[:command]
-            if matcher.call(node)
+            if matcher.match(node)
               unless @current_frame.identified_commands.include?(command)
                 @current_frame.identified_commands << command
               end
