@@ -7,24 +7,13 @@ module RuboCop
         extend AutoCorrector
         include Alignment
 
-        # TODO:
-        #   - reorder tests so they gradually build up in complexity
-        #   - test for when there is no method calls being made, so nothing is added in that case
-        #   - scenario where a module has no method calls but the compat was already present within the module
-        #   - handle stripping of whitespace if calls have been removed
-        #   - Make test to handle modules - lib/msf/core/post/process.rb
-        #   - implement a stack to handle multiple instance where we have multiple classes/modules , big hint Array
-        #   - fix matcher for file stat - currently have two variations, one for with and without a trailing method call
-        #   - fix matcher for process with a method call without parenthesis
-        #
-        #  - Potenial problem child - fileformat/mswin_tiff_overflow.rb
-
         MSG = 'Convert meterpreter api calls into meterpreter command dependencies.'.freeze
         MISSING_METHOD_CALL_FOR_COMMAND_MSG = 'Compatibility command does not have an associated method call.'
         COMMAND_DUPLICATED_MSG = 'Command duplicated.'
 
         CLIENT_OR_SESSION = "{(lvar {:session :client}) (send nil? {:session :client})}"
 
+        # Matchers for identifying what is current present in each module, so we can append required section at a later point
         def_node_matcher :find_nested_update_info_node, <<~PATTERN
           (def :initialize _args (begin (super (send nil? {:update_info :merge_info} (lvar :info) $(hash ...))) ...))
         PATTERN
@@ -41,8 +30,6 @@ module RuboCop
           (def :initialize _args (begin (super $(hash ...)) ...))
         PATTERN
 
-        # Matchers for identifying if the code already has an initialise etc.
-        # TODO: Create matchers to identify where I can add my list of requirements
         def_node_matcher :find_command_array_node, <<~PATTERN
           (hash (pair (str "Commands") $(array ...)))
         PATTERN
@@ -99,6 +86,7 @@ module RuboCop
           leave_frame(node)
         end
 
+        # Allows us to handle scenarios of a module having multiple classes or modules present
         def enter_frame(node)
           # Frames can't be nested
           if @current_frame
@@ -162,7 +150,7 @@ module RuboCop
           elsif nodes[:initialize_node].nil?
             add_offense(nodes[:investigated_node].identifier, &autocorrector)
           else
-            raise 'Fix this dummy'
+            raise 'Fix this dummy' # TODO - handle this
           end
 
           @current_frame = nil
@@ -226,6 +214,7 @@ module RuboCop
           node.type == :hash
         end
 
+        # Generates AST matchers based upon Meterpreter API calls.
         def node_matcher_for(api_call)
           api_call_split = api_call.split('.')
           node_matcher = '(send ' * (api_call_split.length - 1)
@@ -248,6 +237,7 @@ module RuboCop
           NodePattern.new(node_matcher)
         end
 
+        # Maps each Meterpreter API call to a command.
         def mappings
           @mappings ||= [
             {
@@ -258,6 +248,18 @@ module RuboCop
               matcher: node_matcher_for('session.fs.file.ls'),
               command: ['stdapi_fs_ls']
             },
+            {
+              matcher: node_matcher_for('session.fs.dir.chdir'),
+              command: ['stdapi_fs_chdir']
+            },
+            # {
+            #   matcher: node_matcher_for('session.core'),
+            #   command: ['core_channel_*']
+            # },
+            # {
+            #   matcher: node_matcher_for(''),
+            #   command: ['stdapi_sys_process_close']
+            # },
             {
               matcher: node_matcher_for('client.fs.file.exist?'),
               command: ['stdapi_fs_stat']
@@ -660,9 +662,9 @@ module RuboCop
 
               corrector.replace(nodes[:commands_node], new_hash)
 
-            # Handles scenario where we have both compat & meterpreter hashes
-            # but no commands array present within a module
-              elsif nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:commands_node].nil?
+              # Handles scenario where we have both compat & meterpreter hashes
+              # but no commands array present within a module
+            elsif nodes[:compat_node] && nodes[:meterpreter_node] && nodes[:commands_node].nil?
               meterpreter_hash_node = nodes[:meterpreter_node].children[1]
 
               # White spacing handling based of node offsets

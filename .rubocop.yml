@@ -153,9 +153,16 @@ Layout/ModuleDescriptionIndentation:
 
 Lint/MeterpreterCommandDependencies:
   Enabled: true
-  #TODO
-#  Exclude:
-#    - 'lib/foo/whatever'
+  Exclude:
+    - 'lib/rex/post/meterpreter/client_core.rb'
+    - 'lib/rex/post/meterpreter/extensions/priv/priv.rb'
+    - 'lib/rex/post/meterpreter/extensions/stdapi/fs/dir.rb'
+    - 'lib/rex/post/meterpreter/extensions/stdapi/sys/process.rb'
+    - 'lib/rex/post/meterpreter/extensions/stdapi/ui.rb'
+    - 'lib/rex/post/meterpreter/extensions/stdapi/webcam/webcam.rb'
+    - 'lib/rex/post/meterpreter/ui/console/command_dispatcher/espia.rb'
+    - 'lib/rex/post/meterpreter/ui/console/command_dispatcher/incognito.rb'
+    - 'lib/rex/ui/text/shell.rb'
 
 Lint/ModuleDisclosureDateFormat:
   Enabled: true

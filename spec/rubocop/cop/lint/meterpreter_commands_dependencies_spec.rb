@@ -36,6 +36,26 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
+  it 'verifies that if no compat node is present and no method calls that it will not generate anything/alter the file' do
+    expect_no_offenses(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+          )
+        end
+        def run
+        end
+      end
+    RUBY
+  end
+
   it 'verifies that meterpreter method calls are matched and added to the commands array' do
     expect_offense(<<~RUBY)
       class DummyModule
@@ -92,251 +112,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         end
         def run
           session.fs.file.rm("some_file")
-        end
-      end
-    RUBY
-  end
-
-  it 'verifies that if `update_info(` is missing that the method calls are matched and added to the commands array ' do
-    expect_offense(<<~RUBY)
-      class DummyModule
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-                ]
-              }
-            }
-          )
-        end
-        def run
-          session.fs.file.rm("some_file")
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end
-      end
-    RUBY
-
-    expect_correction(<<~RUBY)
-      class DummyModule
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                  stdapi_fs_delete_file
-                ]
-              }
-            }
-          )
-        end
-        def run
-          session.fs.file.rm("some_file")
-        end
-      end
-    RUBY
-  end
-
-
-  it 'successfully corrects helper methods too' do
-    expect_offense(<<~RUBY)
-      class DummyModule
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-                ]
-              }
-            }
-          )
-        end
-
-        def run
-          some_helper_method(session)         
-        end
-
-        def some_helper_method(session)
-         session.fs.file.rm("some_file")
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end
-      end
-    RUBY
-
-    expect_correction(<<~RUBY)
-      class DummyModule
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                  stdapi_fs_delete_file
-                ]
-              }
-            }
-          )
-        end
-
-        def run
-          some_helper_method(session)         
-        end
-
-        def some_helper_method(session)
-         session.fs.file.rm("some_file")
-        end
-      end
-    RUBY
-  end
-
-  it 'verifies that if `update_info(` is missing but initialize has `(info={})` that the method calls are matched and added to the commands array ' do
-    expect_offense(<<~RUBY)
-      class DummyModule
-        def initialize(info={})
-          super
-          ^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-          register_options([])
-        end
-        def run
-          session.fs.file.rm("some_file")
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end
-      end
-    RUBY
-
-    expect_correction(<<~RUBY)
-      class DummyModule
-        def initialize(info={})
-          super
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                  stdapi_fs_delete_file
-                ]
-              }
-            }
-          register_options([])
-        end
-        def run
-          session.fs.file.rm("some_file")
-        end
-      end
-    RUBY
-  end
-
-  it 'verifies that if there are two classes, that it will successfully iterate over them and match the method calls in the appropriate class and generate a commands list' do
-    expect_offense(<<~RUBY)
-      class DummyModule
-        class HelperClass
-          def initialize
-            @foo = 123
-          end
-        end
-
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-                ]
-              }
-            }
-          )
-        end
-
-        def run
-          session.fs.file.rm("some_file")
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end
-      end
-    RUBY
-
-    expect_correction(<<~RUBY)
-      class DummyModule
-        class HelperClass
-          def initialize
-            @foo = 123
-          end
-        end
-
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-            'Compat' => {
-              'Meterpreter' => {
-                'Commands' => %w[
-                  stdapi_fs_delete_file
-                ]
-              }
-            }
-          )
-        end
-
-        def run
-          session.fs.file.rm("some_file")
-        end
-      end
-    RUBY
-  end
-
-  it 'verifies that if no compat node is present and no method calls that it will not generate anything/alter the file' do
-    expect_no_offenses(<<~RUBY)
-      class DummyModule
-        def initialize
-          super(
-            'Name' => 'Simple module name',
-            'Description' => 'Lorem ipsum dolor sit amet',
-            'Author' => [ 'example1', 'example2' ],
-            'License' => MSF_LICENSE,
-            'Platform' => 'win',
-            'Arch' => ARCH_X86,
-            'DisclosureDate' => 'January 5',
-          )
-        end
-        def run
         end
       end
     RUBY
@@ -449,49 +224,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         end
         def run
           session.fs.file.rm("some_file")
-        end
-      end
-    RUBY
-  end
-
-  it 'verfies that the cop will also work with modules' do
-    expect_offense(<<~RUBY)
-      module Msf::Post::Process
-             ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        def meterpreter_get_processes
-          begin
-            return session.sys.process.get_processes.map { |p| p.slice('name', 'pid') }
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-          rescue Rex::Post::Meterpreter::RequestError
-            shell_get_processes
-          end
-        end
-      end
-    RUBY
-
-    expect_correction(<<~RUBY)
-      module Msf::Post::Process
-        def initialize(info = {})
-          super(
-            update_info(
-              info,
-              'Compat' => {
-                'Meterpreter' => {
-                  'Commands' => %w[
-                    stdapi_sys_process_get_processes
-                  ]
-                }
-              }
-            )
-          )
-        end
-
-        def meterpreter_get_processes
-          begin
-            return session.sys.process.get_processes.map { |p| p.slice('name', 'pid') }
-          rescue Rex::Post::Meterpreter::RequestError
-            shell_get_processes
-          end
         end
       end
     RUBY
@@ -877,6 +609,262 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
+  it 'verifies if a compat hash, meterpreter hash and a commands array is present within the module, if not it should be generated and appended appropriately' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Name' => 'Simple module name',
+              'Description' => 'Lorem ipsum dolor sit amet',
+              'Author' => [ 'example1', 'example2' ],
+              'License' => MSF_LICENSE,
+              'Platform' => 'win',
+              'Arch' => ARCH_X86,
+              'DisclosureDate' => 'January 5'
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+            )
+          )
+        end
+        def run
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Name' => 'Simple module name',
+              'Description' => 'Lorem ipsum dolor sit amet',
+              'Author' => [ 'example1', 'example2' ],
+              'License' => MSF_LICENSE,
+              'Platform' => 'win',
+              'Arch' => ARCH_X86,
+              'DisclosureDate' => 'January 5',
+              'Compat' => {
+                'Meterpreter' => {
+                  'Commands' => %w[
+                    stdapi_fs_delete_file
+                  ]
+                }
+              }
+            )
+          )
+        end
+        def run
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
+  it 'verifies that if `update_info(` is missing that the method calls are matched and added to the commands array ' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                ]
+              }
+            }
+          )
+        end
+        def run
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_delete_file
+                ]
+              }
+            }
+          )
+        end
+        def run
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
+  it 'verifies that if `update_info(` is missing but initialize has `(info={})` that the method calls are matched and added to the commands array ' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize(info={})
+          super
+          ^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          register_options([])
+        end
+        def run
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info={})
+          super
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_delete_file
+                ]
+              }
+            }
+          register_options([])
+        end
+        def run
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
+  it 'verifies that if there are two classes, that it will successfully iterate over them and match the method calls in the appropriate class and generate a commands list' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        class HelperClass
+          def initialize
+            @foo = 123
+          end
+        end
+
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                ]
+              }
+            }
+          )
+        end
+
+        def run
+          session.fs.file.rm("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        class HelperClass
+          def initialize
+            @foo = 123
+          end
+        end
+
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_delete_file
+                ]
+              }
+            }
+          )
+        end
+
+        def run
+          session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
+  it 'verfies that the cop will also work with modules' do
+    expect_offense(<<~RUBY)
+      module Msf::Post::Process
+             ^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        def meterpreter_get_processes
+          begin
+            return session.sys.process.get_processes.map { |p| p.slice('name', 'pid') }
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          rescue Rex::Post::Meterpreter::RequestError
+            shell_get_processes
+          end
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      module Msf::Post::Process
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Compat' => {
+                'Meterpreter' => {
+                  'Commands' => %w[
+                    stdapi_sys_process_get_processes
+                  ]
+                }
+              }
+            )
+          )
+        end
+
+        def meterpreter_get_processes
+          begin
+            return session.sys.process.get_processes.map { |p| p.slice('name', 'pid') }
+          rescue Rex::Post::Meterpreter::RequestError
+            shell_get_processes
+          end
+        end
+      end
+    RUBY
+  end
 
   it 'handles two classes being in the same file' do
     expect_offense(<<~RUBY)
@@ -986,61 +974,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
-  it 'verifies if a compat hash, meterpreter hash and a commands array is present within the module, if not it should be generated and appended appropriately' do
-    expect_offense(<<~RUBY)
-      class DummyModule
-        def initialize(info = {})
-          super(
-            update_info(
-              info,
-              'Name' => 'Simple module name',
-              'Description' => 'Lorem ipsum dolor sit amet',
-              'Author' => [ 'example1', 'example2' ],
-              'License' => MSF_LICENSE,
-              'Platform' => 'win',
-              'Arch' => ARCH_X86,
-              'DisclosureDate' => 'January 5'
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-            )
-          )
-        end
-        def run
-          session.fs.file.rm("some_file")
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        end
-      end
-    RUBY
-
-    expect_correction(<<~RUBY)
-      class DummyModule
-        def initialize(info = {})
-          super(
-            update_info(
-              info,
-              'Name' => 'Simple module name',
-              'Description' => 'Lorem ipsum dolor sit amet',
-              'Author' => [ 'example1', 'example2' ],
-              'License' => MSF_LICENSE,
-              'Platform' => 'win',
-              'Arch' => ARCH_X86,
-              'DisclosureDate' => 'January 5',
-              'Compat' => {
-                'Meterpreter' => {
-                  'Commands' => %w[
-                    stdapi_fs_delete_file
-                  ]
-                }
-              }
-            )
-          )
-        end
-        def run
-          session.fs.file.rm("some_file")
-        end
-      end
-    RUBY
-  end
-
   it 'verifies if a there is no initialise method, that it should be generated and appended appropriately' do
     expect_offense(<<~RUBY)
       class DummyModule
@@ -1124,6 +1057,71 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
 
         def run
           session.fs.file.rm("some_file")
+        end
+      end
+    RUBY
+  end
+
+  it 'successfully corrects helper methods too' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                ]
+              }
+            }
+          )
+        end
+
+        def run
+          some_helper_method(session)         
+        end
+
+        def some_helper_method(session)
+         session.fs.file.rm("some_file")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_fs_delete_file
+                ]
+              }
+            }
+          )
+        end
+
+        def run
+          some_helper_method(session)         
+        end
+
+        def some_helper_method(session)
+         session.fs.file.rm("some_file")
         end
       end
     RUBY
