@@ -1447,6 +1447,14 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         &{keyword}.fs.file.chmod(path, mode)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        %{keyword}.fs.file.mv(src_name, dst_name)
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        %{keyword}.fs.file.sha1(remote)
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        %{keyword}.fs.mount.show_mount
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        %{keyword}.net.config.add_route(*args)
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
       EOF
 
       code_snippet_without_error_lines = (

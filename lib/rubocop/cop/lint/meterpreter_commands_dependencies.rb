@@ -221,7 +221,7 @@ module RuboCop
           api_call_split = api_call.split('.')
           node_matcher = '(send ' * (api_call_split.length - 1)
 
-          if api_call_split.first == 'session' || 'client'
+          if api_call_split.first == 'session' || api_call_split.first == 'client'
             api_call_split.shift
           end
 
@@ -288,7 +288,7 @@ module RuboCop
               'client.fs.file.expand_path'
             ],
             stdapi_fs_file_move: [
-              ''
+              'session.fs.file.mv'
             ],
             stdapi_fs_getwd: [
               'session.fs.dir.getwd',
@@ -307,30 +307,68 @@ module RuboCop
             stdapi_fs_mkdir: [
               'client.fs.dir.mkdir'
             ],
+            stdapi_fs_mount_show: [
+              'client.fs.mount.show_mount'
+            ],
             stdapi_fs_search: [
               'client.fs.file.search'
             ],
             stdapi_fs_separator: [
               'session.fs.file.separator'
             ],
+            stdapi_fs_sha1: [
+              'session.fs.file.sha1'
+            ],
             stdapi_fs_stat: [
               'client.fs.file.exist?',
               'session.fs.file.stat',
               'session.fs.file.stat'
             ],
+            stdapi_net_config_add_route: [
+              'client.net.config.add_route'
+            ],
+            stdapi_net_config_get_arp_table: [
+              'client.net.config.arp_table',
+              'client.net.config.get_arp_table'
+            ],
             stdapi_net_config_get_interfaces: [
               'session.net.config.each_interface',
               'session.net.config.respond_to?'
+            ],
+            stdapi_net_config_get_netstat: [
+              'client.net.config.netstat',
+              'client.net.config.get_netstat'
+            ],
+            stdapi_net_config_get_proxy: [
+            'client.net.config.get_proxy_config'
             ],
             stdapi_net_config_get_routes: [
               'client.net.config.each_route',
               'session.net.config.respond_to?(:each_route)'
             ],
+            stdapi_net_config_remove_route: [
+              'client.net.config.remove_route'
+            ],
             stdapi_net_resolve_host: [
               'client.net.resolve.resolve_host'
             ],
+            stdapi_net_resolve_hosts: [
+              'client.net.resolve.resolve_hosts'
+            ],
+            COMMAND_ID_STDAPI_NET_SOCKET_TCP_SHUTDOWN: [
+              '' # UNSURE
+            ],
+            COMMAND_ID_STDAPI_NET_TCP_CHANNEL_OPEN: [
+              '' # UNSURE
+            ],
+            "COMMAND_ID_STDAPI_RAILGUN_*": [
+              'client.railgun'
+            ],
             stdapi_registry_check_key_exists: [
               'client.sys.registry.check_key_exists'
+            ],
+            stdapi_registry_close_key: [
+              'client.sys.registry.close_key'
             ],
             stdapi_registry_create_key: [
               'session.sys.registry.create_key'
@@ -338,8 +376,17 @@ module RuboCop
             stdapi_registry_delete_key: [
               'session.sys.registry.delete_key'
             ],
+            stdapi_registry_delete_value: [
+              'self.client.sys.registry.delete_value'
+            ],
+            stdapi_registry_enum_key: [
+              'client.sys.registry.enum_key'
+            ],
             stdapi_registry_enum_key_direct: [
               'client.sys.registry.enum_key_direct'
+            ],
+            stdapi_registry_enum_value: [
+              'client.sys.registry.enum_value'
             ],
             stdapi_registry_enum_value_direct: [
               'session.sys.registry.enum_value_direct'
@@ -353,8 +400,17 @@ module RuboCop
             stdapi_registry_open_remote_key: [
               'session.sys.registry.open_remote_key'
             ],
+            stdapi_registry_query_class: [
+              'client.sys.registry.query_class'
+            ],
+            stdapi_registry_query_value: [
+              'client.sys.registry.query_value'
+            ],
             stdapi_registry_query_value_direct: [
               'client.sys.registry.query_value_direct'
+            ],
+            stdapi_registry_set_value: [
+              'client.sys.registry.set_value'
             ],
             stdapi_registry_set_value_direct: [
               'session.sys.registry.set_value_direct'
@@ -364,6 +420,9 @@ module RuboCop
             ],
             stdapi_sys_config_driver_list: [
               'session.sys.config.getdrivers'
+            ],
+            stdapi_sys_config_drop_token: [
+              'client.sys.config.drop_token'
             ],
             stdapi_sys_config_getenv: [
               'session.sys.config.getenv',
@@ -380,6 +439,9 @@ module RuboCop
             stdapi_sys_config_getuid: [
               'client.sys.config.getuid'
             ],
+            stdapi_sys_config_localtime: [
+              'client.sys.config.localtime'
+            ],
             stdapi_sys_config_rev2self: [
               'session.sys.config.revert_to_self'
             ],
@@ -389,15 +451,33 @@ module RuboCop
             stdapi_sys_config_sysinfo: [
               'client.sys.config.sysinfo'
             ],
+            "stdapi_sys_eventlog_*": [
+              'session.sys.eventlog'
+            ],
+            stdapi_sys_eventlog_clear: [
+            ],
+            stdapi_sys_eventlog_close: [
+            ],
+            stdapi_sys_eventlog_numrecords: [
+            ],
+            stdapi_sys_eventlog_oldest: [
+            ],
+            stdapi_sys_eventlog_read: [
+            ],
             stdapi_sys_power_exitwindows: [
               'client.sys.power.reboot'
             ],
             stdapi_sys_process_attach: [
               'session.sys.process.open'
             ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_CLOSE: [
+              '' # UNSURE
+            ],
             stdapi_sys_process_execute: [
               'session.sys.process.execute',
               'session.sys.process.execute'
+            ],
+            STDAPI_SYS_PROCESS_GET_INFO: [
             ],
             stdapi_sys_process_get_processes: [
               'client.sys.process.get_processes',
@@ -406,11 +486,121 @@ module RuboCop
             stdapi_sys_process_getpid: [
               'session.sys.process.getpid'
             ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_IMAGE_GET_IMAGES: [
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_IMAGE_GET_PROC_ADDRESS: [
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_IMAGE_LOAD: [
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_IMAGE_UNLOAD: [
+            ],
             stdapi_sys_process_kill: [
               'session.sys.process.kill'
             ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_ALLOCATE: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_FREE: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_LOCK: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_PROTECT: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_QUERY: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_READ: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_UNLOCK: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_WRITE: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_CLOSE: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_CREATE: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_GET_THREADS: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_OPEN: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_QUERY_REGS: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_RESUME: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_SET_REGS: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_SUSPEND: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_TERMINATE: [
+              ''
+            ],
+            COMMAND_ID_STDAPI_SYS_PROCESS_WAIT: [
+              ''
+            ],
+            stdapi_ui_desktop_enum: [
+              'client.ui.enum_desktops'
+            ],
+            stdapi_ui_desktop_get: [
+              'client.ui.get_desktop'
+            ],
+            stdapi_ui_desktop_screenshot: [
+              'session.ui.screenshot'
+            ],
+            stdapi_ui_desktop_set: [
+              'client.ui.set_desktop'
+            ],
+            stdapi_ui_enable_keyboard: [
+              'client.ui.enable_keyboard'
+            ],
+            stdapi_ui_enable_mouse: [
+              'client.ui.enable_mouse'
+            ],
+            stdapi_ui_get_idle_time: [
+              'session.ui.idle_time'
+            ],
+            stdapi_ui_get_keys_utf8: [
+              'session.ui.keyscan_dump'
+            ],
+            stdapi_ui_send_keyevent: [
+              ' session.ui.keyevent_send'
+            ],
+            stdapi_ui_send_keys: [
+              'client.ui.keyboard_send'
+            ],
+            stdapi_ui_send_mouse: [
+              'client.ui.mouse'
+            ],
+            stdapi_ui_start_keyscan: [
+              'client.ui.keyscan_start'
+            ],
+            stdapi_ui_unlock_desktop: [
+              'client.ui.unlock_desktop'
+            ],
             "stdapi_webcam_*": [
               'session.webcam'
+            ],
+            stdapi_audio_mic_start: [
+              'client.mic.mic_start'
+            ],
+            stdapi_audio_mic_stop: [
+              'client.mic.mic_stop'
+            ],
+            stdapi_audio_mic_list: [
+              'client.mic.mic_list'
             ],
           }
           COMMAND_ID_PRIV_ELEVATE_GETSYSTEM
@@ -419,8 +609,6 @@ module RuboCop
               'session.priv.getsystem',
               'client.priv.getsystem'
             ],
-            # priv__[: ]
-
             priv_fs_get_file_mace: [
               'client.priv.fs.get_file_mace'
             ],
