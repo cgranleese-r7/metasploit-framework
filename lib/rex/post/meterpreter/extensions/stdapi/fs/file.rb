@@ -294,7 +294,6 @@ class File < Rex::Post::Meterpreter::Extensions::Stdapi::Fs::IO
     buf_size = 8 * 1024 * 1024
 
     begin
-      require "pry"; binding.pry
       dest_fd = client.fs.file.new(dest_file, "wb")
       src_fd = ::File.open(src_file, "rb")
       src_size = src_fd.stat.size

@@ -1563,7 +1563,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     skip("not working yet")
     ignored_commands = []
     valid_meterpreter_command_names = Rex::Post::Meterpreter::CommandMapper.get_command_names
-    autocorrected_meterpreter_command_names = RuboCop::Cop::Lint::MeterpreterCommandDependencies.new.mappings.map { |mapping| mapping[:command] }
+    autocorrected_meterpreter_command_names = described_class.new.mappings.map { |mapping| mapping[:command] }
     autocorrected_meterpreter_command_names.each { |command| ignored_commands << command if command.end_with?('_*') } # This allows us to ignore commands that call an entire library
 
     invalid_autocorrected_command_names = autocorrected_meterpreter_command_names - valid_meterpreter_command_names - ignored_commands
@@ -1574,10 +1574,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
   it 'verifies that each command ID has an associated matcher' do
     skip("not working yet")
     valid_meterpreter_command_names = Rex::Post::Meterpreter::CommandMapper.get_command_names
-    autocorrected_meterpreter_command_names = RuboCop::Cop::Lint::MeterpreterCommandDependencies.new.mappings.map { |mapping| mapping[:command] }
+    autocorrected_meterpreter_command_names = described_class.new.mappings.map { |mapping| mapping[:command] }
 
     api_commands_without_matchers = valid_meterpreter_command_names - autocorrected_meterpreter_command_names
-    require "pry"; binding.pry
     expect(api_commands_without_matchers).to be_empty
   end
 end
