@@ -19,7 +19,7 @@ module RuboCop
         PATTERN
 
         def_node_matcher :find_update_info_node, <<~PATTERN
-          (def :initialize _args (super (send nil? {:update_info :merge_info} (lvaar :info) $(hash ...)) ...))
+          (def :initialize _args (super (send nil? {:update_info :merge_info} (lvar :info) $(hash ...)) ...))
         PATTERN
 
         def_node_matcher :find_nested_info_node, <<~PATTERN
@@ -218,6 +218,10 @@ module RuboCop
 
         # Generates AST matchers based upon Meterpreter API calls.
         def node_matcher_for(api_call)
+          if api_call.empty?
+            return NodePattern.new("(send nil? :todo_placeholder_fix_this_matcher_later)")
+          end
+
           api_call_split = api_call.split('.')
           node_matcher = '(send ' * (api_call_split.length - 1)
 
@@ -355,13 +359,13 @@ module RuboCop
             stdapi_net_resolve_hosts: [
               'client.net.resolve.resolve_hosts'
             ],
-            COMMAND_ID_STDAPI_NET_SOCKET_TCP_SHUTDOWN: [
+            stdapi_net_socket_tcp_shutdown: [
               '' # UNSURE
             ],
-            COMMAND_ID_STDAPI_NET_TCP_CHANNEL_OPEN: [
+            stdapi_net_tcp_channel_open: [
               '' # UNSURE
             ],
-            "COMMAND_ID_STDAPI_RAILGUN_*": [
+            "stdapi_railgun_*": [
               'client.railgun'
             ],
             stdapi_registry_check_key_exists: [
@@ -377,7 +381,7 @@ module RuboCop
               'session.sys.registry.delete_key'
             ],
             stdapi_registry_delete_value: [
-              'self.client.sys.registry.delete_value'
+              'client.sys.registry.delete_value'
             ],
             stdapi_registry_enum_key: [
               'client.sys.registry.enum_key'
@@ -470,14 +474,14 @@ module RuboCop
             stdapi_sys_process_attach: [
               'session.sys.process.open'
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_CLOSE: [
+            stdapi_sys_process_close: [
               '' # UNSURE
             ],
             stdapi_sys_process_execute: [
               'session.sys.process.execute',
               'session.sys.process.execute'
             ],
-            STDAPI_SYS_PROCESS_GET_INFO: [
+            stdapi_sys_process_get_info: [
             ],
             stdapi_sys_process_get_processes: [
               'client.sys.process.get_processes',
@@ -486,69 +490,69 @@ module RuboCop
             stdapi_sys_process_getpid: [
               'session.sys.process.getpid'
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_IMAGE_GET_IMAGES: [
+            stdapi_sys_process_image_get_images: [
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_IMAGE_GET_PROC_ADDRESS: [
+            stdapi_sys_process_image_get_proc_address: [
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_IMAGE_LOAD: [
+            stdapi_sys_process_image_load: [
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_IMAGE_UNLOAD: [
+            stdapi_sys_process_image_unload: [
             ],
             stdapi_sys_process_kill: [
               'session.sys.process.kill'
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_ALLOCATE: [
+            stdapi_sys_process_memory_allocate: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_FREE: [
+            stdapi_sys_process_memory_free: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_LOCK: [
+            stdapi_sys_process_memory_lock: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_PROTECT: [
+            stdapi_sys_process_memory_protect: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_QUERY: [
+            stdapi_sys_process_memory_query: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_READ: [
+            stdapi_sys_process_memory_read: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_UNLOCK: [
+            stdapi_sys_process_memory_unlock: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_MEMORY_WRITE: [
+            stdapi_sys_process_memory_write: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_CLOSE: [
+            stdapi_sys_process_thread_close: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_CREATE: [
+            stdapi_sys_process_thread_create: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_GET_THREADS: [
+            stdapi_sys_process_thread_get_threads: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_OPEN: [
+            stdapi_sys_process_thread_open: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_QUERY_REGS: [
+            stdapi_sys_process_thread_query_regs: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_RESUME: [
+            stdapi_sys_process_thread_resume: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_SET_REGS: [
+            stdapi_sys_process_thread_set_regs: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_SUSPEND: [
+            stdapi_sys_process_thread_suspend: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_THREAD_TERMINATE: [
+            stdapi_sys_process_thread_terminate: [
               ''
             ],
-            COMMAND_ID_STDAPI_SYS_PROCESS_WAIT: [
+            stdapi_sys_process_wait: [
               ''
             ],
             stdapi_ui_desktop_enum: [
@@ -576,7 +580,7 @@ module RuboCop
               'session.ui.keyscan_dump'
             ],
             stdapi_ui_send_keyevent: [
-              ' session.ui.keyevent_send'
+              'session.ui.keyevent_send'
             ],
             stdapi_ui_send_keys: [
               'client.ui.keyboard_send'
@@ -603,17 +607,25 @@ module RuboCop
               'client.mic.mic_list'
             ],
           }
-          COMMAND_ID_PRIV_ELEVATE_GETSYSTEM
+
           priv_command_ids = {
             priv_elevate_getsystem: [
               'session.priv.getsystem',
-              'client.priv.getsystem'
+            ],
+            priv_fs_blank_directory_mace: [
+              'client.priv.fs.blank_directory_mace',
+            ],
+            priv_fs_blank_file_mace: [
+              'client.priv.fs.blank_file_mace'
             ],
             priv_fs_get_file_mace: [
               'client.priv.fs.get_file_mace'
             ],
             priv_fs_set_file_mace: [
               'session.priv.fs.set_file_mace'
+            ],
+            priv_fs_set_file_mace_from_file: [
+              'session.priv.fs.set_file_mace_from_file'
             ],
             priv_passwd_get_sam_hashes: [
               'client.priv.sam_hashes'
@@ -624,14 +636,54 @@ module RuboCop
             extapi_adsi_domain_query: [
               'session.extapi.adsi.domain_query'
             ],
+            extapi_clipboard_get_data: [
+              'session.extapi.clipboard.get_data',
+            ],
+            extapi_clipboard_monitor_dump: [
+              'client.extapi.clipboard.monitor_dump',
+            ],
+            extapi_clipboard_monitor_pause: [
+              'client.extapi.clipboard.monitor_pause',
+            ],
+            extapi_clipboard_monitor_purge: [
+              'client.extapi.clipboard.monitor_purge',
+            ],
+            extapi_clipboard_monitor_resume: [
+              'client.extapi.clipboard.monitor_resume',
+            ],
+            extapi_clipboard_monitor_start: [
+              'client.extapi.clipboard.monitor_start'
+            ],
+            extapi_clipboard_monitor_stop: [
+              'client.extapi.clipboard.monitor_stop'
+            ],
+            extapi_clipboard_set_data: [
+              'session.extapi.clipboard.set_text',
+            ],
+            extapi_ntds_parse: [
+              'client.extapi.ntds.parse', # TODO: The rabbit hole goes deep: Metasploit::Framework::NTDS::Parser.new(client, ntds_file)
+            ],
             extapi_pageant_send_query: [
-              'client.extapi.pageant.forward'
+              'session.extapi.pageant.forward',
+            ],
+            extapi_service_control: [
+              'client.extapi.service.control',
+            ],
+            extapi_service_enum: [
+              'session.extapi.service.enumerate',
+            ],
+            extapi_service_query: [
+              'session.extapi.service.query',
+            ],
+            extapi_window_enum: [
+              'client.extapi.window.enumerate',
             ],
             extapi_wmi_query: [
-              'client.extapi.wmi.query'
+              'session.extapi.wmi.query',
             ]
           }
 
+          # TODO: `session.android.*` => `android_*`
           android_command_ids = {
             android_activity_start: [
               'session.android.activity_start'
@@ -646,17 +698,23 @@ module RuboCop
 
           kiwi_command_ids = {
             kiwi_exec_cmd: [
-              'session.kiwi.golden_ticket_create',
-              'session.kiwi.kerberos_ticket_use',
-              'client.kiwi.get_debug_privilege',
-              'client.kiwi.creds_all'
+              'session.kiwi',
             ]
           }
 
           appapi_app_install_command_ids = {
             appapi_app_install: [
               'client.appapi.app_install'
-            ]
+            ],
+            appapi_app_list: [
+              'client.appapi.app_list'
+            ],
+            appapi_app_run: [
+              'client.appapi.app_run'
+            ],
+            appapi_app_uninstall: [
+              'client.appapi.app_uninstall'
+            ],
           }
 
           espia_command_ids = {
@@ -666,17 +724,38 @@ module RuboCop
           }
 
           incognito_command_ids = {
+            incognito_add_group_user: [
+              'session.incognito.incognito_add_group_user'
+            ],
+            incognito_add_localgroup_user: [
+              'session.incognito.incognito_add_localgroup_user'
+            ],
+            incognito_add_user: [
+              'session.incognito.incognito_add_user'
+            ],
             incognito_impersonate_token: [
               'session.incognito.incognito_impersonate_token'
             ],
             incognito_list_tokens: [
               'session.incognito.incognito_list_tokens'
-            ]
+            ],
+            incognito_snarf_hashes: [
+              'session.incognito.incognito_snarf_hashes'
+            ],
           }
 
           powershell_command_ids = {
+            powershell_assembly_load: [
+              'client.powershell.import_file'
+            ],
             powershell_execute: [
               'session.powershell.execute_string'
+            ],
+            powershell_session_remove: [
+              'client.powershell.session_remove'
+            ],
+            powershell_shell: [
+              'client.powershell.shell'
             ]
           }
 
@@ -685,14 +764,18 @@ module RuboCop
               'session.lanattacks.tftp.add_file'
             ],
             lanattacks_dhcp_log: [
-              'session.lanattacks.dhcp.log.each'
+              'session.lanattacks.dhcp.log'
             ],
             lanattacks_reset_dhcp: [
               'client.lanattacks.dhcp.reset'
             ],
-            lanattacks_set_dhcp_option: [
-              'client.lanattacks.dhcp.load_options'
+            lanattacks_reset_tftp: [
+              'client.lanattacks.tftp.reset'
             ],
+            lanattacks_set_dhcp_option: [
+              'client.lanattacks.dhcp.set_option',
+              'client.lanattacks.dhcp.load_options'
+          ],
             lanattacks_start_dhcp: [
               'client.lanattacks.dhcp.start'
             ],
@@ -709,8 +792,6 @@ module RuboCop
 
           peinjector_command_ids = {
             peinjector_inject_shellcode: [
-              'client.peinjector.add_thread_x64',
-              'client.peinjector.add_thread_x86',
               'client.peinjector.inject_shellcode'
             ]
           }

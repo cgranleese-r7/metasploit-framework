@@ -1348,9 +1348,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.priv.getsystem(technique)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.kiwi.golden_ticket_create(ticket)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.kiwi.kerberos_ticket_use(ticket)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.priv.sam_hashes
         ^{keyword}^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.incognito.incognito_list_tokens(0)
@@ -1358,9 +1358,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.fs.dir.entries(v)
         ^{keyword}^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.kiwi.get_debug_privilege
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.kiwi.creds_all
-        ^{keyword}^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.config.is_system?
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.extapi.wmi.query("SELECT HotFixID, InstalledOn FROM Win32_QuickFixEngineering")
@@ -1401,8 +1401,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.expand_path(path)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        %{keyword}.peinjector.add_thread_x64(raw)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.peinjector.inject_shellcode(param)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.lanattacks.dhcp.load_options(datastore)
@@ -1411,10 +1409,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.exist?(net_sarang_path_5)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        %{keyword}.peinjector.add_thread_x86(raw)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.lanattacks.dhcp.log.each
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.dir.rmdir(datastore['PATH'])
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.process.open.name
@@ -1445,16 +1441,16 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.process.execute '/bin/sh', "-c \\"chown root:root \#{@chown_file}\\""
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        &{keyword}.fs.file.chmod(path, mode)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        %{keyword}.fs.file.chmod(path, mode)
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.mv(src_name, dst_name)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.sha1(remote)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.mount.show_mount
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.net.config.add_route(*args)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
       EOF
 
       code_snippet_without_error_lines = (
@@ -1508,20 +1504,25 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                             priv_fs_get_file_mace
                             priv_fs_set_file_mace
                             priv_passwd_get_sam_hashes
+                            stdapi_fs_chmod
                             stdapi_fs_delete_dir
                             stdapi_fs_delete_file
                             stdapi_fs_download_file
                             stdapi_fs_file_copy
                             stdapi_fs_file_expand_path
+                            stdapi_fs_file_move
                             stdapi_fs_getwd
                             stdapi_fs_ls
                             stdapi_fs_md5
                             stdapi_fs_mkdir
+                            stdapi_fs_mount_show
                             stdapi_fs_new
                             stdapi_fs_search
                             stdapi_fs_separator
+                            stdapi_fs_sha1
                             stdapi_fs_stat
                             stdapi_fs_upload_file
+                            stdapi_net_config_add_route
                             stdapi_net_config_get_interfaces
                             stdapi_net_config_get_routes
                             stdapi_net_resolve_host
