@@ -1445,6 +1445,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.process.execute '/bin/sh', "-c \\"chown root:root \#{@chown_file}\\""
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        &{keyword}.fs.file.chmod(path, mode)
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies
       EOF
 
       code_snippet_without_error_lines = (

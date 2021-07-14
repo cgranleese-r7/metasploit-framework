@@ -8,10 +8,10 @@ module RuboCop
         include Alignment
 
         MSG = 'Convert meterpreter api calls into meterpreter command dependencies.'.freeze
-        MISSING_METHOD_CALL_FOR_COMMAND_MSG = 'Compatibility command does not have an associated method call.'
-        COMMAND_DUPLICATED_MSG = 'Command duplicated.'
+        MISSING_METHOD_CALL_FOR_COMMAND_MSG = 'Compatibility command does not have an associated method call.'.freeze
+        COMMAND_DUPLICATED_MSG = 'Command duplicated.'.freeze
 
-        CLIENT_OR_SESSION = "{(lvar {:session :client}) (send nil? {:session :client})}"
+        CLIENT_OR_SESSION = '{(lvar {:session :client}) (send nil? {:session :client})}'.freeze
 
         # Matchers for identifying what is current present in each module, so we can append required section at a later point
         def_node_matcher :find_nested_update_info_node, <<~PATTERN
@@ -19,7 +19,7 @@ module RuboCop
         PATTERN
 
         def_node_matcher :find_update_info_node, <<~PATTERN
-          (def :initialize _args (super (send nil? {:update_info :merge_info} (lvar :info) $(hash ...)) ...))
+          (def :initialize _args (super (send nil? {:update_info :merge_info} (lvaar :info) $(hash ...)) ...))
         PATTERN
 
         def_node_matcher :find_nested_info_node, <<~PATTERN
@@ -150,7 +150,7 @@ module RuboCop
           elsif nodes[:initialize_node].nil?
             add_offense(nodes[:investigated_node].identifier, &autocorrector)
           else
-            raise 'Fix this dummy' # TODO - handle this
+            raise 'Fix this dummy' # TODO: - handle this
           end
 
           @current_frame = nil
@@ -170,6 +170,7 @@ module RuboCop
               find_nested_info_node(node)
           )
           return if update_info_node.nil?
+
           nodes[:info_node] = update_info_node
 
           self.visiting_state = :looking_for_hash_keys
@@ -201,6 +202,7 @@ module RuboCop
 
         def on_pair(node)
           return unless visiting_state == :looking_for_hash_keys
+
           if node.key.value == 'Compat'
             nodes[:compat_node] = node
           elsif node.key.value == 'Meterpreter'
@@ -242,279 +244,286 @@ module RuboCop
           return @mappings if @mappings
 
           # TODO: Not sure where to put these:
+          #  - Need to figure out when to match core_channel_*
           wrong_command_ids = {
-            "stdapi_webcam_*": [
-              "session.webcam"
+            net_socket_create: [
+              'client.net.socket.create'
+            ], # UNSURE
+            stdapi_registry_splitkey: [
+              'client.sys.registry.splitkey'
             ],
-            "net_socket_create": [
-              "client.net.socket.create"
+            stdapi_fs_download_file: [
+              'session.fs.file.download_file'
             ],
-            "stdapi_registry_splitkey": [
-              "client.sys.registry.splitkey"
+            stdapi_fs_upload_file: [
+              'session.fs.file.upload_file'
             ],
-            "stdapi_fs_download_file": [
-              "session.fs.file.download_file"
+            stdapi_fs_new: [
+              'session.fs.file.new'
             ],
-            "stdapi_fs_upload_file": [
-              "session.fs.file.upload_file"
-            ],
-            "stdapi_fs_new": [
-              "session.fs.file.new"
-            ],
-            "stdapi_registry_type2str": [
-              "session.sys.registry.type2str"
-            ],
-            "stdapi_railgun_*": [
-              "client.railgun"
+            stdapi_registry_type2str: [
+              'session.sys.registry.type2str'
             ],
           }
 
           stdapi_command_ids = {
             # STDAPI
-            "stdapi_fs_chdir": [
-              "session.fs.dir.chdir"
+            stdapi_fs_chdir: [
+              'session.fs.dir.chdir'
             ],
-            "stdapi_fs_delete_dir": [
-              "session.fs.dir.rmdir",
-              "client.fs.dir.rmdir"
+            stdapi_fs_chmod: [
+              'session.fs.file.chmod'
             ],
-            "stdapi_fs_delete_file": [
-              "session.fs.file.rm"
+            stdapi_fs_delete_dir: [
+              'session.fs.dir.rmdir',
+              'client.fs.dir.rmdir'
             ],
-            "stdapi_fs_file_copy": [
-              "session.fs.file.copy"
+            stdapi_fs_delete_file: [
+              'session.fs.file.rm'
             ],
-            "stdapi_fs_file_expand_path": [
-              "client.fs.file.expand_path"
+            stdapi_fs_file_copy: [
+              'session.fs.file.copy'
             ],
-            "stdapi_fs_getwd": [
-              "session.fs.dir.getwd",
-              "client.fs.dir.getwd",
-              "client.fs.dir.pwd"
+            stdapi_fs_file_expand_path: [
+              'client.fs.file.expand_path'
             ],
-            "stdapi_fs_ls": [
-              "session.fs.file.ls",
-              "client.fs.dir.entries",
-              "session.fs.file.ls"
+            stdapi_fs_file_move: [
+              ''
             ],
-            "stdapi_fs_md5": [
-              "client.fs.file.md5"
+            stdapi_fs_getwd: [
+              'session.fs.dir.getwd',
+              'client.fs.dir.getwd',
+              'client.fs.dir.pwd'
             ],
-            "stdapi_fs_mkdir": [
-              "client.fs.dir.mkdir"
+            stdapi_fs_ls: [
+              'session.fs.file.ls',
+              'client.fs.dir.entries',
+              'client.fs.dir.entries_with_info',
+              'client.fs.dir.match'
             ],
-            "stdapi_fs_search": [
-              "client.fs.file.search"
+            stdapi_fs_md5: [
+              'client.fs.file.md5'
             ],
-            "stdapi_fs_separator": [
-              "session.fs.file.separator"
+            stdapi_fs_mkdir: [
+              'client.fs.dir.mkdir'
             ],
-            "stdapi_fs_stat": [
-              "client.fs.file.exist?",
-              "session.fs.file.stat",
-              "session.fs.file.stat"
+            stdapi_fs_search: [
+              'client.fs.file.search'
             ],
-            "stdapi_net_config_get_interfaces": [
-              "session.net.config.each_interface",
-              "session.net.config.respond_to?"
+            stdapi_fs_separator: [
+              'session.fs.file.separator'
             ],
-            "stdapi_net_config_get_routes": [
-              "client.net.config.each_route",
-              "session.net.config.respond_to?(:each_route)"
+            stdapi_fs_stat: [
+              'client.fs.file.exist?',
+              'session.fs.file.stat',
+              'session.fs.file.stat'
             ],
-            "stdapi_net_resolve_host": [
-              "client.net.resolve.resolve_host"
+            stdapi_net_config_get_interfaces: [
+              'session.net.config.each_interface',
+              'session.net.config.respond_to?'
             ],
-            "stdapi_registry_check_key_exists": [
-              "client.sys.registry.check_key_exists"
+            stdapi_net_config_get_routes: [
+              'client.net.config.each_route',
+              'session.net.config.respond_to?(:each_route)'
             ],
-            "stdapi_registry_create_key": [
-              "session.sys.registry.create_key"
+            stdapi_net_resolve_host: [
+              'client.net.resolve.resolve_host'
             ],
-            "stdapi_registry_delete_key": [
-              "session.sys.registry.delete_key"
+            stdapi_registry_check_key_exists: [
+              'client.sys.registry.check_key_exists'
             ],
-            "stdapi_registry_enum_key_direct": [
-              "client.sys.registry.enum_key_direct"
+            stdapi_registry_create_key: [
+              'session.sys.registry.create_key'
             ],
-            "stdapi_registry_enum_value_direct": [
-              "session.sys.registry.enum_value_direct"
+            stdapi_registry_delete_key: [
+              'session.sys.registry.delete_key'
             ],
-            "stdapi_registry_load_key": [
-              "session.sys.registry.load_key"
+            stdapi_registry_enum_key_direct: [
+              'client.sys.registry.enum_key_direct'
             ],
-            "stdapi_registry_open_key": [
-              "client.sys.registry.open_key"
+            stdapi_registry_enum_value_direct: [
+              'session.sys.registry.enum_value_direct'
             ],
-            "stdapi_registry_open_remote_key": [
-              "session.sys.registry.open_remote_key"
+            stdapi_registry_load_key: [
+              'session.sys.registry.load_key'
             ],
-            "stdapi_registry_query_value_direct": [
-              "client.sys.registry.query_value_direct"
+            stdapi_registry_open_key: [
+              'client.sys.registry.open_key'
             ],
-            "stdapi_registry_set_value_direct": [
-              "session.sys.registry.set_value_direct"
+            stdapi_registry_open_remote_key: [
+              'session.sys.registry.open_remote_key'
             ],
-            "stdapi_registry_unload_key": [
-              "client.sys.registry.unload_key"
+            stdapi_registry_query_value_direct: [
+              'client.sys.registry.query_value_direct'
             ],
-            "stdapi_sys_config_driver_list": [
-              "session.sys.config.getdrivers"
+            stdapi_registry_set_value_direct: [
+              'session.sys.registry.set_value_direct'
             ],
-            "stdapi_sys_config_getenv": [
-              "session.sys.config.getenv",
-              "client.sys.config.getenvs",
-              "session.sys.config.getenv"
+            stdapi_registry_unload_key: [
+              'client.sys.registry.unload_key'
             ],
-            "stdapi_sys_config_getprivs": [
-              "client.sys.config.getprivs"
+            stdapi_sys_config_driver_list: [
+              'session.sys.config.getdrivers'
             ],
-            "stdapi_sys_config_getsid": [
-              "client.sys.config.is_system?",
-              "session.sys.config.getsid"
+            stdapi_sys_config_getenv: [
+              'session.sys.config.getenv',
+              'client.sys.config.getenvs',
+              'session.sys.config.getenv'
             ],
-            "stdapi_sys_config_getuid": [
-              "client.sys.config.getuid"
+            stdapi_sys_config_getprivs: [
+              'client.sys.config.getprivs'
             ],
-            "stdapi_sys_config_rev2self": [
-              "session.sys.config.revert_to_self"
+            stdapi_sys_config_getsid: [
+              'client.sys.config.is_system?',
+              'session.sys.config.getsid'
             ],
-            "stdapi_sys_config_steal_token": [
-              "client.sys.config.steal_token"
+            stdapi_sys_config_getuid: [
+              'client.sys.config.getuid'
             ],
-            "stdapi_sys_config_sysinfo": [
-              "client.sys.config.sysinfo"
+            stdapi_sys_config_rev2self: [
+              'session.sys.config.revert_to_self'
             ],
-            "stdapi_sys_power_exitwindows": [
-              "client.sys.power.reboot"
+            stdapi_sys_config_steal_token: [
+              'client.sys.config.steal_token'
             ],
-            "stdapi_sys_process_attach": [
-              "session.sys.process.open"
+            stdapi_sys_config_sysinfo: [
+              'client.sys.config.sysinfo'
             ],
-            "stdapi_sys_process_execute": [
-              "session.sys.process.execute",
-              "session.sys.process.execute"
+            stdapi_sys_power_exitwindows: [
+              'client.sys.power.reboot'
             ],
-            "stdapi_sys_process_get_processes": [
-              "client.sys.process.get_processes",
-              "session.sys.process.each_process.find"
+            stdapi_sys_process_attach: [
+              'session.sys.process.open'
             ],
-            "stdapi_sys_process_getpid": [
-              "session.sys.process.getpid"
+            stdapi_sys_process_execute: [
+              'session.sys.process.execute',
+              'session.sys.process.execute'
             ],
-            "stdapi_sys_process_kill": [
-              "session.sys.process.kill"
+            stdapi_sys_process_get_processes: [
+              'client.sys.process.get_processes',
+              'session.sys.process.each_process.find'
+            ],
+            stdapi_sys_process_getpid: [
+              'session.sys.process.getpid'
+            ],
+            stdapi_sys_process_kill: [
+              'session.sys.process.kill'
+            ],
+            "stdapi_webcam_*": [
+              'session.webcam'
             ],
           }
-
+          COMMAND_ID_PRIV_ELEVATE_GETSYSTEM
           priv_command_ids = {
-            "priv_elevate_getsystem": [
-              "session.priv.getsystem",
-              "client.priv.getsystem"
+            priv_elevate_getsystem: [
+              'session.priv.getsystem',
+              'client.priv.getsystem'
             ],
-            "priv_fs_get_file_mace": [
-              "client.priv.fs.get_file_mace"
+            # priv__[: ]
+
+            priv_fs_get_file_mace: [
+              'client.priv.fs.get_file_mace'
             ],
-            "priv_fs_set_file_mace": [
-              "session.priv.fs.set_file_mace"
+            priv_fs_set_file_mace: [
+              'session.priv.fs.set_file_mace'
             ],
-            "priv_passwd_get_sam_hashes": [
-              "client.priv.sam_hashes"
-            ],
+            priv_passwd_get_sam_hashes: [
+              'client.priv.sam_hashes'
+            ]
           }
 
           extapi_command_ids = {
-            "extapi_adsi_domain_query": [
-              "session.extapi.adsi.domain_query"
+            extapi_adsi_domain_query: [
+              'session.extapi.adsi.domain_query'
             ],
-            "extapi_pageant_send_query": [
-              "client.extapi.pageant.forward"
+            extapi_pageant_send_query: [
+              'client.extapi.pageant.forward'
             ],
-            "extapi_wmi_query": [
-              "client.extapi.wmi.query"
-            ],
+            extapi_wmi_query: [
+              'client.extapi.wmi.query'
+            ]
           }
 
           android_command_ids = {
-            "android_activity_start": [
-              "session.android.activity_start"
+            android_activity_start: [
+              'session.android.activity_start'
             ],
-            "android_set_wallpaper": [
-              "session.android.set_wallpaper"
+            android_set_wallpaper: [
+              'session.android.set_wallpaper'
             ],
-            "android_wlan_geolocate": [
-              "session.android.wlan_geolocate"
-            ],
+            android_wlan_geolocate: [
+              'session.android.wlan_geolocate'
+            ]
           }
 
           kiwi_command_ids = {
-            "kiwi_exec_cmd": [
-              "session.kiwi.golden_ticket_create",
-              "session.kiwi.kerberos_ticket_use",
-              "client.kiwi.get_debug_privilege",
-              "client.kiwi.creds_all"
-            ],
+            kiwi_exec_cmd: [
+              'session.kiwi.golden_ticket_create',
+              'session.kiwi.kerberos_ticket_use',
+              'client.kiwi.get_debug_privilege',
+              'client.kiwi.creds_all'
+            ]
           }
 
           appapi_app_install_command_ids = {
-            "appapi_app_install": [
-              "client.appapi.app_install"
-            ],
+            appapi_app_install: [
+              'client.appapi.app_install'
+            ]
           }
 
           espia_command_ids = {
-            "espia_image_get_dev_screen": [
-              "client.espia.espia_image_get_dev_screen"
-            ],
+            espia_image_get_dev_screen: [
+              'client.espia.espia_image_get_dev_screen'
+            ]
           }
 
           incognito_command_ids = {
-            "incognito_impersonate_token": [
-              "session.incognito.incognito_impersonate_token"
+            incognito_impersonate_token: [
+              'session.incognito.incognito_impersonate_token'
             ],
-            "incognito_list_tokens": [
-              "session.incognito.incognito_list_tokens"
-            ],
+            incognito_list_tokens: [
+              'session.incognito.incognito_list_tokens'
+            ]
           }
 
           powershell_command_ids = {
-            "powershell_execute": [
-              "session.powershell.execute_string"
-            ],
+            powershell_execute: [
+              'session.powershell.execute_string'
+            ]
           }
 
           lanattacks_command_ids = {
-            "lanattacks_add_tftp_file": [
-              "session.lanattacks.tftp.add_file"
+            lanattacks_add_tftp_file: [
+              'session.lanattacks.tftp.add_file'
             ],
-            "lanattacks_dhcp_log": [
-              "session.lanattacks.dhcp.log.each"
+            lanattacks_dhcp_log: [
+              'session.lanattacks.dhcp.log.each'
             ],
-            "lanattacks_reset_dhcp": [
-              "client.lanattacks.dhcp.reset"
+            lanattacks_reset_dhcp: [
+              'client.lanattacks.dhcp.reset'
             ],
-            "lanattacks_set_dhcp_option": [
-              "client.lanattacks.dhcp.load_options"
+            lanattacks_set_dhcp_option: [
+              'client.lanattacks.dhcp.load_options'
             ],
-            "lanattacks_start_dhcp": [
-              "client.lanattacks.dhcp.start"
+            lanattacks_start_dhcp: [
+              'client.lanattacks.dhcp.start'
             ],
-            "lanattacks_start_tftp": [
-              "client.lanattacks.tftp.start"
+            lanattacks_start_tftp: [
+              'client.lanattacks.tftp.start'
             ],
-            "lanattacks_stop_dhcp": [
-              "client.lanattacks.dhcp.stop"
+            lanattacks_stop_dhcp: [
+              'client.lanattacks.dhcp.stop'
             ],
-            "lanattacks_stop_tftp": [
-              "client.lanattacks.tftp.stop"
-            ],
+            lanattacks_stop_tftp: [
+              'client.lanattacks.tftp.stop'
+            ]
           }
 
           peinjector_command_ids = {
-            "peinjector_inject_shellcode": [
-              "client.peinjector.add_thread_x64",
-              "client.peinjector.add_thread_x86",
-              "client.peinjector.inject_shellcode"
+            peinjector_inject_shellcode: [
+              'client.peinjector.add_thread_x64',
+              'client.peinjector.add_thread_x86',
+              'client.peinjector.inject_shellcode'
             ]
           }
 
@@ -546,7 +555,7 @@ module RuboCop
 
           # input.sort_by { |mapping| (Rex::Post::Meterpreter::CommandMapper.get_command_id(mapping['command'][0])  || - 1) rescue -1 }.each_with_object({}) { |map, acc| acc[map['ma tcher'].gsub(/node_matcher_for\('/, '').gsub(/'\)/, '').gsub('session', 'client')] = map['command'] }
 
-          #input.each_with_object({}){|map, acc| keys = map["command"]; value = map["matcher"]; keys.each {|key| acc[key] ||= { 'expressions' => [], 'command_id' => -1 }; acc[key][
+          # input.each_with_object({}){|map, acc| keys = map["command"]; value = map["matcher"]; keys.each {|key| acc[key] ||= { 'expressions' => [], 'command_id' => -1 }; acc[key][
           # 'expressions'] << value; acc[key]['command_id'] = (::Rex::Post::Meterpreter::CommandMapper.get_command_id(key) rescue 'borked') }}.sort_by { |k, v| (::Rex::Post::Meterprete
           # r::CommandMapper.get_command_id(k) rescue -1) || - 1}.to_h.map { |k, v| [k, v['expressions'].map { |x| x.gsub("node_matcher_for('", '').gsub("')", '') }] }.to_h
 
@@ -1038,22 +1047,22 @@ module RuboCop
           mappings.each do |mapping|
             matcher = mapping[:matcher]
             commands = mapping[:command]
-            if matcher.match(node)
-              commands.each do |command|
-                unless @current_frame.identified_commands.include?(command)
-                  @current_frame.identified_commands << command
-                end
-              end
-              # Add an offense, but don't provide an autocorrect.
-              # There will be a final autocorrect to fix all issues
-              commands.each do |command|
-                unless @current_frame.current_commands.include?(command)
-                  add_offense(node)
-                end
-              end
+            next unless matcher.match(node)
 
-              break
+            commands.each do |command|
+              unless @current_frame.identified_commands.include?(command)
+                @current_frame.identified_commands << command
+              end
             end
+            # Add an offense, but don't provide an autocorrect.
+            # There will be a final autocorrect to fix all issues
+            commands.each do |command|
+              unless @current_frame.current_commands.include?(command)
+                add_offense(node)
+              end
+            end
+
+            break
           end
         end
 
@@ -1063,7 +1072,7 @@ module RuboCop
             if @current_frame.identified_commands.empty? && !@current_frame.current_commands.empty?
               # White spacing handling based of node offsets
               commands_whitespace = offset(nodes[:commands_node])
-              array_content_whitespace = commands_whitespace + "  "
+              array_content_whitespace = commands_whitespace + '  '
 
               # Formatting to add missing commands node when the method has a compat node & meterpreter node present
               # TODO: Use this style for the other sections, by introducing a shared method
@@ -1080,8 +1089,8 @@ module RuboCop
 
               # White spacing handling based of node offsets
               meterpreter_whitespace = offset(nodes[:meterpreter_node])
-              commands_whitespace = meterpreter_whitespace + "  "
-              array_content_whitespace = commands_whitespace + "  "
+              commands_whitespace = meterpreter_whitespace + '  '
+              array_content_whitespace = commands_whitespace + '  '
 
               # Formatting to add missing commands node when the method has a compat node & meterpreter node present
               new_hash =
@@ -1098,9 +1107,9 @@ module RuboCop
             elsif nodes[:compat_node] && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil?
               # White spacing handling based of node offsets
               compat_whitespace = offset(nodes[:compat_node])
-              meterpreter_whitespace = compat_whitespace + "  "
-              commands_whitespace = meterpreter_whitespace + "  "
-              array_content_whitespace = commands_whitespace + "  "
+              meterpreter_whitespace = compat_whitespace + '  '
+              commands_whitespace = meterpreter_whitespace + '  '
+              array_content_whitespace = commands_whitespace + '  '
 
               # Formatting to add missing commands node when the method has a compat node & meterpreter node present
               new_hash =
@@ -1114,7 +1123,7 @@ module RuboCop
               if !nodes[:compat_node].value.children.last.nil?
                 corrector.insert_after(nodes[:compat_node].value.children.last, new_hash)
               else
-                alt_new_hash = "{"
+                alt_new_hash = '{'
                 alt_new_hash << new_hash
                 alt_new_hash << "\n#{compat_whitespace}}"
                 corrector.replace(nodes[:compat_node].value, alt_new_hash)
@@ -1122,10 +1131,10 @@ module RuboCop
 
             elsif !nodes[:initialize_node].nil? && !nodes[:super_node].nil? && nodes[:info_node].nil?
               super_whitespace = offset(nodes[:super_node])
-              compat_whitespace = super_whitespace + "  "
-              meterpreter_whitespace = compat_whitespace + "  "
-              commands_whitespace = meterpreter_whitespace + "  "
-              array_content_whitespace = commands_whitespace + "  "
+              compat_whitespace = super_whitespace + '  '
+              meterpreter_whitespace = compat_whitespace + '  '
+              commands_whitespace = meterpreter_whitespace + '  '
+              array_content_whitespace = commands_whitespace + '  '
 
               # Formatting to add missing commands node when the method has a compat node & meterpreter node present
               new_hash =
@@ -1144,9 +1153,9 @@ module RuboCop
             elsif nodes[:compat_node].nil? && nodes[:meterpreter_node].nil? && nodes[:commands_node].nil? && !nodes[:initialize_node].nil?
               # White spacing handling based of node offsets
               compat_whitespace = offset(nodes[:info_node])
-              meterpreter_whitespace = compat_whitespace + "  "
-              commands_whitespace = meterpreter_whitespace + "  "
-              array_content_whitespace = commands_whitespace + "  "
+              meterpreter_whitespace = compat_whitespace + '  '
+              commands_whitespace = meterpreter_whitespace + '  '
+              array_content_whitespace = commands_whitespace + '  '
 
               # Formatting to add missing commands node when the method has a compat node & meterpreter node present
               new_hash =
@@ -1166,16 +1175,16 @@ module RuboCop
               # White spacing handling based of node offset
               body = nodes[:investigated_node].body
               def_whitespace = offset(body)
-              super_whitespace = def_whitespace + "  "
-              update_info_whitespace = super_whitespace + "  "
-              info_whitespace = update_info_whitespace + "  "
-              meterpreter_whitespace = info_whitespace + "  "
-              commands_whitespace = meterpreter_whitespace + "  "
-              array_content_whitespace = commands_whitespace + "  "
+              super_whitespace = def_whitespace + '  '
+              update_info_whitespace = super_whitespace + '  '
+              info_whitespace = update_info_whitespace + '  '
+              meterpreter_whitespace = info_whitespace + '  '
+              commands_whitespace = meterpreter_whitespace + '  '
+              array_content_whitespace = commands_whitespace + '  '
 
               # Formatting to add missing commands node when the method has a compat node & meterpreter node present
               new_hash =
-                "def initialize(info = {})" \
+                'def initialize(info = {})' \
                 "\n#{super_whitespace}super(" \
                 "\n#{update_info_whitespace}update_info(" \
                 "\n#{info_whitespace}info," \
@@ -1197,7 +1206,7 @@ module RuboCop
             else
               array_node = nodes[:commands_node].children[1]
               commands_whitespace = offset(nodes[:commands_node])
-              array_whitespace = commands_whitespace + "  "
+              array_whitespace = commands_whitespace + '  '
 
               new_array = "%w[\n#{array_whitespace}#{@current_frame.identified_commands.join("\n#{array_whitespace}")}\n#{commands_whitespace}]"
               corrector.replace(array_node, new_array)
