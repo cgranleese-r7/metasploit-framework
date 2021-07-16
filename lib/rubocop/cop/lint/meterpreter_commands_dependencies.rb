@@ -12,6 +12,8 @@ module RuboCop
         COMMAND_DUPLICATED_MSG = 'Command duplicated.'.freeze
 
         CLIENT_OR_SESSION = '{(lvar {:session :client}) (send nil? {:session :client})}'.freeze
+        # Since a created process can have any name, match on anything
+        PROCESS = '{(lvar _) (send nil? _)}'.freeze
 
         # Matchers for identifying what is current present in each module, so we can append required section at a later point
         def_node_matcher :find_nested_update_info_node, <<~PATTERN
@@ -217,23 +219,27 @@ module RuboCop
         end
 
         # Generates AST matchers based upon Meterpreter API calls.
-        def node_matcher_for(api_call)
-          if api_call.empty?
+        def node_pattern_for(value)
+          if value.empty?
             return NodePattern.new("(send nil? :todo_placeholder_fix_this_matcher_later)")
           end
 
-          api_call_split = api_call.split('.')
-          node_matcher = '(send ' * (api_call_split.length - 1)
+          split_values = value.split('.')
+          split_values_length = split_values.length
 
-          if api_call_split.first == 'session' || api_call_split.first == 'client'
-            api_call_split.shift
+          node_matcher = '(send ' * (split_values_length - 1)
+
+          target, *methods = split_values
+          if target == 'session' || target == 'client'
+            node_matcher << CLIENT_OR_SESSION
+          elsif target == 'process'
+            node_matcher << PROCESS
+          else
+            raise "Unknown target in expression #{value}"
           end
 
-          api_call_elements = api_call_split
-          node_matcher << CLIENT_OR_SESSION
-
-          api_call_elements.each_with_index do |element, index|
-            if index == api_call_elements.size - 1
+          methods.each_with_index do |element, index|
+            if index == methods.size - 1
               node_matcher << ' :' + element + ' _*)'
             else
               node_matcher << ' :' + element + ')'
@@ -247,31 +253,34 @@ module RuboCop
         def mappings
           return @mappings if @mappings
 
-          # TODO: Not sure where to put these:
-          #  - Need to figure out when to match core_channel_*
-          wrong_command_ids = {
-            net_socket_create: [
-              'client.net.socket.create'
-            ], # UNSURE
-            stdapi_registry_splitkey: [
-              'client.sys.registry.splitkey'
+          # Example of expressions to commands
+          expression_to_commands = {
+            'session.fs.file.upload': [
+              'core_channel_open',
+              'core_channel_write',
+              'core_channel_tell',
+              'core_channel_close',
             ],
+
+          # TODO: See what these are using and see if they are a good fit the scenario above
             stdapi_fs_download_file: [
               'session.fs.file.download_file'
             ],
-            stdapi_fs_upload_file: [
-              'session.fs.file.upload_file'
-            ],
-            stdapi_fs_new: [
+              stdapi_fs_new: [
               'session.fs.file.new'
             ],
-            stdapi_registry_type2str: [
-              'session.sys.registry.type2str'
+          }
+
+          # TODO: Not sure where to put these:
+          #  - Need to figure out when to match core_channel_*
+          wrong_command_ids = {
+            # TODO: look into how sockets are handle, potentially needs the process treatment
+            net_socket_create: [
+              'client.net.socket.create'
             ],
           }
 
           stdapi_command_ids = {
-            # STDAPI
             stdapi_fs_chdir: [
               'session.fs.dir.chdir'
             ],
@@ -359,11 +368,9 @@ module RuboCop
             stdapi_net_resolve_hosts: [
               'client.net.resolve.resolve_hosts'
             ],
-            stdapi_net_socket_tcp_shutdown: [
-              '' # UNSURE
+            stdapi_net_socket_tcp_shutdown: [ # UNSURE
             ],
-            stdapi_net_tcp_channel_open: [
-              '' # UNSURE
+            stdapi_net_tcp_channel_open: [ # UNSURE
             ],
             "stdapi_railgun_*": [
               'client.railgun'
@@ -475,17 +482,15 @@ module RuboCop
               'session.sys.process.open'
             ],
             stdapi_sys_process_close: [
-              '' # UNSURE
             ],
             stdapi_sys_process_execute: [
-              'session.sys.process.execute',
               'session.sys.process.execute'
             ],
             stdapi_sys_process_get_info: [
             ],
             stdapi_sys_process_get_processes: [
               'client.sys.process.get_processes',
-              'session.sys.process.each_process.find'
+              'session.sys.process.each_process'
             ],
             stdapi_sys_process_getpid: [
               'session.sys.process.getpid'
@@ -502,58 +507,45 @@ module RuboCop
               'session.sys.process.kill'
             ],
             stdapi_sys_process_memory_allocate: [
-              ''
+              'process.memory.allocate'
             ],
             stdapi_sys_process_memory_free: [
-              ''
+              'process.memory.free'
             ],
             stdapi_sys_process_memory_lock: [
-              ''
             ],
             stdapi_sys_process_memory_protect: [
-              ''
             ],
             stdapi_sys_process_memory_query: [
-              ''
             ],
             stdapi_sys_process_memory_read: [
-              ''
             ],
             stdapi_sys_process_memory_unlock: [
-              ''
             ],
             stdapi_sys_process_memory_write: [
-              ''
             ],
             stdapi_sys_process_thread_close: [
-              ''
             ],
             stdapi_sys_process_thread_create: [
-              ''
             ],
             stdapi_sys_process_thread_get_threads: [
-              ''
+              'process.threads.get_threads',
+              'process.threads.each_thread'
             ],
             stdapi_sys_process_thread_open: [
-              ''
+              'process.thread.open'
             ],
             stdapi_sys_process_thread_query_regs: [
-              ''
             ],
             stdapi_sys_process_thread_resume: [
-              ''
             ],
             stdapi_sys_process_thread_set_regs: [
-              ''
             ],
             stdapi_sys_process_thread_suspend: [
-              ''
             ],
             stdapi_sys_process_thread_terminate: [
-              ''
             ],
             stdapi_sys_process_wait: [
-              ''
             ],
             stdapi_ui_desktop_enum: [
               'client.ui.enum_desktops'
@@ -590,6 +582,9 @@ module RuboCop
             ],
             stdapi_ui_start_keyscan: [
               'client.ui.keyscan_start'
+            ],
+            stdapi_ui_stop_keyscan: [
+              'client.ui.keyscan_stop'
             ],
             stdapi_ui_unlock_desktop: [
               'client.ui.unlock_desktop'
@@ -662,6 +657,7 @@ module RuboCop
             ],
             extapi_ntds_parse: [
               'client.extapi.ntds.parse', # TODO: The rabbit hole goes deep: Metasploit::Framework::NTDS::Parser.new(client, ntds_file)
+              NodePattern.new("(send (const (const (const (const nil? :Metasploit) :Framework) :NTDS) :Parser) :new _*)")
             ],
             extapi_pageant_send_query: [
               'session.extapi.pageant.forward',
@@ -683,17 +679,40 @@ module RuboCop
             ]
           }
 
-          # TODO: `session.android.*` => `android_*`
           android_command_ids = {
+            'android_*': [
+              'client.android'
+            ],
             android_activity_start: [
-              'session.android.activity_start'
+            ],
+            android_check_root: [
+            ],
+            android_device_shutdown: [
+            ],
+            android_dump_calllog: [
+            ],
+            android_dump_contacts: [
+            ],
+            android_dump_sms: [
+            ],
+            android_geolocate: [
+            ],
+            android_hide_app_icon: [
+            ],
+            android_interval_collect: [
+            ],
+            android_send_sms: [
+            ],
+            android_set_audio_mode: [
             ],
             android_set_wallpaper: [
-              'session.android.set_wallpaper'
+            ],
+            android_sqlite_query: [
+            ],
+            android_wakelock: [
             ],
             android_wlan_geolocate: [
-              'session.android.wlan_geolocate'
-            ]
+            ],
           }
 
           kiwi_command_ids = {
@@ -796,6 +815,52 @@ module RuboCop
             ]
           }
 
+          python_command_ids = {
+            python_execute: [
+              'client.python.execute_string',
+              'client.python.import'
+            ],
+            python_reset: [
+              'client.python.reset'
+            ]
+          }
+
+          unhook_pe_command_ids = {
+            unhook_pe: [
+              'client.unhook.unhook_pe'
+            ]
+          }
+
+          sniffer_command_ids = {
+            sniffer_capture_dump: [
+              'client.sniffer.capture_dump'
+            ],
+            sniffer_capture_dump_read: [
+              'client.sniffer.capture_dump_read'
+            ],
+            sniffer_capture_release: [
+              'client.sniffer.capture_release'
+            ],
+            sniffer_capture_start: [
+              'client.sniffer.capture_start'
+            ],
+            sniffer_capture_stats: [
+              'client.sniffer.capture_start'
+            ],
+            sniffer_capture_stop: [
+              'client.sniffer.capture_stop'
+            ],
+            sniffer_interfaces: [
+              'client.sniffer.interfaces'
+            ]
+          }
+
+          winpmem_dump_ram_command_ids = {
+            winpmem_dump_ram: [
+              'client.winpmem.dump_ram'
+            ]
+          }
+
           command_ids_to_expressions = {
             **wrong_command_ids,
             **stdapi_command_ids,
@@ -808,125 +873,37 @@ module RuboCop
             **incognito_command_ids,
             **powershell_command_ids,
             **lanattacks_command_ids,
-            **peinjector_command_ids
+            **peinjector_command_ids,
+            **python_command_ids,
+            **sniffer_command_ids,
+            **unhook_pe_command_ids,
+            **winpmem_dump_ram_command_ids,
+            **expression_to_commands
           }
 
-          @mappings = command_ids_to_expressions.flat_map do |command_id, expressions|
-            expressions.map do |expression|
-              {
-                matcher: node_matcher_for(expression),
-                command: [command_id.to_s]
-              }
+          #TODO: add another for the expressions to commands & potentially smush the arrays together
+          @mappings = command_ids_to_expressions.flat_map do |command_id, matchers|
+            matchers.map do |value|
+              if value.is_a?(NodePattern)
+                {
+                  matcher: value,
+                  commands: [command_id.to_s]
+                }
+              elsif value.include?('.')
+                {
+                  matcher: value.is_a?(NodePattern) ? value : node_pattern_for(value),
+                  commands: [command_id.to_s]
+                }
+              elsif value.include?('_')
+                {
+                  matcher: node_pattern_for(command_id.to_s),
+                  commands: [matchers.each {|value| value }]
+                }
+              end
             end
           end
 
           @mappings
-
-          # input.sort_by { |mapping| (Rex::Post::Meterpreter::CommandMapper.get_command_id(mapping['command'][0])  || - 1) rescue -1 }.each_with_object({}) { |map, acc| acc[map['ma tcher'].gsub(/node_matcher_for\('/, '').gsub(/'\)/, '').gsub('session', 'client')] = map['command'] }
-
-          # input.each_with_object({}){|map, acc| keys = map["command"]; value = map["matcher"]; keys.each {|key| acc[key] ||= { 'expressions' => [], 'command_id' => -1 }; acc[key][
-          # 'expressions'] << value; acc[key]['command_id'] = (::Rex::Post::Meterpreter::CommandMapper.get_command_id(key) rescue 'borked') }}.sort_by { |k, v| (::Rex::Post::Meterprete
-          # r::CommandMapper.get_command_id(k) rescue -1) || - 1}.to_h.map { |k, v| [k, v['expressions'].map { |x| x.gsub("node_matcher_for('", '').gsub("')", '') }] }.to_h
-
-          # aim = {
-          #   "stdapi_fs_new" => [
-          #     "client.fs.file.new",
-          #     "client.fs.file.created",
-          #
-          #   ]
-          # }
-
-          # mappings = {
-          #    "session.fs.file.new"=>["stdapi_fs_new", "stdsapi_fs_write"],
-          #    "client.net.socket.create"=>["net_socket_create"],
-          #    "client.sys.registry.splitkey"=>["stdapi_registry_splitkey"],
-          #    "session.fs.file.download_file"=>["stdapi_fs_download_file"],
-          #    "session.fs.file.upload_file"=>["stdapi_fs_upload_file"],
-          #    "session.sys.registry.type2str"=>["stdapi_registry_type2str"],
-          #    "session.webcam"=>["stdapi_webcam_*"],
-          #    "client.railgun"=>["stdapi_railgun_*"],
-          #    "session.fs.dir.chdir"=>["stdapi_fs_chdir"],
-          #    "client.fs.dir.rmdir"=>["stdapi_fs_delete_dir"],
-          #    "session.fs.dir.rmdir"=>["stdapi_fs_delete_dir"],
-          #    "session.fs.file.rm"=>["stdapi_fs_delete_file"],
-          #    "session.fs.file.copy"=>["stdapi_fs_file_copy"],
-          #    "client.fs.file.expand_path"=>["stdapi_fs_file_expand_path"],
-          #    "client.fs.dir.getwd"=>["stdapi_fs_getwd"],
-          #    "session.fs.dir.getwd"=>["stdapi_fs_getwd"],
-          #    "client.fs.dir.pwd"=>["stdapi_fs_getwd"],
-          #    "client.fs.dir.entries"=>["stdapi_fs_ls"],
-          #    "session.fs.file.ls"=>["stdapi_fs_ls"],
-          #    "client.fs.file.md5"=>["stdapi_fs_md5"],
-          #    "client.fs.dir.mkdir"=>["stdapi_fs_mkdir"],
-          #    "client.fs.file.search"=>["stdapi_fs_search"],
-          #    "session.fs.file.separator"=>["stdapi_fs_separator"],
-          #    "session.fs.file.stat"=>["stdapi_fs_stat"],
-          #    "client.fs.file.exist?"=>["stdapi_fs_stat"],
-          #    "session.net.config.respond_to?"=>["stdapi_net_config_get_interfaces"],
-          #    "session.net.config.each_interface"=>["stdapi_net_config_get_interfaces"],
-          #    "client.net.config.each_route"=>["stdapi_net_config_get_routes"],
-          #    "session.net.config.respond_to?(:each_route)"=>["stdapi_net_config_get_routes"],
-          #    "client.net.resolve.resolve_host"=>["stdapi_net_resolve_host"],
-          #    "client.sys.registry.check_key_exists"=>["stdapi_registry_check_key_exists"],
-          #    "session.sys.registry.create_key"=>["stdapi_registry_create_key"],
-          #    "session.sys.registry.delete_key"=>["stdapi_registry_delete_key"],
-          #    "client.sys.registry.enum_key_direct"=>["stdapi_registry_enum_key_direct"],
-          #    "session.sys.registry.enum_value_direct"=>["stdapi_registry_enum_value_direct"],
-          #    "session.sys.registry.load_key"=>["stdapi_registry_load_key"],
-          #    "client.sys.registry.open_key"=>["stdapi_registry_open_key"],
-          #    "session.sys.registry.open_remote_key"=>["stdapi_registry_open_remote_key"],
-          #    "client.sys.registry.query_value_direct"=>["stdapi_registry_query_value_direct"],
-          #    "session.sys.registry.set_value_direct"=>["stdapi_registry_set_value_direct"],
-          #    "client.sys.registry.unload_key"=>["stdapi_registry_unload_key"],
-          #    "session.sys.config.getdrivers"=>["stdapi_sys_config_driver_list"],
-          #    "session.sys.config.getenv"=>["stdapi_sys_config_getenv"],
-          #    "client.sys.config.getenvs"=>["stdapi_sys_config_getenv"],
-          #    "client.sys.config.getprivs"=>["stdapi_sys_config_getprivs"],
-          #    "client.sys.config.is_system?"=>["stdapi_sys_config_getsid"],
-          #    "session.sys.config.getsid"=>["stdapi_sys_config_getsid"],
-          #    "client.sys.config.getuid"=>["stdapi_sys_config_getuid"],
-          #    "session.sys.config.revert_to_self"=>["stdapi_sys_config_rev2self"],
-          #    "client.sys.config.steal_token"=>["stdapi_sys_config_steal_token"],
-          #    "client.sys.config.sysinfo"=>["stdapi_sys_config_sysinfo"],
-          #    "client.sys.power.reboot"=>["stdapi_sys_power_exitwindows"],
-          #    "session.sys.process.open"=>["stdapi_sys_process_attach"],
-          #    "session.sys.process.execute"=>["stdapi_sys_process_execute"],
-          #    "client.sys.process.get_processes"=>["stdapi_sys_process_get_processes"],
-          #    "session.sys.process.each_process.find"=>["stdapi_sys_process_get_processes"],
-          #    "session.sys.process.getpid"=>["stdapi_sys_process_getpid"],
-          #    "session.sys.process.kill"=>["stdapi_sys_process_kill"],
-          #    "session.priv.getsystem"=>["priv_elevate_getsystem"],
-          #    "client.priv.getsystem"=>["priv_elevate_getsystem"],
-          #    "client.priv.fs.get_file_mace"=>["priv_fs_get_file_mace"],
-          #    "session.priv.fs.set_file_mace"=>["priv_fs_set_file_mace"],
-          #    "client.priv.sam_hashes"=>["priv_passwd_get_sam_hashes"],
-          #    "session.extapi.adsi.domain_query"=>["extapi_adsi_domain_query"],
-          #    "client.extapi.pageant.forward"=>["extapi_pageant_send_query"],
-          #    "client.extapi.wmi.query"=>["extapi_wmi_query"],
-          #    "session.android.activity_start"=>["android_activity_start"],
-          #    "session.android.set_wallpaper"=>["android_set_wallpaper"],
-          #    "session.android.wlan_geolocate"=>["android_wlan_geolocate"],
-          #    "session.kiwi.kerberos_ticket_use"=>["kiwi_exec_cmd"],
-          #    "client.kiwi.creds_all"=>["kiwi_exec_cmd"],
-          #    "session.kiwi.golden_ticket_create"=>["kiwi_exec_cmd"],
-          #    "client.kiwi.get_debug_privilege"=>["kiwi_exec_cmd"],
-          #    "client.appapi.app_install"=>["appapi_app_install"],
-          #    "client.espia.espia_image_get_dev_screen"=>["espia_image_get_dev_screen"],
-          #    "session.incognito.incognito_impersonate_token"=>["incognito_impersonate_token"],
-          #    "session.incognito.incognito_list_tokens"=>["incognito_list_tokens"],
-          #    "session.powershell.execute_string"=>["powershell_execute"],
-          #    "session.lanattacks.tftp.add_file"=>["lanattacks_add_tftp_file"],
-          #    "session.lanattacks.dhcp.log.each"=>["lanattacks_dhcp_log"],
-          #    "client.lanattacks.dhcp.reset"=>["lanattacks_reset_dhcp"],
-          #    "client.lanattacks.dhcp.load_options"=>["lanattacks_set_dhcp_option"],
-          #    "client.lanattacks.dhcp.start"=>["lanattacks_start_dhcp"],
-          #    "client.lanattacks.tftp.start"=>["lanattacks_start_tftp"],
-          #    "client.lanattacks.dhcp.stop"=>["lanattacks_stop_dhcp"],
-          #    "client.lanattacks.tftp.stop"=>["lanattacks_stop_tftp"],
-          #    "client.peinjector.add_thread_x86"=>["peinjector_inject_shellcode"],
-          #    "client.peinjector.add_thread_x64"=>["peinjector_inject_shellcode"],
-          #    "client.peinjector.inject_shellcode"=>["peinjector_inject_shellcode"]
-          #   }
 
           # @mappings = [
           #   {
@@ -1315,7 +1292,7 @@ module RuboCop
         def on_send(node)
           mappings.each do |mapping|
             matcher = mapping[:matcher]
-            commands = mapping[:command]
+            commands = mapping[:commands]
             next unless matcher.match(node)
 
             commands.each do |command|

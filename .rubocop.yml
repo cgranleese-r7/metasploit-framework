@@ -160,8 +160,7 @@ Lint/MeterpreterCommandDependencies:
     - 'lib/rex/post/meterpreter/extensions/stdapi/sys/process.rb'
     - 'lib/rex/post/meterpreter/extensions/stdapi/ui.rb'
     - 'lib/rex/post/meterpreter/extensions/stdapi/webcam/webcam.rb'
-    - 'lib/rex/post/meterpreter/ui/console/command_dispatcher/espia.rb'
-    - 'lib/rex/post/meterpreter/ui/console/command_dispatcher/incognito.rb'
+    - 'lib/rex/post/meterpreter/ui/console/command_dispatcher/*'
     - 'lib/rex/ui/text/shell.rb'
 
 Lint/ModuleDisclosureDateFormat:

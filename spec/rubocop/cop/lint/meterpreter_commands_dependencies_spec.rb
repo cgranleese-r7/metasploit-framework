@@ -1127,6 +1127,66 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
+  it 'verifies that if NTDS parser object is called that it adds the correct command name' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                ]
+              }
+            }
+          )
+        end
+
+        def run
+          ntds_parser = Metasploit::Framework::NTDS::Parser.new(client, ntds_file)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          client.extapi.ntds.parse("some_file")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  extapi_ntds_parse
+                ]
+              }
+            }
+          )
+        end
+
+        def run
+          ntds_parser = Metasploit::Framework::NTDS::Parser.new(client, ntds_file)
+          client.extapi.ntds.parse("some_file")
+        end
+      end
+    RUBY
+  end
+
   it 'handles `abrt_raceabrt_priv_esc.rb` edge cases that were not being matched for unknown reasons' do
     expect_offense(<<~RUBY)
       class DummyModule
@@ -1236,6 +1296,175 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     RUBY
   end
 
+  it 'tracks the use of processes' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                ]
+              }
+            }
+          )
+          register_options([])
+        end
+        def run
+          target = client.sys.process.open(notepad_process.pid, PROCESS_ALL_ACCESS)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          target.thread.create(exploit_mem + offset, param_ptr)
+
+          targetprocess = client.sys.process.open(pid, PROCESS_ALL_ACCESS)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          targetprocess.thread.each_thread do |x|
+            if resume
+              targetprocess.thread.open(x).resume
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+            else
+              targetprocess.thread.open(x).suspend
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+            end
+          end
+
+          calc = client.sys.process.open(pid, PROCESS_ALL_ACCESS)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          mem  = calc.memory.allocate(32)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          calc.memory.write(mem, "1234")
+        end
+
+        def helper(process)
+          shellcode_mem = process.memory.allocate(shellcode_size)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          process.memory.protect(shellcode_mem)
+          process.memory.write(shellcode_mem, shellcode)
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize
+          super(
+            'Name' => 'Simple module name',
+            'Description' => 'Lorem ipsum dolor sit amet',
+            'Author' => [ 'example1', 'example2' ],
+            'License' => MSF_LICENSE,
+            'Platform' => 'win',
+            'Arch' => ARCH_X86,
+            'DisclosureDate' => 'January 5',
+            'Compat' => {
+              'Meterpreter' => {
+                'Commands' => %w[
+                  stdapi_sys_process_attach
+                  stdapi_sys_process_memory_allocate
+                  stdapi_sys_process_thread_open
+                ]
+              }
+            }
+          )
+          register_options([])
+        end
+        def run
+          target = client.sys.process.open(notepad_process.pid, PROCESS_ALL_ACCESS)
+          target.thread.create(exploit_mem + offset, param_ptr)
+
+          targetprocess = client.sys.process.open(pid, PROCESS_ALL_ACCESS)
+          targetprocess.thread.each_thread do |x|
+            if resume
+              targetprocess.thread.open(x).resume
+            else
+              targetprocess.thread.open(x).suspend
+            end
+          end
+
+          calc = client.sys.process.open(pid, PROCESS_ALL_ACCESS)
+          mem  = calc.memory.allocate(32)
+          calc.memory.write(mem, "1234")
+        end
+
+        def helper(process)
+          shellcode_mem = process.memory.allocate(shellcode_size)
+          process.memory.protect(shellcode_mem)
+          process.memory.write(shellcode_mem, shellcode)
+        end
+      end
+    RUBY
+  end
+
+  it 'verfies that mapping commands to expressions also functions correctly' do
+    expect_offense(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Name' => 'Simple module name',
+              'Description' => 'Lorem ipsum dolor sit amet',
+              'Author' => [ 'example1', 'example2' ],
+              'License' => MSF_LICENSE,
+              'Platform' => 'win',
+              'Arch' => ARCH_X86,
+              'DisclosureDate' => 'January 5',
+              'Compat' => {
+                'Meterpreter' => {
+                  'Commands' => %w[
+                  ^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+                  ]
+                }
+              }
+            )
+          )
+        end
+        def run
+          session.fs.file.upload(@paths['ff'] + new_file, tmp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        end
+      end
+    RUBY
+
+    expect_correction(<<~RUBY)
+      class DummyModule
+        def initialize(info = {})
+          super(
+            update_info(
+              info,
+              'Name' => 'Simple module name',
+              'Description' => 'Lorem ipsum dolor sit amet',
+              'Author' => [ 'example1', 'example2' ],
+              'License' => MSF_LICENSE,
+              'Platform' => 'win',
+              'Arch' => ARCH_X86,
+              'DisclosureDate' => 'January 5',
+              'Compat' => {
+                'Meterpreter' => {
+                  'Commands' => %w[
+                    core_channel_open
+                    core_channel_write
+                    core_channel_tell
+                    core_channel_close
+                  ]
+                }
+              }
+            )
+          )
+        end
+        def run
+          session.fs.file.upload(@paths['ff'] + new_file, tmp)
+        end
+      end
+    RUBY
+  end
+
   it 'handles lots of examples' do
     %w[client].each do |keyword|
       code_snippet_with_errors = <<-EOF
@@ -1247,8 +1476,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.ls("file")
         ^{keyword}^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        %{keyword}.sys.registry.splitkey(key)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.registry.load_key(root_key, base_key, file)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.registry.unload_key(root_key,base_key)
@@ -1268,7 +1495,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.sys.registry.query_value_direct(root_key, base_key, valname, perms)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.registry.set_value_direct(root_key, base_key, valname, %{keyword}.sys.registry.type2str(type), data, perms)
-        _{keyword}                                                            ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.registry.check_key_exists(root_key, base_key)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
@@ -1313,7 +1539,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.fs.file.stat(@chown_file).stathash
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.android.activity_start('intent:#Intent;launchFlags=0x8000;component=com.android.settings/.ChooseLockGeneric;i.lockscreen.password_type=0;B.confirm_credentials=false;end')
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.net.resolve.resolve_host(name)[:ip]
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.separator
@@ -1321,12 +1547,10 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.fs.file.exist?(@paths['ff'] + temp_file) && !%{keyword}.fs.file.exist?(@paths['ff'] + org_file)
         _{keyword}                                              ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        %{keyword}.fs.file.upload_file(@paths['ff'] + new_file, tmp)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.search(path, "config.xml", true, -1)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.android.wlan_geolocate
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.net.config.respond_to?(:each_route)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.webcam.record_mic(datastore['DURATION'])
@@ -1334,7 +1558,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.espia.espia_image_get_dev_screen
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.android.set_wallpaper(File.binread(file))
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.config.steal_token(pid)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.config.revert_to_self
@@ -1428,7 +1652,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         %{keyword}.sys.process.execute(cmd, nil, {'Hidden' => true})
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.process.each_process.find
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.process.open.pid
         ^{keyword}^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.process.execute 'script', "command"
@@ -1462,132 +1686,161 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
       )
 
       expect_offense(<<~RUBY, keyword: keyword)
-              class DummyModule
-                    ^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-                def run
-        #{code_snippet_with_errors}
-                end
-              end
+        class DummyModule
+              ^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          def run
+  #{code_snippet_with_errors}
+          end
+        end
       RUBY
 
       expect_correction(<<~RUBY)
-              class DummyModule
-                def initialize(info = {})
-                  super(
-                    update_info(
-                      info,
-                      'Compat' => {
-                        'Meterpreter' => {
-                          'Commands' => %w[
-                            android_activity_start
-                            android_set_wallpaper
-                            android_wlan_geolocate
-                            appapi_app_install
-                            espia_image_get_dev_screen
-                            extapi_adsi_domain_query
-                            extapi_pageant_send_query
-                            extapi_wmi_query
-                            incognito_impersonate_token
-                            incognito_list_tokens
-                            kiwi_exec_cmd
-                            lanattacks_add_tftp_file
-                            lanattacks_dhcp_log
-                            lanattacks_reset_dhcp
-                            lanattacks_set_dhcp_option
-                            lanattacks_start_dhcp
-                            lanattacks_start_tftp
-                            lanattacks_stop_dhcp
-                            lanattacks_stop_tftp
-                            net_socket_create
-                            peinjector_inject_shellcode
-                            priv_elevate_getsystem
-                            priv_fs_get_file_mace
-                            priv_fs_set_file_mace
-                            priv_passwd_get_sam_hashes
-                            stdapi_fs_chmod
-                            stdapi_fs_delete_dir
-                            stdapi_fs_delete_file
-                            stdapi_fs_download_file
-                            stdapi_fs_file_copy
-                            stdapi_fs_file_expand_path
-                            stdapi_fs_file_move
-                            stdapi_fs_getwd
-                            stdapi_fs_ls
-                            stdapi_fs_md5
-                            stdapi_fs_mkdir
-                            stdapi_fs_mount_show
-                            stdapi_fs_new
-                            stdapi_fs_search
-                            stdapi_fs_separator
-                            stdapi_fs_sha1
-                            stdapi_fs_stat
-                            stdapi_fs_upload_file
-                            stdapi_net_config_add_route
-                            stdapi_net_config_get_interfaces
-                            stdapi_net_config_get_routes
-                            stdapi_net_resolve_host
-                            stdapi_railgun_*
-                            stdapi_registry_check_key_exists
-                            stdapi_registry_create_key
-                            stdapi_registry_delete_key
-                            stdapi_registry_enum_key_direct
-                            stdapi_registry_enum_value_direct
-                            stdapi_registry_load_key
-                            stdapi_registry_open_key
-                            stdapi_registry_open_remote_key
-                            stdapi_registry_query_value_direct
-                            stdapi_registry_set_value_direct
-                            stdapi_registry_splitkey
-                            stdapi_registry_type2str
-                            stdapi_registry_unload_key
-                            stdapi_sys_config_driver_list
-                            stdapi_sys_config_getenv
-                            stdapi_sys_config_getprivs
-                            stdapi_sys_config_getsid
-                            stdapi_sys_config_getuid
-                            stdapi_sys_config_rev2self
-                            stdapi_sys_config_steal_token
-                            stdapi_sys_config_sysinfo
-                            stdapi_sys_power_exitwindows
-                            stdapi_sys_process_attach
-                            stdapi_sys_process_execute
-                            stdapi_sys_process_get_processes
-                            stdapi_sys_process_getpid
-                            stdapi_sys_process_kill
-                            stdapi_webcam_*
-                          ]
-                        }
-                      }
-                    )
-                  )
-                end
+        class DummyModule
+          def initialize(info = {})
+            super(
+              update_info(
+                info,
+                'Compat' => {
+                  'Meterpreter' => {
+                    'Commands' => %w[
+                      android_*
+                      appapi_app_install
+                      espia_image_get_dev_screen
+                      extapi_adsi_domain_query
+                      extapi_pageant_send_query
+                      extapi_wmi_query
+                      incognito_impersonate_token
+                      incognito_list_tokens
+                      kiwi_exec_cmd
+                      lanattacks_add_tftp_file
+                      lanattacks_dhcp_log
+                      lanattacks_reset_dhcp
+                      lanattacks_set_dhcp_option
+                      lanattacks_start_dhcp
+                      lanattacks_start_tftp
+                      lanattacks_stop_dhcp
+                      lanattacks_stop_tftp
+                      net_socket_create
+                      peinjector_inject_shellcode
+                      priv_elevate_getsystem
+                      priv_fs_get_file_mace
+                      priv_fs_set_file_mace
+                      priv_passwd_get_sam_hashes
+                      stdapi_fs_chmod
+                      stdapi_fs_delete_dir
+                      stdapi_fs_delete_file
+                      stdapi_fs_download_file
+                      stdapi_fs_file_copy
+                      stdapi_fs_file_expand_path
+                      stdapi_fs_file_move
+                      stdapi_fs_getwd
+                      stdapi_fs_ls
+                      stdapi_fs_md5
+                      stdapi_fs_mkdir
+                      stdapi_fs_mount_show
+                      stdapi_fs_new
+                      stdapi_fs_search
+                      stdapi_fs_separator
+                      stdapi_fs_sha1
+                      stdapi_fs_stat
+                      stdapi_net_config_add_route
+                      stdapi_net_config_get_interfaces
+                      stdapi_net_config_get_routes
+                      stdapi_net_resolve_host
+                      stdapi_railgun_*
+                      stdapi_registry_check_key_exists
+                      stdapi_registry_create_key
+                      stdapi_registry_delete_key
+                      stdapi_registry_enum_key_direct
+                      stdapi_registry_enum_value_direct
+                      stdapi_registry_load_key
+                      stdapi_registry_open_key
+                      stdapi_registry_open_remote_key
+                      stdapi_registry_query_value_direct
+                      stdapi_registry_set_value_direct
+                      stdapi_registry_unload_key
+                      stdapi_sys_config_driver_list
+                      stdapi_sys_config_getenv
+                      stdapi_sys_config_getprivs
+                      stdapi_sys_config_getsid
+                      stdapi_sys_config_getuid
+                      stdapi_sys_config_rev2self
+                      stdapi_sys_config_steal_token
+                      stdapi_sys_config_sysinfo
+                      stdapi_sys_power_exitwindows
+                      stdapi_sys_process_attach
+                      stdapi_sys_process_execute
+                      stdapi_sys_process_get_processes
+                      stdapi_sys_process_getpid
+                      stdapi_sys_process_kill
+                      stdapi_webcam_*
+                    ]
+                  }
+                }
+              )
+            )
+          end
 
-                def run
-        #{code_snippet_without_error_lines}
-                end
-              end
+          def run
+  #{code_snippet_without_error_lines}
+          end
+        end
       RUBY
     end
   end
 
   it 'autocorrects only valid meterpreter commands' do
-    skip("not working yet")
     ignored_commands = []
     valid_meterpreter_command_names = Rex::Post::Meterpreter::CommandMapper.get_command_names
-    autocorrected_meterpreter_command_names = described_class.new.mappings.map { |mapping| mapping[:command] }
-    autocorrected_meterpreter_command_names.each { |command| ignored_commands << command if command.end_with?('_*') } # This allows us to ignore commands that call an entire library
+    autocorrected_meterpreter_command_names = described_class.new.mappings.flat_map { |mapping| mapping[:commands] }.flatten.uniq
+
+    # This allows entire libraries to be ignore if the commands are being called with a wildcard
+    autocorrected_meterpreter_command_names.each do |command|
+      if command.is_a?(Array)
+        command.each do |commands|
+          ignored_commands << commands if commands.end_with?('_*')
+        end
+      else
+        ignored_commands << command if command.end_with?('_*')
+      end
+    end
 
     invalid_autocorrected_command_names = autocorrected_meterpreter_command_names - valid_meterpreter_command_names - ignored_commands
-
+    require "pry"; binding.pry
     expect(invalid_autocorrected_command_names).to be_empty
   end
 
   it 'verifies that each command ID has an associated matcher' do
-    skip("not working yet")
     valid_meterpreter_command_names = Rex::Post::Meterpreter::CommandMapper.get_command_names
-    autocorrected_meterpreter_command_names = described_class.new.mappings.map { |mapping| mapping[:command] }
+    autocorrected_meterpreter_command_names = described_class.new.mappings.flat_map { |mapping| mapping[:commands] }
+    api_commands_without_matchers = valid_meterpreter_command_names - autocorrected_meterpreter_command_names.flatten.uniq
+    api_commands_handled_via_wildcards = []
 
-    api_commands_without_matchers = valid_meterpreter_command_names - autocorrected_meterpreter_command_names
+    autocorrected_meterpreter_command_names.each do |command|
+      if command.is_a?(Array)
+        command.each do |commands|
+          if commands.end_with?('_*')
+            prefix = commands.gsub("_*", "")
+            api_commands_without_matchers.each do |unmatched_command|
+              if unmatched_command.start_with?(prefix)
+                api_commands_handled_via_wildcards << unmatched_command
+              end
+            end
+          end
+        end
+      else
+        if command.end_with?('_*')
+          prefix = command.gsub("_*", "")
+          api_commands_without_matchers.each do |unmatched_command|
+            if unmatched_command.start_with?(prefix)
+              api_commands_handled_via_wildcards << unmatched_command
+            end
+          end
+        end
+      end
+    end
+
+    api_commands_without_matchers -= api_commands_handled_via_wildcards
     expect(api_commands_without_matchers).to be_empty
   end
 end
