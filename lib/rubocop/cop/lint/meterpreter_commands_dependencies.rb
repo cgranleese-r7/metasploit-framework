@@ -266,21 +266,20 @@ module RuboCop
             stdapi_fs_download_file: [
               'session.fs.file.download_file'
             ],
-              stdapi_fs_new: [
-              'session.fs.file.new'
-            ],
           }
 
-          # TODO: Not sure where to put these:
-          #  - Need to figure out when to match core_channel_*
-          wrong_command_ids = {
-            # TODO: look into how sockets are handle, potentially needs the process treatment
-            net_socket_create: [
+          # TODO: Need to figure out when to match core_channel_*
+
+          core_channel_ids = {
+            core_channel_open: [
               'client.net.socket.create'
             ],
           }
 
           stdapi_command_ids = {
+            "stdapi_fs_*": [
+              'session.fs.file.new'
+            ],
             stdapi_fs_chdir: [
               'session.fs.dir.chdir'
             ],
@@ -862,7 +861,7 @@ module RuboCop
           }
 
           command_ids_to_expressions = {
-            **wrong_command_ids,
+            **core_channel_ids,
             **stdapi_command_ids,
             **priv_command_ids,
             **extapi_command_ids,

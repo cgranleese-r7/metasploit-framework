@@ -1726,6 +1726,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                       priv_fs_get_file_mace
                       priv_fs_set_file_mace
                       priv_passwd_get_sam_hashes
+                      stdapi_fs_*
                       stdapi_fs_chmod
                       stdapi_fs_delete_dir
                       stdapi_fs_delete_file
@@ -1738,7 +1739,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                       stdapi_fs_md5
                       stdapi_fs_mkdir
                       stdapi_fs_mount_show
-                      stdapi_fs_new
                       stdapi_fs_search
                       stdapi_fs_separator
                       stdapi_fs_sha1
@@ -1806,7 +1806,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     end
 
     invalid_autocorrected_command_names = autocorrected_meterpreter_command_names - valid_meterpreter_command_names - ignored_commands
-    require "pry"; binding.pry
     expect(invalid_autocorrected_command_names).to be_empty
   end
 

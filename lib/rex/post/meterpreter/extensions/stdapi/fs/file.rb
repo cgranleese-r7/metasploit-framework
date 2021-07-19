@@ -347,6 +347,7 @@ class File < Rex::Post::Meterpreter::Extensions::Stdapi::Fs::IO
   # Download a single file.
   #
   def File.download_file(dest_file, src_file, opts = {}, &stat)
+    require "pry"; binding.pry
     stat ||= lambda { |a,b,c| }
 
     adaptive = opts["adaptive"]
