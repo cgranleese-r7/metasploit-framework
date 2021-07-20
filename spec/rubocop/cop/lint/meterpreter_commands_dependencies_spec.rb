@@ -1448,10 +1448,11 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
               'Compat' => {
                 'Meterpreter' => {
                   'Commands' => %w[
-                    core_channel_open
-                    core_channel_write
-                    core_channel_tell
                     core_channel_close
+                    core_channel_open
+                    core_channel_tell
+                    core_channel_write
+                    stdapi_fs_separator
                   ]
                 }
               }
@@ -1551,8 +1552,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.android.wlan_geolocate
         ^{keyword}^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        %{keyword}.net.config.respond_to?(:each_route)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.webcam.record_mic(datastore['DURATION'])
         ^{keyword}^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.espia.espia_image_get_dev_screen
@@ -1657,8 +1656,12 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
         ^{keyword}^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.sys.process.execute 'script', "command"
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
-        %{keyword}.fs.file.download_file("test", "file", opts)
-        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        %{keyword}.fs.file.download("test", "file", opts)
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        %{keyword}.fs.file.upload(dst_item, src_item)
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+        %{keyword}.fs.file.upload_file(@paths['ff'] + new_file, tmp)
+        ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.lanattacks.tftp.add_file("update_test",contents)
         ^{keyword}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         %{keyword}.fs.file.download_file("local_path/img", "f_path/img", opts)
@@ -1705,6 +1708,12 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                     'Commands' => %w[
                       android_*
                       appapi_app_install
+                      core_channel_close
+                      core_channel_eof
+                      core_channel_open
+                      core_channel_read
+                      core_channel_tell
+                      core_channel_write
                       espia_image_get_dev_screen
                       extapi_adsi_domain_query
                       extapi_pageant_send_query
@@ -1720,7 +1729,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                       lanattacks_start_tftp
                       lanattacks_stop_dhcp
                       lanattacks_stop_tftp
-                      net_socket_create
                       peinjector_inject_shellcode
                       priv_elevate_getsystem
                       priv_fs_get_file_mace
@@ -1730,7 +1738,6 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                       stdapi_fs_chmod
                       stdapi_fs_delete_dir
                       stdapi_fs_delete_file
-                      stdapi_fs_download_file
                       stdapi_fs_file_copy
                       stdapi_fs_file_expand_path
                       stdapi_fs_file_move
@@ -1796,13 +1803,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
 
     # This allows entire libraries to be ignore if the commands are being called with a wildcard
     autocorrected_meterpreter_command_names.each do |command|
-      if command.is_a?(Array)
-        command.each do |commands|
-          ignored_commands << commands if commands.end_with?('_*')
-        end
-      else
-        ignored_commands << command if command.end_with?('_*')
-      end
+      ignored_commands << command if command.end_with?('_*')
     end
 
     invalid_autocorrected_command_names = autocorrected_meterpreter_command_names - valid_meterpreter_command_names - ignored_commands
@@ -1813,33 +1814,63 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
     valid_meterpreter_command_names = Rex::Post::Meterpreter::CommandMapper.get_command_names
     autocorrected_meterpreter_command_names = described_class.new.mappings.flat_map { |mapping| mapping[:commands] }
     api_commands_without_matchers = valid_meterpreter_command_names - autocorrected_meterpreter_command_names.flatten.uniq
-    api_commands_handled_via_wildcards = []
 
+    # Handle wildcard matchers, i.e. `stdapi_railgun_*`
+    api_commands_handled_via_wildcards = []
     autocorrected_meterpreter_command_names.each do |command|
-      if command.is_a?(Array)
-        command.each do |commands|
-          if commands.end_with?('_*')
-            prefix = commands.gsub("_*", "")
-            api_commands_without_matchers.each do |unmatched_command|
-              if unmatched_command.start_with?(prefix)
-                api_commands_handled_via_wildcards << unmatched_command
-              end
-            end
-          end
-        end
-      else
-        if command.end_with?('_*')
-          prefix = command.gsub("_*", "")
-          api_commands_without_matchers.each do |unmatched_command|
-            if unmatched_command.start_with?(prefix)
-              api_commands_handled_via_wildcards << unmatched_command
-            end
+      if command.end_with?('_*')
+        prefix = command.gsub("_*", "")
+        api_commands_without_matchers.each do |unmatched_command|
+          if unmatched_command.start_with?(prefix)
+            api_commands_handled_via_wildcards << unmatched_command
           end
         end
       end
     end
 
     api_commands_without_matchers -= api_commands_handled_via_wildcards
+
+    # Remove known core command ids
+    ignored_core_command_ids = [
+       "core_channel_interact",
+       "core_channel_seek",
+       "core_console_write",
+       "core_enumextcmd",
+       "core_get_session_guid",
+       "core_loadlib",
+       "core_machine_id",
+       "core_migrate",
+       "core_native_arch",
+       "core_negotiate_tlv_encryption",
+       "core_patch_url",
+       "core_pivot_add",
+       "core_pivot_remove",
+       "core_pivot_session_died",
+       "core_set_session_guid",
+       "core_set_uuid",
+       "core_shutdown",
+       "core_transport_add",
+       "core_transport_change",
+       "core_transport_getcerthash",
+       "core_transport_list",
+       "core_transport_next",
+       "core_transport_prev",
+       "core_transport_remove",
+       "core_transport_setcerthash",
+       "core_transport_set_timeouts",
+       "core_transport_sleep",
+       "core_pivot_session_new",
+    ]
+
+    api_commands_without_matchers -= ignored_core_command_ids
+
+    # Remove additional command ids
+    other_ignored_command_ids = [
+      "stdapi_net_tcp_channel_open",
+      "stdapi_net_socket_tcp_shutdown"
+    ]
+
+    api_commands_without_matchers -= other_ignored_command_ids
     expect(api_commands_without_matchers).to be_empty
   end
 end
