@@ -237,12 +237,8 @@ module RuboCop
             raise "Unknown target in expression #{value}"
           end
 
-          methods.each_with_index do |element, index|
-            if index == methods.size - 1
-              node_matcher << ' :' + element + ' _*)'
-            else
-              node_matcher << ' :' + element + ')'
-            end
+          methods.each do |element|
+            node_matcher << ' :' + element + ' _*)'
           end
 
           NodePattern.new(node_matcher)
@@ -631,22 +627,21 @@ module RuboCop
               'process.thread.open'
             ],
             stdapi_sys_process_thread_query_regs: [
-              'process.query_regs'
+              'process.thread.query_regs'
             ],
             stdapi_sys_process_thread_resume: [
-              'client.sys.process.resume' # TODO: Being called on an api call
+              'process.thread.open.resume'
             ],
             stdapi_sys_process_thread_set_regs: [
-             'client.sys.process.set_regs'
+             'client.sys.process.thread.set_regs'
             ],
             stdapi_sys_process_thread_suspend: [
-              'client.sys.process.suspend' # TODO: Being called on an api call
+              'process.thread.open.suspend'
             ],
             stdapi_sys_process_thread_terminate: [
-              'client.sys.process.terminate'
             ],
             stdapi_sys_process_wait: [
-              'client.sys.process.wait'
+              'client.sys.thread.process.wait'
             ],
             stdapi_ui_desktop_enum: [
               'client.ui.enum_desktops'

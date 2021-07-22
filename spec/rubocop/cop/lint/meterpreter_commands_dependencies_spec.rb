@@ -1330,9 +1330,11 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
             if resume
               targetprocess.thread.open(x).resume
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
             else
               targetprocess.thread.open(x).suspend
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
             end
           end
 
@@ -1342,6 +1344,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                  ^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           calc.memory.write(mem, "1234")
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          targetprocess.thread.open(x).resume
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end
 
         def helper(process)
@@ -1375,6 +1380,8 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                   stdapi_sys_process_memory_write
                   stdapi_sys_process_thread_create
                   stdapi_sys_process_thread_open
+                  stdapi_sys_process_thread_resume
+                  stdapi_sys_process_thread_suspend
                 ]
               }
             }
@@ -1397,6 +1404,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           calc = client.sys.process.open(pid, PROCESS_ALL_ACCESS)
           mem  = calc.memory.allocate(32)
           calc.memory.write(mem, "1234")
+          targetprocess.thread.open(x).resume
         end
 
         def helper(process)
