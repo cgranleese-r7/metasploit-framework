@@ -1322,6 +1322,7 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           target = client.sys.process.open(notepad_process.pid, PROCESS_ALL_ACCESS)
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           target.thread.create(exploit_mem + offset, param_ptr)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
 
           targetprocess = client.sys.process.open(pid, PROCESS_ALL_ACCESS)
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
@@ -1340,13 +1341,16 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
           mem  = calc.memory.allocate(32)
                  ^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           calc.memory.write(mem, "1234")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end
 
         def helper(process)
           shellcode_mem = process.memory.allocate(shellcode_size)
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           process.memory.protect(shellcode_mem)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
           process.memory.write(shellcode_mem, shellcode)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Convert meterpreter api calls into meterpreter command dependencies.
         end
       end
     RUBY
@@ -1367,6 +1371,9 @@ RSpec.describe RuboCop::Cop::Lint::MeterpreterCommandDependencies, :config do
                 'Commands' => %w[
                   stdapi_sys_process_attach
                   stdapi_sys_process_memory_allocate
+                  stdapi_sys_process_memory_protect
+                  stdapi_sys_process_memory_write
+                  stdapi_sys_process_thread_create
                   stdapi_sys_process_thread_open
                 ]
               }

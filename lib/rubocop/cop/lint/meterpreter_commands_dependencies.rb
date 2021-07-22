@@ -7,7 +7,6 @@ module RuboCop
         extend AutoCorrector
         include Alignment
 
-        # Rspec messages for various scenarios
         MSG = 'Convert meterpreter api calls into meterpreter command dependencies.'.freeze
         MISSING_METHOD_CALL_FOR_COMMAND_MSG = 'Compatibility command does not have an associated method call.'.freeze
         COMMAND_DUPLICATED_MSG = 'Command duplicated.'.freeze
@@ -360,6 +359,8 @@ module RuboCop
           }
 
           stdapi_command_ids = {
+            # TODO: - Check out subsytems and verify the calls
+            #       - Check which commands are being called with system.. or a process object/variable
             "stdapi_fs_*": [
               'session.fs.file.new'
             ],
@@ -559,7 +560,7 @@ module RuboCop
               'client.sys.process.open'
             ],
             stdapi_sys_process_close: [
-              'client.sys.process.close'
+              'process.close'
             ],
             stdapi_sys_process_execute: [
               'client.sys.process.execute'
@@ -575,19 +576,21 @@ module RuboCop
               'client.sys.process.getpid'
             ],
             stdapi_sys_process_image_get_images: [
-              'client.sys.process.get_images'
+              'client.sys.process.image.get_images',
+              'client.sys.process.image.each_image'
             ],
             stdapi_sys_process_image_get_proc_address: [
-              'client.sys.process.get_procedure_address'
+              'client.sys.process.image.get_procedure_address'
             ],
             stdapi_sys_process_image_load: [
-              'client.sys.process.load'
+              'client.sys.process.image.load'
             ],
             stdapi_sys_process_image_unload: [
-              'client.sys.process.unload'
+              'client.sys.process.image.unload'
             ],
             stdapi_sys_process_kill: [
-              'client.sys.process.kill'
+              'client.sys.process.kill',
+              'process.kill'
             ],
             stdapi_sys_process_memory_allocate: [
               'process.memory.allocate'
@@ -596,28 +599,29 @@ module RuboCop
               'process.memory.free'
             ],
             stdapi_sys_process_memory_lock: [
-              'client.sys.process.lock'
+              'client.sys.process.memory.lock'
             ],
             stdapi_sys_process_memory_protect: [
-              'client.sys.process.protect'
+              'process.memory.protect'
             ],
             stdapi_sys_process_memory_query: [
-              'client.sys.process.query'
+              'process.memory.query'
             ],
             stdapi_sys_process_memory_read: [
-              'client.sys.process.read'
+              'process.memory.read'
             ],
             stdapi_sys_process_memory_unlock: [
-              'client.sys.process.unlock'
+              'client.sys.process.memory.unlock'
             ],
             stdapi_sys_process_memory_write: [
-              'client.sys.process.write'
+              'process.memory.write'
             ],
             stdapi_sys_process_thread_close: [
-              'client.sys.process.close'
+              'client.sys.process.thread.close'
             ],
             stdapi_sys_process_thread_create: [
-              'client.sys.process.create'
+              'client.sys.process.thread.create',
+              'process.thread.create'
             ],
             stdapi_sys_process_thread_get_threads: [
               'process.threads.get_threads',
@@ -627,16 +631,16 @@ module RuboCop
               'process.thread.open'
             ],
             stdapi_sys_process_thread_query_regs: [
-              'client.sys.process.query_regs'
+              'process.query_regs'
             ],
             stdapi_sys_process_thread_resume: [
-              'client.sys.process.resume'
+              'client.sys.process.resume' # TODO: Being called on an api call
             ],
             stdapi_sys_process_thread_set_regs: [
              'client.sys.process.set_regs'
             ],
             stdapi_sys_process_thread_suspend: [
-              'client.sys.process.suspend'
+              'client.sys.process.suspend' # TODO: Being called on an api call
             ],
             stdapi_sys_process_thread_terminate: [
               'client.sys.process.terminate'
