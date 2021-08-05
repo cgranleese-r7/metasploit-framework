@@ -2,6 +2,7 @@
 require 'set'
 require 'rex/post/meterpreter'
 require 'rex'
+require 'msf/ui/debug'
 
 module Rex
 module Post
@@ -43,6 +44,14 @@ class Console::CommandDispatcher::Core
     '-l' => [false, 'List all available extensions.']
   )
 
+  @@debug_opts = Rex::Parser::Arguments.new(
+    "-h" => [ false, "Help banner."                                   ],
+    "-d" => [ false, "Display the Datastore Information."             ],
+    "-c" => [ false, "Display command history."                       ],
+    "-e" => [ false, "Display the most recent Error and Stack Trace." ],
+    "-l" => [ false, "Display the most recent logs."                  ],
+    "-v" => [ false, "Display versions and install info."             ])
+
   #
   # List of supported commands.
   #
@@ -53,6 +62,7 @@ class Console::CommandDispatcher::Core
       'bg'                       => 'Alias for background',
       'close'                    => 'Closes a channel',
       'channel'                  => 'Displays information or control active channels',
+      'debug'                    => 'Display information useful for debugging',
       'exit'                     => 'Terminate the meterpreter session',
       'help'                     => 'Help menu',
       'irb'                      => 'Open an interactive Ruby shell on the current session',
@@ -625,6 +635,54 @@ class Console::CommandDispatcher::Core
     Pry.config.history_load = false
     Rex::Ui::Text::Shell::HistoryManager.with_context(history_file: Msf::Config.pry_history, name: :pry) do
       client.pry
+    end
+  end
+
+  def cmd_debug_help
+    print_line "Usage: debug [options]"
+    print_line
+    print_line("Print a set of information in a Markdown format to be included when opening an Issue on Github. " +
+                 "This information helps us fix problems you encounter and should be included when you open a new issue: " +
+                 Msf::Ui::Debug.issue_link)
+    print @@debug_opts.usage
+  end
+
+  #
+  # Display information useful for debugging errors.
+  #
+  def cmd_debug(*args)
+    require "pry"; binding.pry
+    if args.empty?
+      print_line Msf::Ui::Debug.all(client.framework, shell)
+      return
+    end
+
+    if args.include?("-h")
+      cmd_debug_help
+    else
+      output = ""
+      @@debug_opts.parse(args) do |opt|
+        case opt
+        when '-d'
+          output << Msf::Ui::Debug.datastore(client.framework, shell)
+        when '-c'
+          output << Msf::Ui::Debug.history(shell)
+        when '-e'
+          output << Msf::Ui::Debug.errors
+        when '-l'
+          output << Msf::Ui::Debug.logs
+        when '-v'
+          output << Msf::Ui::Debug.versions(client.framework)
+        end
+      end
+
+      if output.empty?
+        print_line("Valid argument was not given.")
+        cmd_debug_help
+      else
+        output = Msf::Ui::Debug.preamble + output
+        print_line output
+      end
     end
   end
 
