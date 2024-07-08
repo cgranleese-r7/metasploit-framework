@@ -97,7 +97,7 @@ module SingleCommandShell
     if platform == 'windows'
       result = Msf::Sessions::CommandShellWindows.to_cmd(cmd, args)
     else
-      result = Msf::Session::CommandShellUnix.to_cmd(cmd, args)
+      result = Msf::Sessions::CommandShellUnix.to_cmd(cmd, args)
     end
   end
 

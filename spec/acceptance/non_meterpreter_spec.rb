@@ -1,23 +1,23 @@
 require 'acceptance_spec_helper'
 require 'base64'
 
-RSpec.describe 'Meterpreter' do
+# TODO: Need better name for file and constant
+
+RSpec.describe 'NonMeterpreter' do
   include_context 'wait_for_expect'
 
-  # Tests to ensure that Meterpreter is consistent across all implementations/operation systems
-  METERPRETER_PAYLOADS = Acceptance::Meterpreter.with_meterpreter_name_merged(
+  # Tests to ensure that CMD/Powershell/Linux is consistent across all implementations/operation systems
+  NON_METERPRETER_PAYLOADS = Acceptance::NonMeterpreter.with_non_meterpreter_name_merged(
     {
-      python: Acceptance::Meterpreter::PYTHON_METERPRETER,
-      php: Acceptance::Meterpreter::PHP_METERPRETER,
-      java: Acceptance::Meterpreter::JAVA_METERPRETER,
-      mettle: Acceptance::Meterpreter::METTLE_METERPRETER,
-      windows_meterpreter: Acceptance::Meterpreter::WINDOWS_METERPRETER
+      powershell: Acceptance::NonMeterpreter::POWERSHELL,
+      cmd: Acceptance::NonMeterpreter::CMD,
+      linux: Acceptance::NonMeterpreter::LINUX
     }
   )
 
   allure_test_environment = AllureRspec.configuration.environment_properties
 
-  let_it_be(:current_platform) { Acceptance::Meterpreter::current_platform }
+  let_it_be(:current_platform) { Acceptance::NonMeterpreter::current_platform }
 
   # @!attribute [r] port_allocator
   #   @return [Acceptance::PortAllocator]
@@ -50,7 +50,7 @@ RSpec.describe 'Meterpreter' do
     console
   end
 
-  METERPRETER_PAYLOADS.each do |meterpreter_name, meterpreter_config|
+  NON_METERPRETER_PAYLOADS.each do |meterpreter_name, meterpreter_config|
     meterpreter_runtime_name = "#{meterpreter_name}#{ENV.fetch('METERPRETER_RUNTIME_VERSION', '')}"
 
     describe meterpreter_runtime_name, focus: meterpreter_config[:focus] do
@@ -58,8 +58,8 @@ RSpec.describe 'Meterpreter' do
         describe(
           Acceptance::Meterpreter.human_name_for_payload(payload_config).to_s,
           if: (
-            Acceptance::Meterpreter.run_meterpreter?(meterpreter_config) &&
-              Acceptance::Meterpreter.supported_platform?(payload_config)
+            Acceptance::NonMeterpreter.run_meterpreter?(meterpreter_config) &&
+              Acceptance::NonMeterpreter.supported_platform?(payload_config)
           )
         ) do
           let(:payload) { Acceptance::Payload.new(payload_config) }
@@ -146,7 +146,9 @@ RSpec.describe 'Meterpreter' do
                 break
               end
 
-              session_opened_matcher = /Meterpreter session (\d+) opened[^\n]*\n/
+              # TODO: Was strictly for Meterpreter sessions, now more generic
+              #   - can be reverted if we decide to move these new tests
+              session_opened_matcher = /\w.* session (\d+) opened[^\n]*\n/
               session_message = ''
               begin
                 session_message = console.recvuntil(session_opened_matcher, timeout: 1)
@@ -184,8 +186,8 @@ RSpec.describe 'Meterpreter' do
             console.reset
           end
 
-          context "#{Acceptance::Meterpreter.current_platform}" do
-            describe "#{Acceptance::Meterpreter.current_platform}/#{meterpreter_runtime_name} Meterpreter successfully opens a session for the #{payload_config[:name].inspect} payload" do
+          context "#{Acceptance::NonMeterpreter.current_platform}" do
+            describe "#{Acceptance::NonMeterpreter.current_platform}/#{meterpreter_runtime_name} Meterpreter successfully opens a session for the #{payload_config[:name].inspect} payload" do
               it(
                 "exposes available metasploit commands",
                 if: (
@@ -239,8 +241,9 @@ RSpec.describe 'Meterpreter' do
                     type: Allure::ContentType::JSON,
                     test_case: false
                   )
-                  expect(available_commands_json[:sessions].length).to be 1
-                  expect(available_commands_json[:sessions].first[:commands]).to_not be_empty
+                  # Removed these lines as I believe the commands are Meterpreter specific
+                  # expect(available_commands_json[:sessions].length).to be 1
+                  # expect(available_commands_json[:sessions].first[:commands]).to_not be_empty
                 rescue RSpec::Expectations::ExpectationNotMetError, StandardError => e
                   test_run_error = e
                 end
@@ -333,17 +336,17 @@ RSpec.describe 'Meterpreter' do
             meterpreter_config[:module_tests].each do |module_test|
               describe module_test[:name].to_s, focus: module_test[:focus] do
                 it(
-                  "#{Acceptance::Meterpreter.current_platform}/#{meterpreter_runtime_name} meterpreter successfully opens a session for the #{payload_config[:name].inspect} payload and passes the #{module_test[:name].inspect} tests",
+                  "#{Acceptance::NonMeterpreter.current_platform}/#{meterpreter_runtime_name} meterpreter successfully opens a session for the #{payload_config[:name].inspect} payload and passes the #{module_test[:name].inspect} tests",
                   if: (
                     # Run if ENV['METERPRETER'] = 'java php' etc
-                    Acceptance::Meterpreter.run_meterpreter?(meterpreter_config) &&
-                      # Run if ENV['METERPRETER_MODULE_TEST'] = 'test/cmd_exec' etc
-                      Acceptance::Meterpreter.run_meterpreter_module_test?(module_test[:name]) &&
+                    Acceptance::NonMeterpreter.run_meterpreter?(meterpreter_config) &&
+                      # Run if ENV['METERPRETER_MODULE_TEST'] = 'post/test/cmd_exec' etc
+                      Acceptance::NonMeterpreter.run_meterpreter_module_test?(module_test[:name]) &&
                       # Only run payloads / tests, if the host machine can run them
-                      Acceptance::Meterpreter.supported_platform?(payload_config) &&
-                      Acceptance::Meterpreter.supported_platform?(module_test) &&
+                      Acceptance::NonMeterpreter.supported_platform?(payload_config) &&
+                      Acceptance::NonMeterpreter.supported_platform?(module_test) &&
                       # Skip tests that are explicitly skipped, or won't pass in the current environment
-                      !Acceptance::Meterpreter.skipped_module_test?(module_test, allure_test_environment)
+                      !Acceptance::NonMeterpreter.skipped_module_test?(module_test, allure_test_environment)
                   ),
                   # test metadata - will appear in allure report
                   module_test: module_test[:name]
@@ -364,7 +367,15 @@ RSpec.describe 'Meterpreter' do
                     payload_process, session_id = payload_process_and_session_id
 
                     expect(payload_process).to(be_alive, proc do
+                      $stderr.puts "Made it inside expect payload_process: #{payload_process}"
+                      $stderr.puts "Is the process alive?: #{payload_process.alive?}"
+                      $stderr.puts "Process wait.thread?: #{payload_process.wait_thread}"
+                      $stderr.puts "We have access to .wait_thread, but do we have access to .wait_thread.value?: #{payload_process.alive?}"
+
                       current_payload_status = "Expected Payload process to be running. Instead got: payload process exited with #{payload_process.wait_thread.value} - when running the command #{payload_process.cmd.inspect}"
+
+                      $stderr.puts "Made it after current_payload_status: #{payload_process}"
+                      $stderr.puts "Is the process alive?: #{payload_process.alive?}"
 
                       Allure.add_attachment(
                         name: 'Failed payload blob',
@@ -407,7 +418,7 @@ RSpec.describe 'Meterpreter' do
                       end
 
                       validated_lines.each do |test_line|
-                        test_line = Acceptance::Meterpreter.uncolorize(test_line)
+                        test_line = Acceptance::NonMeterpreter.uncolorize(test_line)
                         expect(test_line).to_not include('FAILED', '[-] FAILED', '[-] Exception', '[-] '), "Unexpected error: #{test_line}"
                       end
 
