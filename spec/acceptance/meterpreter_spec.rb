@@ -10,7 +10,10 @@ RSpec.describe 'Meterpreter' do
       php: Acceptance::Meterpreter::PHP_METERPRETER,
       java: Acceptance::Meterpreter::JAVA_METERPRETER,
       mettle: Acceptance::Meterpreter::METTLE_METERPRETER,
-      windows_meterpreter: Acceptance::Meterpreter::WINDOWS_METERPRETER
+      windows_meterpreter: Acceptance::Meterpreter::WINDOWS_METERPRETER,
+      powershell: Acceptance::Meterpreter::POWERSHELL,
+      cmd: Acceptance::Meterpreter::CMD,
+      linux: Acceptance::Meterpreter::LINUX
     }
   )
 
@@ -145,7 +148,9 @@ RSpec.describe 'Meterpreter' do
                 break
               end
 
-              session_opened_matcher = /Meterpreter session (\d+) opened[^\n]*\n/
+              # TODO: Was strictly for Meterpreter sessions, now more generic
+              #   - can be reverted if we decide to move these new tests
+              session_opened_matcher = /\w.* session (\d+) opened[^\n]*\n/
               session_message = ''
               begin
                 session_message = console.recvuntil(session_opened_matcher, timeout: 1)
@@ -336,7 +341,7 @@ RSpec.describe 'Meterpreter' do
                   if: (
                     # Run if ENV['METERPRETER'] = 'java php' etc
                     Acceptance::Meterpreter.run_meterpreter?(meterpreter_config) &&
-                      # Run if ENV['METERPRETER_MODULE_TEST'] = 'test/cmd_exec' etc
+                      # Run if ENV['METERPRETER_MODULE_TEST'] = 'post/test/cmd_exec' etc
                       Acceptance::Meterpreter.run_meterpreter_module_test?(module_test[:name]) &&
                       # Only run payloads / tests, if the host machine can run them
                       Acceptance::Meterpreter.supported_platform?(payload_config) &&
