@@ -141,14 +141,15 @@ RSpec.describe 'NonMeterpreter' do
             session_id = nil
 
             # Wait for the session to open, or break early if the payload is detected as dead
-            wait_for_expect do
+            larger_retry_count_for_powershell = 600
+            wait_for_expect(larger_retry_count_for_powershell) do
               unless payload_process.alive?
                 break
               end
 
               # TODO: Was strictly for Meterpreter sessions, now more generic
               #   - can be reverted if we decide to move these new tests
-              session_opened_matcher = /\w.* session (\d+) opened[^\n]*\n/
+              session_opened_matcher = /session (\d+) opened[^\n]*\n/
               session_message = ''
               begin
                 session_message = console.recvuntil(session_opened_matcher, timeout: 1)

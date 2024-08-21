@@ -4,13 +4,13 @@ module Acceptance::NonMeterpreter
   POWERSHELL = {
     payloads: [
       {
-        name: 'windows/x64/powershell_reverse_tcp',
-        extension: '.exe',
+        name: 'cmd/windows/powershell_reverse_tcp',
+        extension: '.ps1',
         platforms: [:windows],
-        execute_cmd: ['${payload_path}'],
+        execute_cmd: ['powershell ${payload_path}'],
         executable: true,
         generate_options: {
-          '-f': 'exe'
+          '-f': 'raw'
         },
         datastore: {
           global: {},
