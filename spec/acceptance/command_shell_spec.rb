@@ -1,23 +1,21 @@
 require 'acceptance_spec_helper'
 require 'base64'
 
-# TODO: Need better name for file and constant
-
-RSpec.describe 'NonMeterpreter' do
+RSpec.describe 'CommandShell' do
   include_context 'wait_for_expect'
 
   # Tests to ensure that CMD/Powershell/Linux is consistent across all implementations/operation systems
-  NON_METERPRETER_PAYLOADS = Acceptance::NonMeterpreter.with_non_meterpreter_name_merged(
+  COMMAND_SHELL_PAYLOADS = Acceptance::CommandShell.with_command_shell_name_merged(
     {
-      powershell: Acceptance::NonMeterpreter::POWERSHELL,
-      cmd: Acceptance::NonMeterpreter::CMD,
-      linux: Acceptance::NonMeterpreter::LINUX
+      powershell: Acceptance::CommandShell::POWERSHELL,
+      cmd: Acceptance::CommandShell::CMD,
+      linux: Acceptance::CommandShell::LINUX
     }
   )
 
   allure_test_environment = AllureRspec.configuration.environment_properties
 
-  let_it_be(:current_platform) { Acceptance::NonMeterpreter::current_platform }
+  let_it_be(:current_platform) { Acceptance::CommandShell::current_platform }
 
   # @!attribute [r] port_allocator
   #   @return [Acceptance::PortAllocator]
@@ -50,16 +48,16 @@ RSpec.describe 'NonMeterpreter' do
     console
   end
 
-  NON_METERPRETER_PAYLOADS.each do |meterpreter_name, meterpreter_config|
-    meterpreter_runtime_name = "#{meterpreter_name}#{ENV.fetch('METERPRETER_RUNTIME_VERSION', '')}"
+  COMMAND_SHELL_PAYLOADS.each do |command_shell_name, command_shell_config|
+    command_shell_runtime_name = "#{command_shell_name}#{ENV.fetch('COMMAND_SHELL_RUNTIME_VERSION', '')}"
 
-    describe meterpreter_runtime_name, focus: meterpreter_config[:focus] do
-      meterpreter_config[:payloads].each.with_index do |payload_config, payload_config_index|
+    describe command_shell_runtime_name, focus: command_shell_config[:focus] do
+      command_shell_config[:payloads].each.with_index do |payload_config, payload_config_index|
         describe(
-          Acceptance::Meterpreter.human_name_for_payload(payload_config).to_s,
+          Acceptance::CommandShell.human_name_for_payload(payload_config).to_s,
           if: (
-            Acceptance::NonMeterpreter.run_meterpreter?(meterpreter_config) &&
-              Acceptance::NonMeterpreter.supported_platform?(payload_config)
+            Acceptance::CommandShell.run_meterpreter?(command_shell_config) &&
+              Acceptance::CommandShell.supported_platform?(payload_config)
           )
         ) do
           let(:payload) { Acceptance::Payload.new(payload_config) }
@@ -77,7 +75,7 @@ RSpec.describe 'NonMeterpreter' do
             Acceptance::TempChildProcessFile.new("#{payload.name}_session_tlv_logging", 'txt')
           end
 
-          let(:meterpreter_logging_file) do
+          let(:command_shell_logging_file) do
             # LocalPath.new('/tmp/php_log.txt')
             Acceptance::TempChildProcessFile.new("#{payload.name}_debug_log", 'txt')
           end
@@ -99,8 +97,7 @@ RSpec.describe 'NonMeterpreter' do
             {
               AutoVerifySessionTimeout: ENV['CI'] ? 30 : 10,
               lport: port_allocator.next,
-              lhost: '127.0.0.1',
-              MeterpreterDebugLogging: "rpath:#{meterpreter_logging_file.path}"
+              lhost: '127.0.0.1'
             }
           end
 
@@ -147,8 +144,6 @@ RSpec.describe 'NonMeterpreter' do
                 break
               end
 
-              # TODO: Was strictly for Meterpreter sessions, now more generic
-              #   - can be reverted if we decide to move these new tests
               session_opened_matcher = /session (\d+) opened[^\n]*\n/
               session_message = ''
               begin
@@ -187,18 +182,18 @@ RSpec.describe 'NonMeterpreter' do
             console.reset
           end
 
-          context "#{Acceptance::NonMeterpreter.current_platform}" do
-            describe "#{Acceptance::NonMeterpreter.current_platform}/#{meterpreter_runtime_name} Meterpreter successfully opens a session for the #{payload_config[:name].inspect} payload" do
+          context "#{Acceptance::CommandShell.current_platform}" do
+            describe "#{Acceptance::CommandShell.current_platform}/#{command_shell_runtime_name} command shell successfully opens a session for the #{payload_config[:name].inspect} payload" do
               it(
                 "exposes available metasploit commands",
                 if: (
-                  # Assume that regardless of payload, staged/unstaged/etc, the Meterpreter will have the same commands available
+                  # Assume that regardless of payload, staged/unstaged/etc, the command shell will have the same commands available
                   # So only run this test when config_index == 0
-                  payload_config_index == 0 && Acceptance::Meterpreter.supported_platform?(payload_config)
+                  payload_config_index == 0 && Acceptance::CommandShell.supported_platform?(payload_config)
                   # Run if ENV['METERPRETER'] = 'java php' etc
-                  Acceptance::Meterpreter.run_meterpreter?(meterpreter_config) &&
+                  Acceptance::CommandShell.run_meterpreter?(command_shell_config) &&
                     # Only run payloads / tests, if the host machine can run them
-                    Acceptance::Meterpreter.supported_platform?(payload_config)
+                    Acceptance::CommandShell.supported_platform?(payload_config)
                 )
               ) do
                 begin
@@ -242,9 +237,6 @@ RSpec.describe 'NonMeterpreter' do
                     type: Allure::ContentType::JSON,
                     test_case: false
                   )
-                  # Removed these lines as I believe the commands are Meterpreter specific
-                  # expect(available_commands_json[:sessions].length).to be 1
-                  # expect(available_commands_json[:sessions].first[:commands]).to_not be_empty
                 rescue RSpec::Expectations::ExpectationNotMetError, StandardError => e
                   test_run_error = e
                 end
@@ -313,7 +305,7 @@ RSpec.describe 'NonMeterpreter' do
 
                 Allure.add_attachment(
                   name: 'payload debug log if available',
-                  source: get_file_attachment_contents(meterpreter_logging_file.path),
+                  source: get_file_attachment_contents(command_shell_logging_file.path),
                   type: Allure::ContentType::TXT
                 )
 
@@ -334,20 +326,19 @@ RSpec.describe 'NonMeterpreter' do
               end
             end
 
-            meterpreter_config[:module_tests].each do |module_test|
+            command_shell_config[:module_tests].each do |module_test|
               describe module_test[:name].to_s, focus: module_test[:focus] do
                 it(
-                  "#{Acceptance::NonMeterpreter.current_platform}/#{meterpreter_runtime_name} meterpreter successfully opens a session for the #{payload_config[:name].inspect} payload and passes the #{module_test[:name].inspect} tests",
+                  "#{Acceptance::CommandShell.current_platform}/#{command_shell_runtime_name} command shell successfully opens a session for the #{payload_config[:name].inspect} payload and passes the #{module_test[:name].inspect} tests",
                   if: (
-                    # Run if ENV['METERPRETER'] = 'java php' etc
-                    Acceptance::NonMeterpreter.run_meterpreter?(meterpreter_config) &&
+                    Acceptance::CommandShell.run_meterpreter?(command_shell_config) &&
                       # Run if ENV['METERPRETER_MODULE_TEST'] = 'post/test/cmd_exec' etc
-                      Acceptance::NonMeterpreter.run_meterpreter_module_test?(module_test[:name]) &&
+                      Acceptance::CommandShell.run_meterpreter_module_test?(module_test[:name]) &&
                       # Only run payloads / tests, if the host machine can run them
-                      Acceptance::NonMeterpreter.supported_platform?(payload_config) &&
-                      Acceptance::NonMeterpreter.supported_platform?(module_test) &&
+                      Acceptance::CommandShell.supported_platform?(payload_config) &&
+                      Acceptance::CommandShell.supported_platform?(module_test) &&
                       # Skip tests that are explicitly skipped, or won't pass in the current environment
-                      !Acceptance::NonMeterpreter.skipped_module_test?(module_test, allure_test_environment)
+                      !Acceptance::CommandShell.skipped_module_test?(module_test, allure_test_environment)
                   ),
                   # test metadata - will appear in allure report
                   module_test: module_test[:name]
@@ -419,7 +410,7 @@ RSpec.describe 'NonMeterpreter' do
                       end
 
                       validated_lines.each do |test_line|
-                        test_line = Acceptance::NonMeterpreter.uncolorize(test_line)
+                        test_line = Acceptance::CommandShell.uncolorize(test_line)
                         expect(test_line).to_not include('FAILED', '[-] FAILED', '[-] Exception', '[-] '), "Unexpected error: #{test_line}"
                       end
 
@@ -502,12 +493,6 @@ RSpec.describe 'NonMeterpreter' do
                   Allure.add_attachment(
                     name: 'payload output if available',
                     source: "Final status:\n#{current_payload_status}\nstdout and stderr:\n#{get_file_attachment_contents(payload_stdout_and_stderr_file.path)}",
-                    type: Allure::ContentType::TXT
-                  )
-
-                  Allure.add_attachment(
-                    name: 'payload debug log if available',
-                    source: get_file_attachment_contents(meterpreter_logging_file.path),
                     type: Allure::ContentType::TXT
                   )
 

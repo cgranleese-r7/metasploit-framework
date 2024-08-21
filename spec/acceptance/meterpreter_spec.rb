@@ -337,7 +337,7 @@ RSpec.describe 'Meterpreter' do
                   if: (
                     # Run if ENV['METERPRETER'] = 'java php' etc
                     Acceptance::Meterpreter.run_meterpreter?(meterpreter_config) &&
-                      # Run if ENV['METERPRETER_MODULE_TEST'] = 'test/cmd_exec' etc
+                      # Run if ENV['METERPRETER_MODULE_TEST'] = 'post/test/cmd_exec' etc
                       Acceptance::Meterpreter.run_meterpreter_module_test?(module_test[:name]) &&
                       # Only run payloads / tests, if the host machine can run them
                       Acceptance::Meterpreter.supported_platform?(payload_config) &&

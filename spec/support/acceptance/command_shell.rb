@@ -1,4 +1,4 @@
-module Acceptance::NonMeterpreter
+module Acceptance::CommandShell
   # @return [Symbol] The current platform
   def self.current_platform
     host_os = RbConfig::CONFIG['host_os']
@@ -14,6 +14,8 @@ module Acceptance::NonMeterpreter
     end
   end
 
+
+  # TODO
   # Allows restricting the tests of a specific Meterpreter's test suite with the METERPRETER environment variable
   # @return [TrueClass, FalseClass] True if the given Meterpreter should be run, false otherwise.
   def self.run_meterpreter?(meterpreter_config)
@@ -54,8 +56,8 @@ module Acceptance::NonMeterpreter
   # @param [Hash] payload_config
   # @return [String] The human readable name for the given payload configuration
   def self.human_name_for_payload(payload_config)
-    is_stageless = payload_config[:name].include?('meterpreter_reverse_tcp')
-    is_staged = payload_config[:name].include?('meterpreter/reverse_tcp')
+    is_stageless = payload_config[:name].include?('_reverse_tcp')
+    is_staged = payload_config[:name].include?('/reverse_tcp')
 
     details = []
     details << 'stageless' if is_stageless
@@ -67,7 +69,7 @@ module Acceptance::NonMeterpreter
 
   # @param [Object] hash A hash of key => hash
   # @return [Object] Returns a new hash with the 'key' merged into hash value and all payloads
-  def self.with_non_meterpreter_name_merged(hash)
+  def self.with_command_shell_name_merged(hash)
     hash.each_with_object({}) do |(name, config), acc|
       acc[name] = config.merge({ name: name })
     end
@@ -81,7 +83,6 @@ module Acceptance::NonMeterpreter
     case value
     when Array
       left_operand, operator, right_operand = value
-      # Map values such as `:meterpreter_name` to the runtime value
       left_operand = environment[left_operand] if environment.key?(left_operand)
       right_operand = environment[right_operand] if environment.key?(right_operand)
 
