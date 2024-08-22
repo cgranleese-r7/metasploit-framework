@@ -15,22 +15,21 @@ module Acceptance::CommandShell
   end
 
 
-  # TODO
-  # Allows restricting the tests of a specific Meterpreter's test suite with the METERPRETER environment variable
-  # @return [TrueClass, FalseClass] True if the given Meterpreter should be run, false otherwise.
-  def self.run_meterpreter?(meterpreter_config)
-    return true if ENV['METERPRETER'].blank?
+  # Allows restricting the tests of a specific command shell's test suite with the command shell environment variable
+  # @return [TrueClass, FalseClass] True if the given command shell should be run, false otherwise.
+  def self.run_command_shell?(command_shell_config)
+    return true if ENV['COMMAND_SHELL'].blank?
 
-    name = meterpreter_config[:name].to_s
-    ENV['METERPRETER'].include?(name)
+    name = command_shell_config[:name].to_s
+    ENV['COMMAND_SHELL'].include?(name)
   end
 
-  # Allows restricting the tests of a specific Meterpreter's test suite with the METERPRETER environment variable
-  # @return [TrueClass, FalseClass] True if the given Meterpreter should be run, false otherwise.
-  def self.run_meterpreter_module_test?(module_test)
-    return true if ENV['METERPRETER_MODULE_TEST'].blank?
+  # Allows restricting the tests of a specific command shell's test suite with the command shell environment variable
+  # @return [TrueClass, FalseClass] True if the given command shell should be run, false otherwise.
+  def self.run_command_shell_module_test?(module_test)
+    return true if ENV['COMMAND_SHELL_MODULE_TEST'].blank?
 
-    ENV['METERPRETER_MODULE_TEST'].include?(module_test)
+    ENV['COMMAND_SHELL_MODULE_TEST'].include?(module_test)
   end
 
   # @param [String] string A console string with ANSI escape codes present

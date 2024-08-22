@@ -12,15 +12,19 @@ This directory contains:
 
 - Makefile to build the binaries `makefile.mk`
   This file is used to create the binaries for both Windows and Linux that the docker command below will make use of.
+  This will output the following binaries:
 
-- Precompiled binaries for Windows
-  - `show_args.exe`
+  - Precompiled binary for Windows
+    - `show_args.exe`
 
-- Precompiled binaries for Linux and Mettle
-  - `show_args`
+  - Precompiled binary for Linux and Mettle
+    - `show_args`
 
-- Precompiled binaries for macOS
-  - `show_args_macos`
+### Note
+
+You will need to compile the OSX payload separately on an OSX machine, Docker is not supported. The test assume the file 
+will be named as `show_args_macos`.
+
 
 ## Compile binaries locally
 
@@ -30,5 +34,3 @@ We make use of gcc for this: https://hub.docker.com/_/gcc
 ```shell
 docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp gcc:11.4.0 /bin/bash -c "apt update && apt install -y gcc-mingw-w64 && make all -f makefile.mk"
 ```
-
-You will need to compile the OSX payload separately on an OSX machine, Docker is not supported.

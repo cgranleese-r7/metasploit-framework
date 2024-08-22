@@ -1,5 +1,3 @@
-# TODO: Not sure this should be under Meterpreter long term, but adding here for testing for now
-
 module Acceptance::CommandShell
   POWERSHELL = {
     payloads: [
@@ -144,7 +142,6 @@ module Acceptance::CommandShell
           },
           windows: {
             known_failures: [
-              "[-] FAILED: should write REG_EXPAND_SZ values",
               "[-] FAILED: should write REG_SZ unicode values"
             ]
           }

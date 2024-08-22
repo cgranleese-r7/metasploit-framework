@@ -1,5 +1,3 @@
-# TODO: Not sure this should be under Meterpreter long term, but adding here for testing for now
-
 module Acceptance::CommandShell
   LINUX = {
     payloads: [

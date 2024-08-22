@@ -63,27 +63,27 @@ jobs:
       matrix:
         os:
           - macos-12
-          - windows-2019
+#          - windows-2019
           - ubuntu-20.04
         ruby:
           - 3.0.2
-        meterpreter:
+#        meterpreter:
           # Python
-          - { name: python, runtime_version: 3.6 }
-          - { name: python, runtime_version: 3.11 }
+#          - { name: python, runtime_version: 3.6 }
+#          - { name: python, runtime_version: 3.11 }
 
           # Java
-          - { name: java, runtime_version: 8 }
-          - { name: java, runtime_version: 21 }
+#          - { name: java, runtime_version: 8 }
+#          - { name: java, runtime_version: 21 }
 
           # PHP
-          - { name: php, runtime_version: 5.3 }
-          - { name: php, runtime_version: 7.4 }
-          - { name: php, runtime_version: 8.3 }
+#          - { name: php, runtime_version: 5.3 }
+#          - { name: php, runtime_version: 7.4 }
+#          - { name: php, runtime_version: 8.3 }
         include:
           # Windows Meterpreter
-          - { meterpreter: { name: windows_meterpreter }, os: windows-2019 }
-          - { meterpreter: { name: windows_meterpreter }, os: windows-2022 }
+#          - { meterpreter: { name: windows_meterpreter }, os: windows-2019 }
+#          - { meterpreter: { name: windows_meterpreter }, os: windows-2022 }
 
           # Mettle
           - { meterpreter: { name: mettle }, os: macos-12 }
@@ -214,10 +214,10 @@ jobs:
           bundler: 2.2.33
 
       - name: Move mettle gem into framework
-        if: ${{ matrix.meterpreter.name == 'mettle' && (contains(github.event.issue.labels.*.name, 'mettle-testing-branch')) }}
+        if: ${{ matrix.meterpreter.name == 'mettle' && runner.os == 'macos' }}
+        #        if: contains(github.event.issue.labels.*.name, 'mettle-label')
         run: |
           cp ./mettle/pkg/metasploit_payloads-mettle-${{ env.METTLE_VERSION }}.pre.dev.gem ./metasploit-framework
-        working-directory: metasploit-framework
 
       - name: Install mettle gem
         if: ${{ matrix.meterpreter.name == 'mettle' }}

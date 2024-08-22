@@ -1,5 +1,3 @@
-# TODO: Not sure this should be under Meterpreter long term, but adding here for testing for now
-
 module Acceptance::CommandShell
   CMD = {
     payloads: [
@@ -143,10 +141,7 @@ module Acceptance::CommandShell
             known_failures: []
           },
           windows: {
-            known_failures: [
-              "[-] FAILED: should write REG_EXPAND_SZ values",
-              "[-] FAILED: should write REG_SZ unicode values"
-            ]
+            known_failures: []
           }
         }
       }

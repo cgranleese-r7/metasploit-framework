@@ -56,7 +56,7 @@ RSpec.describe 'CommandShell' do
         describe(
           Acceptance::CommandShell.human_name_for_payload(payload_config).to_s,
           if: (
-            Acceptance::CommandShell.run_meterpreter?(command_shell_config) &&
+            Acceptance::CommandShell.run_command_shell?(command_shell_config) &&
               Acceptance::CommandShell.supported_platform?(payload_config)
           )
         ) do
@@ -191,7 +191,7 @@ RSpec.describe 'CommandShell' do
                   # So only run this test when config_index == 0
                   payload_config_index == 0 && Acceptance::CommandShell.supported_platform?(payload_config)
                   # Run if ENV['METERPRETER'] = 'java php' etc
-                  Acceptance::CommandShell.run_meterpreter?(command_shell_config) &&
+                  Acceptance::CommandShell.run_command_shell?(command_shell_config) &&
                     # Only run payloads / tests, if the host machine can run them
                     Acceptance::CommandShell.supported_platform?(payload_config)
                 )
@@ -331,9 +331,9 @@ RSpec.describe 'CommandShell' do
                 it(
                   "#{Acceptance::CommandShell.current_platform}/#{command_shell_runtime_name} command shell successfully opens a session for the #{payload_config[:name].inspect} payload and passes the #{module_test[:name].inspect} tests",
                   if: (
-                    Acceptance::CommandShell.run_meterpreter?(command_shell_config) &&
+                    Acceptance::CommandShell.run_command_shell?(command_shell_config) &&
                       # Run if ENV['METERPRETER_MODULE_TEST'] = 'post/test/cmd_exec' etc
-                      Acceptance::CommandShell.run_meterpreter_module_test?(module_test[:name]) &&
+                      Acceptance::CommandShell.run_command_shell_module_test?(module_test[:name]) &&
                       # Only run payloads / tests, if the host machine can run them
                       Acceptance::CommandShell.supported_platform?(payload_config) &&
                       Acceptance::CommandShell.supported_platform?(module_test) &&
