@@ -62,9 +62,9 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-12
+          - macos-13
 #          - windows-2019
-          - ubuntu-20.04
+#          - ubuntu-20.04
         ruby:
           - 3.0.2
         meterpreter:
@@ -80,14 +80,14 @@ jobs:
 #          - { name: php, runtime_version: 5.3 }
 #          - { name: php, runtime_version: 7.4 }
 #          - { name: php, runtime_version: 8.3 }
-        include:
-          # Windows Meterpreter
+#        include:
+#          # Windows Meterpreter
 #          - { meterpreter: { name: windows_meterpreter }, os: windows-2019 }
 #          - { meterpreter: { name: windows_meterpreter }, os: windows-2022 }
-
-          # Mettle
-          - { meterpreter: { name: mettle }, os: macos-12 }
-          - { meterpreter: { name: mettle }, os: ubuntu-20.04 }
+#
+#          # Mettle
+#          - { meterpreter: { name: mettle }, os: macos-13 }
+#          - { meterpreter: { name: mettle }, os: ubuntu-20.04 }
 
     runs-on: ${{ matrix.os }}
 
@@ -150,9 +150,10 @@ jobs:
       - name: Install Docker - macOS
         if: ${{ ( matrix.meterpreter.name == 'java') && (runner.os == 'macos' ) }}
         run: |
+          brew install postgresql
           brew install docker
-          colima delete
-          colima start --arch x86_64
+#          colima delete
+#          colima start --arch x86_64
 
       - name: Checkout mettle
         if: ${{ matrix.meterpreter.name == 'mettle' }}
@@ -207,10 +208,15 @@ jobs:
           # https://github.com/ruby/setup-ruby/tree/d2b39ad0b52eca07d23f3aa14fdf2a3fcc1f411c#windows
           bundler: 2.2.33
 
+#      - name: Install pg - macOS
+#        if: ${{ ( matrix.meterpreter.name == 'java') && (runner.os == 'macos' ) }}
+#        run: |
+#          gem install pg -- --with-pg-config=/opt/local/lib/postgresql[version number]/bin/pg_config
+#          bundle install
+
       - name: Move mettle gem into framework
         if: ${{ matrix.meterpreter.name == 'mettle' }}
         run: |
-          echo "FRAMEWORK_METTLE_VERSION=$(grep -oh "'metasploit_payloads-mettle', '[0-9].[0-9].[0-9]*'" metasploit-framework.gemspec | grep -oh '[0-9].[0-9].[0-9]*')" | tee -a $GITHUB_ENV
           cp ../mettle/pkg/metasploit_payloads-mettle-${{ env.METTLE_VERSION }}.pre.dev.gem .
         working-directory: metasploit-framework
 
@@ -219,9 +225,7 @@ jobs:
         run: |
           set -x
           bundle exec gem install metasploit_payloads-mettle-${{ env.METTLE_VERSION }}.pre.dev.gem
-          cat metasploit-framework.gemspec
-          ruby -pi.bak -e "gsub(/'metasploit_payloads-mettle', '${{ env.FRAMEWORK_METTLE_VERSION }}'/, '\'metasploit_payloads-mettle\', \'${{ env.METTLE_VERSION }}.pre.dev\'')" metasploit-framework.gemspec
-          cat metasploit-framework.gemspec
+          ruby -pi.bak -e "gsub(/'metasploit_payloads-mettle', '.*'/, '\'metasploit_payloads-mettle\', \'${{ env.METTLE_VERSION }}.pre.dev\'')" metasploit-framework.gemspec
           bundle config unset deployment
           bundle update metasploit_payloads-mettle
           bundle install
