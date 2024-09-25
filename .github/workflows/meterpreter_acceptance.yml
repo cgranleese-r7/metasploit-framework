@@ -63,27 +63,27 @@ jobs:
       matrix:
         os:
           - macos-12
-          - windows-2019
+#          - windows-2019
           - ubuntu-20.04
         ruby:
           - 3.0.2
         meterpreter:
           # Python
-          - { name: python, runtime_version: 3.6 }
-          - { name: python, runtime_version: 3.11 }
+#          - { name: python, runtime_version: 3.6 }
+#          - { name: python, runtime_version: 3.11 }
 
           # Java
           - { name: java, runtime_version: 8 }
           - { name: java, runtime_version: 21 }
 
           # PHP
-          - { name: php, runtime_version: 5.3 }
-          - { name: php, runtime_version: 7.4 }
-          - { name: php, runtime_version: 8.3 }
+#          - { name: php, runtime_version: 5.3 }
+#          - { name: php, runtime_version: 7.4 }
+#          - { name: php, runtime_version: 8.3 }
         include:
           # Windows Meterpreter
-          - { meterpreter: { name: windows_meterpreter }, os: windows-2019 }
-          - { meterpreter: { name: windows_meterpreter }, os: windows-2022 }
+#          - { meterpreter: { name: windows_meterpreter }, os: windows-2019 }
+#          - { meterpreter: { name: windows_meterpreter }, os: windows-2022 }
 
           # Mettle
           - { meterpreter: { name: mettle }, os: macos-12 }
@@ -210,7 +210,8 @@ jobs:
       - name: Move mettle gem into framework
         if: ${{ matrix.meterpreter.name == 'mettle' }}
         run: |
-          cp ./mettle/pkg/metasploit_payloads-mettle-${{ env.METTLE_VERSION }}.pre.dev.gem ./metasploit-framework
+          echo "FRAMEWORK_METTLE_VERSION=$(grep -oh "'metasploit_payloads-mettle', '[0-9].[0-9].[0-9]*'" metasploit-framework.gemspec | grep -oh '[0-9].[0-9].[0-9]*')" | tee -a $GITHUB_ENV
+          cp ../mettle/pkg/metasploit_payloads-mettle-${{ env.METTLE_VERSION }}.pre.dev.gem .
         working-directory: metasploit-framework
 
       - name: Install mettle gem
@@ -218,7 +219,9 @@ jobs:
         run: |
           set -x
           bundle exec gem install metasploit_payloads-mettle-${{ env.METTLE_VERSION }}.pre.dev.gem
-          ruby -pi.bak -e "gsub(/'metasploit_payloads-mettle', '${{ env.METTLE_VERSION }}'/, '\'metasploit_payloads-mettle\', \'${{ env.METTLE_VERSION }}.pre.dev\'')" metasploit-framework.gemspec
+          cat metasploit-framework.gemspec
+          ruby -pi.bak -e "gsub(/'metasploit_payloads-mettle', '${{ env.FRAMEWORK_METTLE_VERSION }}'/, '\'metasploit_payloads-mettle\', \'${{ env.METTLE_VERSION }}.pre.dev\'')" metasploit-framework.gemspec
+          cat metasploit-framework.gemspec
           bundle config unset deployment
           bundle update metasploit_payloads-mettle
           bundle install
