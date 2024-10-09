@@ -14,6 +14,7 @@ RSpec.describe Msf::Ui::Console::CommandDispatcher::Core do
   it { is_expected.to respond_to :cmd_getg }
   it { is_expected.to respond_to :cmd_set_tabs }
   it { is_expected.to respond_to :cmd_setg_tabs }
+  it { is_expected.to respond_to :cmd_spool }
 
   def set_and_test_variable(name, framework_value, module_value, framework_re, module_re)
     # the specified global value
@@ -33,6 +34,67 @@ RSpec.describe Msf::Ui::Console::CommandDispatcher::Core do
       @output = []
       core.cmd_get(name)
       expect(@output.join).to match module_re
+    end
+  end
+
+  describe '#cmd_spool' do
+    context 'without arguments' do
+      it 'should show the correct help message' do
+        core.cmd_spool
+        expect(@output.join).to match(%r{Usage: spool <off>|<filename>Example:  spool /tmp/console.log})
+      end
+    end
+
+    context 'with arguments' do
+      let(:name) { ::Rex::Text.rand_text_alpha(10).upcase }
+
+
+      context 'with an active module' do
+        let(:mod) do
+          mod = ::Msf::Module.new
+          mod.send(:initialize, {})
+          mod
+        end
+
+        let(:file_name) do
+          'foo.log'
+        end
+
+        let(:stdout) do
+          instance = double(
+            Rex::Ui::Text::Output::Tee.new(file_name)
+          )
+          instance
+        end
+
+        before(:each) do
+          allow(subject).to receive(:active_module).and_return(mod)
+          allow(driver).to receive(:input).and_return(driver_input)
+          allow(driver).to receive(:output).and_return(driver_output)
+          allow(driver_output).to receive(:config).and_return({:color=>:auto})
+          allow(driver).to receive(:init_ui).and_return(driver_input, stdout)
+          driver.init_ui(driver_input, stdout)
+          mod.init_ui(driver_input, stdout)
+        end
+
+        it 'should show the help message' do
+          core.cmd_spool('-h')
+          expect(@output.join).to match(%r{Usage: spool <off>|<filename>Example:  spool /tmp/console.log})
+          @output = []
+          core.cmd_spool('--help')
+          expect(@output.join).to match(%r{Usage: spool <off>|<filename>Example:  spool /tmp/console.log})
+        end
+
+        it 'should start spooling' do
+          core.cmd_spool(file_name)
+          expect(@output.join).to match(/Spooling to file foo.log.../)
+        end
+
+        it 'should stop spooling' do
+          core.cmd_spool('off')
+          expect(@output.join).to match(/Spooling is now disabled/)
+        end
+      end
     end
   end
 

@@ -1413,7 +1413,7 @@ class Core
   end
 
   def cmd_spool(*args)
-    if args.include?('-h') or args.empty?
+    if args.include?('-h') || args.include?('--help') || args.empty?
       cmd_spool_help
       return
     end
