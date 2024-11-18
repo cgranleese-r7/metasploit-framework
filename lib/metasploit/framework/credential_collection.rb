@@ -383,7 +383,7 @@ module Metasploit::Framework
           yield Metasploit::Framework::Credential.new(public: add_public, private: password, realm: realm, private_type: private_type(password) )
         end
         if user_as_pass
-          yield Metasploit::Framework::Credential.new(public: add_public, private: user_from_file, realm: realm, private_type: :password)
+          yield Metasploit::Framework::Credential.new(public: add_public, private: add_public, realm: realm, private_type: :password)
         end
         if blank_passwords
           yield Metasploit::Framework::Credential.new(public: add_public, private: "", realm: realm, private_type: :password)
@@ -502,7 +502,7 @@ module Metasploit::Framework
           yield Metasploit::Framework::Credential.new(public: add_public, private: password, realm: realm, private_type: private_type(password) )
         end
         if user_as_pass
-          yield Metasploit::Framework::Credential.new(public: add_public, private: user_from_file, realm: realm, private_type: :password)
+          yield Metasploit::Framework::Credential.new(public: add_public, private: add_public, realm: realm, private_type: :password)
         end
         if blank_passwords
           yield Metasploit::Framework::Credential.new(public: add_public, private: "", realm: realm, private_type: :password)
