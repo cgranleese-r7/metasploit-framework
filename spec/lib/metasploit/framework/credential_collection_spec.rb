@@ -536,7 +536,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       let(:additional_privates) { ['test_private'] }
       let(:additional_publics) { ['test_public'] }
 
-      # REMOVE BEFORE COMMIT: fails because of the useraspass error, then fails because of the nil value for addiitonal publics and should be ok then
+      # REMOVE BEFORE COMMIT: fails because of the useraspass error, then fails because of the nil value for addittonal publics and should be ok then
       specify  do
         expect { |b| collection.each(&b) }.to yield_successive_args(
           "test_prepend",

@@ -498,6 +498,9 @@ module Metasploit::Framework
       end
 
       additional_publics.each do |add_public|
+        if nil_passwords
+          yield Metasploit::Framework::Credential.new(public: add_public, private: nil, realm: realm, private_type: :password)
+        end
         if password.present?
           yield Metasploit::Framework::Credential.new(public: add_public, private: password, realm: realm, private_type: private_type(password) )
         end
