@@ -423,10 +423,10 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
             # REMOVE BEFORE COMMIT: fails because no pwd spraying
             specify  do
               expect { |b| collection.each(&b) }.to yield_successive_args(
-                Metasploit::Framework::Credential.new(public: "test_public1", private: ""),
-                Metasploit::Framework::Credential.new(public: "test_public2", private: ""),
                 Metasploit::Framework::Credential.new(public: "test_public1", private: nil),
                 Metasploit::Framework::Credential.new(public: "test_public2", private: nil),
+                Metasploit::Framework::Credential.new(public: "test_public1", private: ""),
+                Metasploit::Framework::Credential.new(public: "test_public2", private: ""),
               )
             end
           end
@@ -447,7 +447,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
 
             specify  do
               expect { |b| collection.each(&b) }.to yield_successive_args(
-                Metasploit::Framework::Credential.new(public: "adsf", private: "password"),
+                Metasploit::Framework::Credential.new(public: "asdf", private: "password"),
                 Metasploit::Framework::Credential.new(public: "jkl", private: "password"),
                 Metasploit::Framework::Credential.new(public: "test_public", private: "password"),
               )
@@ -524,7 +524,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
 
         filename
       end
-      let(:user_as_pass) { false }
+      let(:user_as_pass) { true }
       let(:userpass_file) do
         filename = "userpass_file"
         stub_file = StringIO.new("userpass_user userpass_pass\n")
