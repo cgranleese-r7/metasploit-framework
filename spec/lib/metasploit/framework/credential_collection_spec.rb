@@ -72,7 +72,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       let(:pass_file) do
         filename = "foo"
         stub_file = StringIO.new("asdf\njkl\n")
-        allow(File).to receive(:open).with(filename,/^r/).and_return stub_file
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
         filename
       end
@@ -85,7 +85,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       end
     end
 
-    context "when given a userspass_file" do
+    context "when given a userpass_file" do
       let(:username) { nil }
       let(:password) { nil }
       let(:userpass_file) do
@@ -102,8 +102,6 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
           Metasploit::Framework::Credential.new(public: "foo", private: "bar"),
         )
       end
-
-      # REMOVE BEFORE COMMIT: question for the userpass file: do we want to make options work with it or not?
     end
 
     context "when given a pass_file and user_file" do
@@ -119,7 +117,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       let(:pass_file) do
         filename = "pass_file"
         stub_file = StringIO.new("asdf\njkl\n")
-        allow(File).to receive(:open).with(filename,/^r/).and_return stub_file
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
         filename
       end
@@ -148,7 +146,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       let(:user_file) do
         filename = "user_file"
         stub_file = StringIO.new("user1\nuser2\nuser3\n")
-        allow(File).to receive(:open).with(filename,/^r/).and_return stub_file
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
         filename
       end
@@ -163,23 +161,40 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
           Metasploit::Framework::Credential.new(public: "user3", private: "password2"),
         )
       end
+    end
 
-      context 'when :user_as_pass is true' do
-        let(:user_as_pass) { true }
+    context 'when given a pass_file and user_file and password spray and :user_as_pass is true' do
+      let(:password) { nil }
+      let(:username) { nil }
+      let(:password_spray) { true }
+      let(:pass_file) do
+        filename = "pass_file"
+        stub_file = StringIO.new("password1\npassword2\n")
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
-        specify  do
-          expect { |b| collection.each(&b) }.to yield_successive_args(
-            Metasploit::Framework::Credential.new(public: "user1", private: "user1"),
-            Metasploit::Framework::Credential.new(public: "user2", private: "user2"),
-            Metasploit::Framework::Credential.new(public: "user3", private: "user3"),
-            Metasploit::Framework::Credential.new(public: "user1", private: "password1"),
-            Metasploit::Framework::Credential.new(public: "user2", private: "password1"),
-            Metasploit::Framework::Credential.new(public: "user3", private: "password1"),
-            Metasploit::Framework::Credential.new(public: "user1", private: "password2"),
-            Metasploit::Framework::Credential.new(public: "user2", private: "password2"),
-            Metasploit::Framework::Credential.new(public: "user3", private: "password2"),
-          )
-        end
+        filename
+      end
+      let(:user_file) do
+        filename = "user_file"
+        stub_file = StringIO.new("user1\nuser2\nuser3\n")
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
+
+        filename
+      end
+      let(:user_as_pass) { true }
+
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          Metasploit::Framework::Credential.new(public: "user1", private: "user1"),
+          Metasploit::Framework::Credential.new(public: "user2", private: "user2"),
+          Metasploit::Framework::Credential.new(public: "user3", private: "user3"),
+          Metasploit::Framework::Credential.new(public: "user1", private: "password1"),
+          Metasploit::Framework::Credential.new(public: "user2", private: "password1"),
+          Metasploit::Framework::Credential.new(public: "user3", private: "password1"),
+          Metasploit::Framework::Credential.new(public: "user1", private: "password2"),
+          Metasploit::Framework::Credential.new(public: "user2", private: "password2"),
+          Metasploit::Framework::Credential.new(public: "user3", private: "password2"),
+        )
       end
     end
 
@@ -209,7 +224,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       let(:user_file) do
         filename = "user_file"
         stub_file = StringIO.new("user1\nuser2\nuser3\n")
-        allow(File).to receive(:open).with(filename,/^r/).and_return stub_file
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
         filename
       end
@@ -244,7 +259,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       let(:user_file) do
         filename = "user_file"
         stub_file = StringIO.new("user1\nuser2\nuser3\n")
-        allow(File).to receive(:open).with(filename,/^r/).and_return stub_file
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
         filename
       end
@@ -282,7 +297,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       let(:pass_file) do
         filename = "pass_file"
         stub_file = StringIO.new("asdf\njkl\n")
-        allow(File).to receive(:open).with(filename, /^r/).and_return stub_file
+        allow(File).to receive(:open).with(filename, /^r/).and_yield stub_file
 
         filename
       end
@@ -317,18 +332,19 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
           Metasploit::Framework::Credential.new(public: username, private: password),
         )
       end
+    end
 
-      context "when using password spraying" do
-        let(:password_spray) { true }
+    context "when using password spraying and :nil_passwords is true" do
+      let(:password_spray) { true }
+      let(:nil_passwords) { true }
 
-        # REMOVE BEFORE COMMIT: yields nothings, fails because of bug in method
-        context "without password" do
-          let(:password) { nil }
-          specify  do
-            expect { |b| collection.each(&b) }.to yield_successive_args(
-              Metasploit::Framework::Credential.new(public: username, private: nil),
-            )
-          end
+      # REMOVE BEFORE COMMIT: yields nothings, fails because of bug in method
+      context "without password" do
+        let(:password) { nil }
+        specify  do
+          expect { |b| collection.each(&b) }.to yield_successive_args(
+            Metasploit::Framework::Credential.new(public: username, private: nil),
+          )
         end
       end
     end
@@ -371,137 +387,135 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       end
     end
 
-    context "when given additional_publics" do
+    context "when given additional_publics and :user_as_pass is true" do
       let(:username) { nil }
       let(:password) { nil }
       let(:additional_publics) { [ "test_public" ] }
+      let(:user_as_pass) { true }
 
-      context "when :user_as_pass is true" do
-        let(:user_as_pass) { true }
-
-        # REMOVE BEFORE COMMIT currently failing
-        specify  do
-          expect { |b| collection.each(&b) }.to yield_successive_args(
-            Metasploit::Framework::Credential.new(public: "test_public", private: "test_public"),
-          )
-        end
-
-
-        context "when using password spraying" do
-          let(:password_spray) { true }
-
-          # REMOVE BEFORE COMMIT currently failing
-          specify  do
-            expect { |b| collection.each(&b) }.to yield_successive_args(
-              Metasploit::Framework::Credential.new(public: "test_public", private: "test_public"),
-            )
-          end
-        end
-      end
-
-      context "when :nil_passwords is true" do
-        let(:nil_passwords) { true }
-
-        # REMOVE BEFORE COMMIT: this option is ignored currently for additional_publics
-        specify do
-          expect { |b| collection.each(&b) }.to yield_successive_args(
-            Metasploit::Framework::Credential.new(public: "test_public", private: nil),
-          )
-        end
-      end
-
-      context "when using password spraying" do
-        let(:password_spray) { true }
-
-        context "when :blank_passwords and :nil_password are true" do
-          let(:blank_passwords) { true }
-          let(:nil_passwords) { true }
-
-          context "with 2 additional_publics" do
-            let(:additional_publics) { [ "test_public1", "test_public2" ] }
-
-            # REMOVE BEFORE COMMIT: fails because no pwd spraying
-            specify  do
-              expect { |b| collection.each(&b) }.to yield_successive_args(
-                Metasploit::Framework::Credential.new(public: "test_public1", private: nil),
-                Metasploit::Framework::Credential.new(public: "test_public2", private: nil),
-                Metasploit::Framework::Credential.new(public: "test_public1", private: ""),
-                Metasploit::Framework::Credential.new(public: "test_public2", private: ""),
-              )
-            end
-          end
-        end
-
-        context "when given a user file" do
-          let(:user_file) do
-            filename = "user_file"
-            stub_file = StringIO.new("asdf\njkl\n")
-            allow(File).to receive(:open).with(filename, /^r/).and_return stub_file
-
-            filename
-          end
-
-          # REMOVE BEFORE COMMIT: this also yields the usernames as passwords for the additional_public
-          context "when given a password" do
-            let(:password) { "password" }
-
-            specify  do
-              expect { |b| collection.each(&b) }.to yield_successive_args(
-                Metasploit::Framework::Credential.new(public: "asdf", private: "password"),
-                Metasploit::Framework::Credential.new(public: "jkl", private: "password"),
-                Metasploit::Framework::Credential.new(public: "test_public", private: "password"),
-              )
-            end
-          end
-        end
+      # REMOVE BEFORE COMMIT currently failing
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          Metasploit::Framework::Credential.new(public: "test_public", private: "test_public"),
+        )
       end
     end
 
-    context "when using password spraying" do
-      let(:password_spray) { true }
+    context "when given additional_publics, :user_as_pass is true and using password spraying" do
       let(:username) { nil }
       let(:password) { nil }
+      let(:additional_publics) { [ "test_public" ] }
+      let(:user_as_pass) { true }
+      let(:password_spray) { true }
 
-      context "when :blank_passwords is true" do
-        let(:blank_passwords) { true }
+      # REMOVE BEFORE COMMIT currently failing
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          Metasploit::Framework::Credential.new(public: "test_public", private: "test_public"),
+        )
+      end
+    end
 
-        context "with password (but no username)" do
-          let(:password) { "pass" }
+    context "when given additional_publics and :nil_password is true" do
+      let(:username) { nil }
+      let(:password) { nil }
+      let(:additional_publics) { [ "test_public" ] }
+      let(:nil_passwords) { true }
 
-          # REMOVE BEFORE COMMIT: this yields empty creds (no username, no pass)
-          specify  do
-            expect { |b| collection.each(&b) }.to yield_successive_args()
-          end
-        end
+      # REMOVE BEFORE COMMIT: this option is ignored currently for additional_publics
+      specify do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          Metasploit::Framework::Credential.new(public: "test_public", private: nil),
+        )
+      end
+    end
 
-        # REMOVE BEFORE COMMIT: yields nothings, fails because of bug in method
-        context "with username (but no password)" do
-          let(:username) { "user" }
+    context "when given additional_publics, :nil_password is true, :blank_passwords is true and using password spraying" do
+      let(:username) { nil }
+      let(:password) { nil }
+      let(:additional_publics) { [ "test_public1", "test_public2" ] }
+      let(:nil_passwords) { true }
+      let(:blank_passwords) { true }
+      let(:password_spray) { true }
 
-          specify  do
-            expect { |b| collection.each(&b) }.to yield_successive_args(
-              Metasploit::Framework::Credential.new(public: username, private: ''),
-            )
-          end
-        end
+      # REMOVE BEFORE COMMIT: fails because no pwd spraying
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          Metasploit::Framework::Credential.new(public: "test_public1", private: nil),
+          Metasploit::Framework::Credential.new(public: "test_public2", private: nil),
+          Metasploit::Framework::Credential.new(public: "test_public1", private: ""),
+          Metasploit::Framework::Credential.new(public: "test_public2", private: ""),
+        )
+      end
+    end
 
-        context "when given a user_file" do
-          let(:user_file) do
-            filename = "foo"
-            stub_file = StringIO.new("asdf\njkl\n")
-            allow(File).to receive(:open).with(filename,/^r/).and_return stub_file
+    context "when given additional_publics, a user_file, a password and using password spraying" do
+      let(:username) { nil }
+      let(:password) { "password" }
+      let(:additional_publics) { [ "test_public" ] }
+      let(:user_file) do
+        filename = "user_file"
+        stub_file = StringIO.new("asdf\njkl\n")
+        allow(File).to receive(:open).with(filename, /^r/).and_yield stub_file
 
-            filename
-          end
+        filename
+      end
 
-          # REMOVE BEFORE COMMIT: yields nothing, same for blank passwords option
-          specify  do
-            expect { |b| collection.each(&b) }.to yield_successive_args(
-              Metasploit::Framework::Credential.new(public: "asdf", private: ''),
-              Metasploit::Framework::Credential.new(public: "jkl", private: ''),
-            )
-          end
-        end
+      # REMOVE BEFORE COMMIT: this also yields the usernames as passwords for the additional_public
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          Metasploit::Framework::Credential.new(public: "asdf", private: "password"),
+          Metasploit::Framework::Credential.new(public: "jkl", private: "password"),
+          Metasploit::Framework::Credential.new(public: "test_public", private: "password"),
+        )
+      end
+    end
+
+    context "when using password spraying with blank_passwords and a password (but no username)" do
+      let(:password_spray) { true }
+      let(:blank_passwords) { true }
+      let(:username) { nil }
+      let(:password) { "pass" }
+
+      # REMOVE BEFORE COMMIT: this yields empty creds (no username, no pass)
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args()
+      end
+    end
+
+    context "when using password spraying with blank_passwords and a username (but no password)" do
+      let(:password_spray) { true }
+      let(:blank_passwords) { true }
+      let(:username) { "user" }
+      let(:password) { nil }
+
+      # REMOVE BEFORE COMMIT: this yields empty creds (no username, no pass)
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          Metasploit::Framework::Credential.new(public: username, private: ''),
+        )
+      end
+    end
+
+    context "when using password spraying with blank_passwords and given a user_file" do
+      let(:password_spray) { true }
+      let(:blank_passwords) { true }
+      let(:username) { nil }
+      let(:password) { nil }
+      let(:user_file) do
+        filename = "foo"
+        stub_file = StringIO.new("asdf\njkl\n")
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
+
+        filename
+      end
+
+      # REMOVE BEFORE COMMIT: yields nothing, same for blank passwords option
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          Metasploit::Framework::Credential.new(public: "asdf", private: ''),
+          Metasploit::Framework::Credential.new(public: "jkl", private: ''),
+        )
       end
     end
 
@@ -520,7 +534,7 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
       let(:pass_file) do
         filename = "pass_file"
         stub_file = StringIO.new("passfile\n")
-        allow(File).to receive(:open).with(filename,/^r/).and_return stub_file
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
         filename
       end
@@ -561,48 +575,63 @@ RSpec.describe Metasploit::Framework::CredentialCollection do
           Metasploit::Framework::Credential.new(public: "test_public", private: "test_private")
         )
       end
+    end
 
-      context "when using password spraying" do
-        let(:password_spray) { true }
-        let(:user_file) do
-          filename = "user_file"
-          stub_file = StringIO.new("userfile")
-          allow(File).to receive(:open).with(filename,/^r/).and_return stub_file
+    context "when using password spraying in combination with every other option" do
+      let(:password_spray) { true }
+      let(:nil_passwords) { true }
+      let(:blank_passwords) { true }
+      let(:username) { "user" }
+      let(:password) { "pass" }
+      let(:user_file) do
+        filename = "user_file"
+        stub_file = StringIO.new("userfile")
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
-          filename
-        end
-        let(:pass_file) do
-          filename = "pass_file"
-          stub_file = StringIO.new("passfile\n")
-          allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
+        filename
+      end
+      let(:pass_file) do
+        filename = "pass_file"
+        stub_file = StringIO.new("passfile\n")
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
-          filename
-        end
+        filename
+      end
+      let(:user_as_pass) { true }
+      let(:userpass_file) do
+        filename = "userpass_file"
+        stub_file = StringIO.new("userpass_user userpass_pass\n")
+        allow(File).to receive(:open).with(filename,/^r/).and_yield stub_file
 
-        specify  do
-          expect { |b| collection.each(&b) }.to yield_successive_args(
-            "test_prepend",
-            Metasploit::Framework::Credential.new(public: "user", private: nil),
-            Metasploit::Framework::Credential.new(public: "userfile", private: nil),
-            Metasploit::Framework::Credential.new(public: "test_public", private: nil),
-            Metasploit::Framework::Credential.new(public: "user", private: "pass"),
-            Metasploit::Framework::Credential.new(public: "userfile", private: "pass"),
-            Metasploit::Framework::Credential.new(public: "test_public", private: "pass"),
-            Metasploit::Framework::Credential.new(public: "user", private: "user"),
-            Metasploit::Framework::Credential.new(public: "userfile", private: "userfile"),
-            Metasploit::Framework::Credential.new(public: "test_public", private: "test_public"),
-            Metasploit::Framework::Credential.new(public: "user", private: ""),
-            Metasploit::Framework::Credential.new(public: "userfile", private: ""),
-            Metasploit::Framework::Credential.new(public: "test_public", private: ""),
-            Metasploit::Framework::Credential.new(public: "user", private: "passfile"),
-            Metasploit::Framework::Credential.new(public: "userfile", private: "passfile"),
-            Metasploit::Framework::Credential.new(public: "test_public", private: "passfile"),
-            Metasploit::Framework::Credential.new(public: "userpass_user", private: "userpass_pass"),
-            Metasploit::Framework::Credential.new(public: "user", private: "test_private"),
-            Metasploit::Framework::Credential.new(public: "userfile", private: "test_private"),
-            Metasploit::Framework::Credential.new(public: "test_public", private: "test_private"),
-          )
-        end
+        filename
+      end
+      let(:prepended_creds) { ['test_prepend'] }
+      let(:additional_privates) { ['test_private'] }
+      let(:additional_publics) { ['test_public'] }
+
+      specify  do
+        expect { |b| collection.each(&b) }.to yield_successive_args(
+          "test_prepend",
+          Metasploit::Framework::Credential.new(public: "user", private: nil),
+          Metasploit::Framework::Credential.new(public: "userfile", private: nil),
+          Metasploit::Framework::Credential.new(public: "test_public", private: nil),
+          Metasploit::Framework::Credential.new(public: "user", private: "pass"),
+          Metasploit::Framework::Credential.new(public: "userfile", private: "pass"),
+          Metasploit::Framework::Credential.new(public: "test_public", private: "pass"),
+          Metasploit::Framework::Credential.new(public: "user", private: "user"),
+          Metasploit::Framework::Credential.new(public: "userfile", private: "userfile"),
+          Metasploit::Framework::Credential.new(public: "test_public", private: "test_public"),
+          Metasploit::Framework::Credential.new(public: "user", private: ""),
+          Metasploit::Framework::Credential.new(public: "userfile", private: ""),
+          Metasploit::Framework::Credential.new(public: "test_public", private: ""),
+          Metasploit::Framework::Credential.new(public: "user", private: "passfile"),
+          Metasploit::Framework::Credential.new(public: "userfile", private: "passfile"),
+          Metasploit::Framework::Credential.new(public: "test_public", private: "passfile"),
+          Metasploit::Framework::Credential.new(public: "userpass_user", private: "userpass_pass"),
+          Metasploit::Framework::Credential.new(public: "user", private: "test_private"),
+          Metasploit::Framework::Credential.new(public: "userfile", private: "test_private"),
+          Metasploit::Framework::Credential.new(public: "test_public", private: "test_private"),
+        )
       end
     end
   end
