@@ -273,6 +273,14 @@ module Metasploit::Framework
         yield Metasploit::Framework::Credential.new(public: '', private: '', realm: realm, private_type: :password)
       end
 
+      if ignore_private
+        if ignore_public
+          yield Metasploit::Framework::Credential.new(public: nil, private: nil, realm: realm)
+        else
+          yield Metasploit::Framework::Credential.new(public: username, private: nil, realm: realm)
+        end
+      end
+
       if password_spray
         each_unfiltered_password_first(&block)
       else
