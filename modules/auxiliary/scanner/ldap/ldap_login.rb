@@ -96,7 +96,7 @@ class MetasploitModule < Msf::Auxiliary
     ignore_public = datastore['LDAP::Auth'] == Msf::Exploit::Remote::AuthOption::SCHANNEL
     ignore_private =
       datastore['LDAP::Auth'] == Msf::Exploit::Remote::AuthOption::SCHANNEL ||
-      (Msf::Exploit::Remote::AuthOption::KERBEROS && !datastore['ANONYMOUS_LOGIN'] && !datastore['PASSWORD'])
+      (Msf::Exploit::Remote::AuthOption::KERBEROS && !datastore['ANONYMOUS_LOGIN'] && !datastore['LDAPPassword'])
 
     cred_collection = build_credential_collection(
       username: datastore['LDAPUsername'],
@@ -109,7 +109,7 @@ class MetasploitModule < Msf::Auxiliary
     )
 
     opts = {
-      domain: datastore['LDAPDomain'],
+      ldap_domain: datastore['LDAPDomain'],
       append_domain: datastore['APPEND_DOMAIN'],
       ssl: datastore['SSL'],
       proxies: datastore['PROXIES'],
@@ -124,7 +124,7 @@ class MetasploitModule < Msf::Auxiliary
     realm_key = nil
     if opts[:ldap_auth] == Msf::Exploit::Remote::AuthOption::KERBEROS
       realm_key = Metasploit::Model::Realm::Key::ACTIVE_DIRECTORY_DOMAIN
-      if !datastore['ANONYMOUS_LOGIN'] && !datastore['PASSWORD']
+      if !datastore['ANONYMOUS_LOGIN'] && !datastore['LDAPPassword']
         # In case no password has been provided, we assume the user wants to use Kerberos tickets stored in cache
         # Write mode is still enable in case new TGS tickets are retrieved.
         opts[:kerberos_ticket_storage] = kerberos_ticket_storage({ read: true, write: true })
@@ -172,6 +172,7 @@ class MetasploitModule < Msf::Auxiliary
         successful_sessions << create_session(result, ip) if create_session?
       else
         invalidate_login(credential_data)
+        require 'pry-byebug'; binding.pry
         vprint_error "#{ip}:#{rport} - LOGIN FAILED: #{result.credential} (#{result.status}: #{result.proof})"
       end
     end
