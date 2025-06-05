@@ -28,10 +28,26 @@ on:
         description: 'metasploit-payloads branch you want to test'
         required: true
         default: 'master'
+      metasploit_payloads_username:
+        description: 'GitHub username for forked metasploit-payloads repository'
+        required: false
+        default: 'rapid7'
       mettle_commit:
         description: 'mettle branch you want to test'
         required: true
         default: 'master'
+      mettle_username:
+        description: 'GitHub username for forked mettle repository'
+        required: false
+        default: 'rapid7'
+      metasploit_framework_commit:
+        description: 'metasploit-framework branch you want to test'
+        required: false
+        default: ''
+      metasploit_framework_username:
+        description: 'GitHub username for forked metasploit-framework repository'
+        required: false
+        default: 'rapid7'
   push:
     branches-ignore:
       - gh-pages
@@ -60,7 +76,11 @@ jobs:
   build:
     uses: ./.github/workflows/shared_meterpreter_acceptance.yml
     with:
+      metasploit_framework_commit: ${{ github.event.inputs.metasploit_framework_commit }}
+      metasploit_framework_username: ${{ github.event.inputs.metasploit_framework_username }}
       metasploit_payloads_commit: ${{ github.event.inputs.metasploit_payloads_commit }}
+      metasploit_payloads_username: ${{ github.event.inputs.metasploit_payloads_username }}
       mettle_commit: ${{ github.event.inputs.mettle_commit }}
+      mettle_username: ${{ github.event.inputs.mettle_username }}
       build_metasploit_payloads: ${{ contains(github.event.pull_request.labels.*.name, 'payload-testing-branch') }}
       build_mettle: ${{ contains(github.event.pull_request.labels.*.name, 'payload-testing-mettle-branch') }}

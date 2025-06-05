@@ -8,14 +8,29 @@ on:
         default: ''
         required: false
         type: string
+      metasploit_framework_username:
+        description: "GitHub username for forked metasploit-framework repository"
+        default: 'rapid7'
+        required: false
+        type: string
       metasploit_payloads_commit:
         description: "metasploit-payloads commit to build with"
         default: ''
         required: false
         type: string
+      metasploit_payloads_username:
+        description: "GitHub username for forked metasploit-payloads repository"
+        default: 'rapid7'
+        required: false
+        type: string
       mettle_commit:
         description: "mettle commit to build with"
         default: ''
+        required: false
+        type: string
+      mettle_username:
+        description: "GitHub username for forked mettle repository"
+        default: 'rapid7'
         required: false
         type: string
       build_mettle:
@@ -42,7 +57,7 @@ jobs:
       - name: Checkout metasploit-payloads
         uses: actions/checkout@v4
         with:
-          repository: rapid7/metasploit-payloads
+          repository: ${{ inputs.metasploit_payloads_username }}/metasploit-payloads
           path: metasploit-payloads
           ref: ${{ inputs.metasploit_payloads_commit }}
 
@@ -154,7 +169,7 @@ jobs:
         if: ${{ matrix.meterpreter.name == 'mettle' && inputs.build_mettle }}
         uses: actions/checkout@v4
         with:
-          repository: rapid7/mettle
+          repository: ${{ inputs.mettle_username }}/mettle
           path: mettle
           ref: ${{ inputs.mettle_commit }}
 
@@ -187,7 +202,7 @@ jobs:
       - name: Checkout metasploit-framework commit
         uses: actions/checkout@v4
         with:
-          repository: rapid7/metasploit-framework
+          repository: ${{ inputs.metasploit_framework_username }}/metasploit-framework
           path: metasploit-framework
           ref: ${{ inputs.metasploit_framework_commit }}
 
@@ -254,7 +269,7 @@ jobs:
         if: ${{ inputs.build_metasploit_payloads && matrix.meterpreter.name != 'mettle' }}
         uses: actions/checkout@v4
         with:
-          repository: rapid7/metasploit-payloads
+          repository: ${{ inputs.metasploit_payloads_username }}/metasploit-payloads
           path: metasploit-payloads
           ref: ${{ inputs.metasploit_payloads_commit }}
 
