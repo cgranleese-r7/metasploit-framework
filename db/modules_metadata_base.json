@@ -8833,7 +8833,7 @@
       "Michael Heinzl",
       "Tenable"
     ],
-    "description": "This module exploits a path traversal vulnerability (CVE-2023-2915) in ThinManager <= v13.1.0 to delete arbitrary files from the system.\n\n          The affected service listens by default on TCP port 2031 and runs in the context of NT AUTHORITY\\SYSTEM.",
+    "description": "This module exploits a path traversal vulnerability (CVE-2023-2915) in\n          ThinManager <= v13.1.0 to delete arbitrary files from the system.\n          The affected service listens by default on TCP port 2031 and runs in the\n          context of NT AUTHORITY\\SYSTEM.",
     "references": [
       "CVE-2023-2915",
       "URL-https://www.tenable.com/security/research/tra-2023-28",
@@ -8845,7 +8845,7 @@
     "autofilter_ports": [],
     "autofilter_services": [],
     "targets": null,
-    "mod_time": "2025-06-05 02:57:40 +0000",
+    "mod_time": "2025-06-09 09:17:11 +0000",
     "path": "/modules/auxiliary/admin/networking/thinmanager_traversal_delete.rb",
     "is_install_path": true,
     "ref_name": "admin/networking/thinmanager_traversal_delete",
@@ -8876,7 +8876,7 @@
       "Michael Heinzl",
       "Tenable"
     ],
-    "description": "This module exploits a path traversal vulnerability (CVE-2023-27855 ) in ThinManager <= v13.0.1 to upload arbitrary files to the target system.\n\n          The affected service listens by default on TCP port 2031 and runs in the context of NT AUTHORITY\\SYSTEM.",
+    "description": "This module exploits a path traversal vulnerability (CVE-2023-27855) in\n          ThinManager <= v13.0.1 to upload arbitrary files to the target system.\n          The affected service listens by default on TCP port 2031 and runs in the\n          context of NT AUTHORITY\\SYSTEM.",
     "references": [
       "CVE-2023-27855",
       "URL-https://www.tenable.com/security/research/tra-2023-13",
@@ -8888,7 +8888,7 @@
     "autofilter_ports": [],
     "autofilter_services": [],
     "targets": null,
-    "mod_time": "2025-06-06 10:06:21 +0000",
+    "mod_time": "2025-06-09 09:17:11 +0000",
     "path": "/modules/auxiliary/admin/networking/thinmanager_traversal_upload.rb",
     "is_install_path": true,
     "ref_name": "admin/networking/thinmanager_traversal_upload",
@@ -8920,9 +8920,9 @@
       "Michael Heinzl",
       "Tenable"
     ],
-    "description": "This module exploits a path traversal vulnerability (CVE-2023-2917) in ThinManager <= v13.1.0 to upload arbitrary files to the target system.\n\n          The affected service listens by default on TCP port 2031 and runs in the context of NT AUTHORITY\\SYSTEM.",
+    "description": "This module exploits a path traversal vulnerability (CVE-2023-2917) in\n          ThinManager <= v13.1.0 to upload arbitrary files to the target system.\n          The affected service listens by default on TCP port 2031 and runs in the\n          context of NT AUTHORITY\\SYSTEM.",
     "references": [
-      "CVE-2023-2917 ",
+      "CVE-2023-2917",
       "URL-https://www.tenable.com/security/research/tra-2023-28",
       "URL-https://support.rockwellautomation.com/app/answers/answer_view/a_id/1140471"
     ],
@@ -8932,7 +8932,7 @@
     "autofilter_ports": [],
     "autofilter_services": [],
     "targets": null,
-    "mod_time": "2025-05-15 21:55:27 +0000",
+    "mod_time": "2025-06-09 09:17:11 +0000",
     "path": "/modules/auxiliary/admin/networking/thinmanager_traversal_upload2.rb",
     "is_install_path": true,
     "ref_name": "admin/networking/thinmanager_traversal_upload2",
@@ -26506,7 +26506,7 @@
       "Michael Heinzl",
       "Tenable"
     ],
-    "description": "This module exploits a path traversal vulnerability (CVE-2023-27856) in ThinManager <= v13.0.1 to retrieve arbitrary files from the system.\n\n          The affected service listens by default on TCP port 2031 and runs in the context of NT AUTHORITY\\SYSTEM.",
+    "description": "This module exploits a path traversal vulnerability (CVE-2023-27856) in\n          ThinManager <= v13.0.1 to retrieve arbitrary files from the system.\n          The affected service listens by default on TCP port 2031 and runs in the\n          context of NT AUTHORITY\\SYSTEM.",
     "references": [
       "CVE-2023-27856",
       "URL-https://www.tenable.com/security/research/tra-2023-13",
@@ -26518,7 +26518,7 @@
     "autofilter_ports": [],
     "autofilter_services": [],
     "targets": null,
-    "mod_time": "2025-06-04 19:18:43 +0000",
+    "mod_time": "2025-06-09 09:17:11 +0000",
     "path": "/modules/auxiliary/gather/thinmanager_traversal_download.rb",
     "is_install_path": true,
     "ref_name": "gather/thinmanager_traversal_download",
@@ -52403,7 +52403,7 @@
       "microsoft-ds"
     ],
     "targets": null,
-    "mod_time": "2025-05-21 10:45:08 +0000",
+    "mod_time": "2025-06-11 11:56:56 +0000",
     "path": "/modules/auxiliary/scanner/smb/smb_version.rb",
     "is_install_path": true,
     "ref_name": "scanner/smb/smb_version",
@@ -63490,7 +63490,7 @@
     "targets": [
       "FreeBSD 6.2-Release Bruteforce"
     ],
-    "mod_time": "2025-04-13 00:38:37 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/freebsd/tacacs/xtacacsd_report.rb",
     "is_install_path": true,
     "ref_name": "freebsd/tacacs/xtacacsd_report",
@@ -63882,7 +63882,7 @@
       "Evgeny Legerov <admin@gleg.net>",
       "jduck <jduck@metasploit.com>"
     ],
-    "description": "This module exploits a stack-based buffer overflow in versions 1.2 through\n        1.3.0 of ProFTPD server. The vulnerability is within the \"sreplace\" function\n        within the \"src/support.c\" file.\n\n        The off-by-one heap overflow bug in the ProFTPD sreplace function has been\n        discovered about 2 (two) years ago by Evgeny Legerov. We tried to exploit\n        this off-by-one bug via MKD command, but failed. We did not work on this bug\n        since then.\n\n        Actually, there are exists at least two bugs in sreplace function, one is the\n        mentioned off-by-one heap overflow bug the other is a stack-based buffer overflow\n        via 'sstrncpy(dst,src,negative argument)'.\n\n        We were unable to reach the \"sreplace\" stack bug on ProFTPD 1.2.10 stable\n        version, but the version 1.3.0rc3 introduced some interesting changes, among them:\n\n        1. another (integer) overflow in sreplace!\n        2. now it is possible to reach sreplace stack-based buffer overflow bug via\n          the \"pr_display_file\" function!\n        3. stupid '.message' file display bug\n\n        So we decided to choose ProFTPD 1.3.0 as a target for our exploit.\n        To reach the bug, you need to upload a specially created .message file to a\n        writeable directory, then do \"CWD <writeable directory>\" to trigger the invocation\n        of sreplace function.\n\n        Note that ProFTPD 1.3.0rc3 has introduced a stupid bug: to display '.message'\n        file you also have to upload a file named '250'. ProFTPD 1.3.0 fixes this bug.\n\n        The exploit is a part of VulnDisco Pack since Dec 2005.",
+    "description": "This module exploits a stack-based buffer overflow in versions 1.2 through\n          1.3.0 of ProFTPD server. The vulnerability is within the \"sreplace\" function\n          within the \"src/support.c\" file.\n\n          The off-by-one heap overflow bug in the ProFTPD sreplace function has been\n          discovered about 2 (two) years ago by Evgeny Legerov. We tried to exploit\n          this off-by-one bug via MKD command, but failed. We did not work on this bug\n          since then.\n\n          Actually, there are exists at least two bugs in sreplace function, one is the\n          mentioned off-by-one heap overflow bug the other is a stack-based buffer overflow\n          via 'sstrncpy(dst,src,negative argument)'.\n\n          We were unable to reach the \"sreplace\" stack bug on ProFTPD 1.2.10 stable\n          version, but the version 1.3.0rc3 introduced some interesting changes, among them:\n\n          1. another (integer) overflow in sreplace!\n          2. now it is possible to reach sreplace stack-based buffer overflow bug via\n          the \"pr_display_file\" function!\n          3. stupid '.message' file display bug\n\n          So we decided to choose ProFTPD 1.3.0 as a target for our exploit.\n          To reach the bug, you need to upload a specially created .message file to a\n          writeable directory, then do \"CWD <writeable directory>\" to trigger the invocation\n          of sreplace function.\n\n          Note that ProFTPD 1.3.0rc3 has introduced a stupid bug: to display '.message'\n          file you also have to upload a file named '250'. ProFTPD 1.3.0 fixes this bug.\n\n          The exploit is a part of VulnDisco Pack since Dec 2005.",
     "references": [
       "CVE-2006-5815",
       "OSVDB-68985",
@@ -63907,14 +63907,25 @@
       "Debug",
       "ProFTPD 1.3.0 (source install) / Debian 3.1"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 22:36:46 +0000",
     "path": "/modules/exploits/linux/ftp/proftp_sreplace.rb",
     "is_install_path": true,
     "ref_name": "linux/ftp/proftp_sreplace",
     "check": true,
     "post_auth": false,
     "default_credential": false,
-    "notes": {},
+    "notes": {
+      "Stability": [
+        "crash-service-down"
+      ],
+      "SideEffects": [
+        "artifacts-on-disk",
+        "ioc-in-logs"
+      ],
+      "Reliability": [
+        "unreliable-session"
+      ]
+    },
     "session_types": false,
     "needs_cleanup": null
   },
@@ -63928,7 +63939,7 @@
     "author": [
       "jduck <jduck@metasploit.com>"
     ],
-    "description": "This module exploits a stack-based buffer overflow in versions of ProFTPD\n        server between versions 1.3.2rc3 and 1.3.3b. By sending data containing a\n        large number of Telnet IAC commands, an attacker can corrupt memory and\n        execute arbitrary code.\n\n        The Debian Squeeze version of the exploit uses a little ROP stub to indirectly\n        transfer the flow of execution to a pool buffer (the cmd_rec \"res\" in\n        \"pr_cmd_read\").\n\n        The Ubuntu version uses a ROP stager to mmap RWX memory, copy a small stub\n        to it, and execute the stub. The stub then copies the remainder of the payload\n        in and executes it.\n\n        NOTE: Most Linux distributions either do not ship a vulnerable version of\n        ProFTPD, or they ship a version compiled with stack smashing protection.\n\n        Although SSP significantly reduces the probability of a single attempt\n        succeeding, it will not prevent exploitation. Since the daemon forks in a\n        default configuration, the cookie value will remain the same despite\n        some attempts failing. By making repeated requests, an attacker can eventually\n        guess the cookie value and exploit the vulnerability.\n\n        The cookie in Ubuntu has 24-bits of entropy. This reduces the effectiveness\n        and could allow exploitation in semi-reasonable amount of time.",
+    "description": "This module exploits a stack-based buffer overflow in versions of ProFTPD\n          server between versions 1.3.2rc3 and 1.3.3b. By sending data containing a\n          large number of Telnet IAC commands, an attacker can corrupt memory and\n          execute arbitrary code.\n\n          The Debian Squeeze version of the exploit uses a little ROP stub to indirectly\n          transfer the flow of execution to a pool buffer (the cmd_rec \"res\" in\n          \"pr_cmd_read\").\n\n          The Ubuntu version uses a ROP stager to mmap RWX memory, copy a small stub\n          to it, and execute the stub. The stub then copies the remainder of the payload\n          in and executes it.\n\n          NOTE: Most Linux distributions either do not ship a vulnerable version of\n          ProFTPD, or they ship a version compiled with stack smashing protection.\n\n          Although SSP significantly reduces the probability of a single attempt\n          succeeding, it will not prevent exploitation. Since the daemon forks in a\n          default configuration, the cookie value will remain the same despite\n          some attempts failing. By making repeated requests, an attacker can eventually\n          guess the cookie value and exploit the vulnerability.\n\n          The cookie in Ubuntu has 24-bits of entropy. This reduces the effectiveness\n          and could allow exploitation in semi-reasonable amount of time.",
     "references": [
       "CVE-2010-4221",
       "OSVDB-68985",
@@ -63946,14 +63957,24 @@
       "ProFTPD 1_3_3a Server (Debian) - Squeeze Beta1 (Debug)",
       "ProFTPD 1.3.2c Server (Ubuntu 10.04)"
     ],
-    "mod_time": "2021-03-17 06:51:08 +0000",
+    "mod_time": "2025-06-10 22:36:46 +0000",
     "path": "/modules/exploits/linux/ftp/proftp_telnet_iac.rb",
     "is_install_path": true,
     "ref_name": "linux/ftp/proftp_telnet_iac",
     "check": true,
     "post_auth": false,
     "default_credential": false,
-    "notes": {},
+    "notes": {
+      "Stability": [
+        "crash-service-down"
+      ],
+      "SideEffects": [
+        "ioc-in-logs"
+      ],
+      "Reliability": [
+        "unreliable-session"
+      ]
+    },
     "session_types": false,
     "needs_cleanup": null
   },
@@ -86177,7 +86198,7 @@
     "targets": [
       "Linux x86"
     ],
-    "mod_time": "2025-02-23 18:58:52 +0000",
+    "mod_time": "2025-06-12 14:32:12 +0000",
     "path": "/modules/exploits/linux/local/sock_sendpage.rb",
     "is_install_path": true,
     "ref_name": "linux/local/sock_sendpage",
@@ -86188,8 +86209,12 @@
       "Reliability": [
         "repeatable-session"
       ],
+      "SideEffects": [],
       "Stability": [
         "crash-os-down"
+      ],
+      "AKA": [
+        "EXACTCHANGE"
       ]
     },
     "session_types": [
@@ -89446,10 +89471,10 @@
       "todb <todb@metasploit.com>",
       "lucipher"
     ],
-    "description": "On some default Linux installations of PostgreSQL, the\n        postgres service account may write to the /tmp directory, and\n        may source UDF Shared Libraries from there as well, allowing\n        execution of arbitrary code.\n\n        This module compiles a Linux shared object file, uploads it to\n        the target host via the UPDATE pg_largeobject method of binary\n        injection, and creates a UDF (user defined function) from that\n        shared object. Because the payload is run as the shared object's\n        constructor, it does not need to conform to specific Postgres\n        API versions.",
+    "description": "On some default Linux installations of PostgreSQL, the\n          postgres service account may write to the /tmp directory, and\n          may source UDF Shared Libraries from there as well, allowing\n          execution of arbitrary code.\n\n          This module compiles a Linux shared object file, uploads it to\n          the target host via the UPDATE pg_largeobject method of binary\n          injection, and creates a UDF (user defined function) from that\n          shared object. Because the payload is run as the shared object's\n          constructor, it does not need to conform to specific Postgres\n          API versions.",
     "references": [
       "CVE-2007-3280",
-      "URL-http://www.leidecker.info/pgshell/Having_Fun_With_PostgreSQL.txt"
+      "URL-https://www.leidecker.info/pgshell/Having_Fun_With_PostgreSQL.txt"
     ],
     "platform": "Linux",
     "arch": "",
@@ -89464,14 +89489,25 @@
       "Linux x86",
       "Linux x86_64"
     ],
-    "mod_time": "2024-02-19 10:57:53 +0000",
+    "mod_time": "2025-06-12 21:03:41 +0000",
     "path": "/modules/exploits/linux/postgres/postgres_payload.rb",
     "is_install_path": true,
     "ref_name": "linux/postgres/postgres_payload",
     "check": true,
     "post_auth": false,
     "default_credential": false,
-    "notes": {},
+    "notes": {
+      "Stability": [
+        "crash-safe"
+      ],
+      "SideEffects": [
+        "ioc-in-logs",
+        "artifacts-on-disk"
+      ],
+      "Reliability": [
+        "repeatable-session"
+      ]
+    },
     "session_types": [
       "postgresql"
     ],
@@ -89488,12 +89524,12 @@
     "author": [
       "spoonm <spoonm@no$email.com>"
     ],
-    "description": "This is an exploit for the Poptop negative read overflow.  This will\n        work against versions prior to 1.1.3-b3 and 1.1.3-20030409, but I\n        currently do not have a good way to detect Poptop versions.\n\n        The server will by default only allow 4 concurrent manager processes\n        (what we run our code in), so you could have a max of 4 shells at once.\n\n        Using the current method of exploitation, our socket will be closed\n        before we have the ability to run code, preventing the use of Findsock.",
+    "description": "This is an exploit for the Poptop negative read overflow.  This will\n          work against versions prior to 1.1.3-b3 and 1.1.3-20030409, but I\n          currently do not have a good way to detect Poptop versions.\n\n          The server will by default only allow 4 concurrent manager processes\n          (what we run our code in), so you could have a max of 4 shells at once.\n\n          Using the current method of exploitation, our socket will be closed\n          before we have the ability to run code, preventing the use of Findsock.",
     "references": [
       "CVE-2003-0213",
       "OSVDB-3293",
-      "URL-http://securityfocus.com/archive/1/317995",
-      "URL-http://www.freewebs.com/blightninjas/"
+      "URL-https://web.archive.org/web/20210120064041/http://securityfocus.com/archive/1/317995",
+      "URL-https://web.archive.org/web/20061215104830/http://www.freewebs.com/blightninjas/"
     ],
     "platform": "Linux",
     "arch": "x86",
@@ -89503,14 +89539,24 @@
     "targets": [
       "Linux Bruteforce"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-12 21:14:25 +0000",
     "path": "/modules/exploits/linux/pptp/poptop_negative_read.rb",
     "is_install_path": true,
     "ref_name": "linux/pptp/poptop_negative_read",
     "check": true,
     "post_auth": false,
     "default_credential": false,
-    "notes": {},
+    "notes": {
+      "Stability": [
+        "crash-service-down"
+      ],
+      "SideEffects": [
+        "ioc-in-logs"
+      ],
+      "Reliability": [
+        "repeatable-session"
+      ]
+    },
     "session_types": false,
     "needs_cleanup": null
   },
@@ -89658,7 +89704,7 @@
       "Jun Mao",
       "jduck <jduck@metasploit.com>"
     ],
-    "description": "This exploits a memory corruption vulnerability present in Samba versions\n        prior to 3.3.13. When handling chained response packets, Samba fails to validate\n        the offset value used when building the next part. By setting this value to a\n        number larger than the destination buffer size, an attacker can corrupt memory.\n        Additionally, setting this value to a value smaller than 'smb_wct' (0x24) will\n        cause the header of the input buffer chunk to be corrupted.\n\n        After close inspection, it appears that 3.0.x versions of Samba are not\n        exploitable. Since they use an \"InputBuffer\" size of 0x20441, an attacker cannot\n        cause memory to be corrupted in an exploitable way. It is possible to corrupt the\n        heap header of the \"InputBuffer\", but it didn't seem possible to get the chunk\n        to be processed again prior to process exit.\n\n        In order to gain code execution, this exploit attempts to overwrite a \"talloc\n        chunk\" destructor function pointer.\n\n        This particular module is capable of exploiting the flaw on x86 Linux systems\n        that do not have the nx memory protection.\n\n        NOTE: It is possible to make exploitation attempts indefinitely since Samba forks\n        for user sessions in the default configuration.",
+    "description": "This exploits a memory corruption vulnerability present in Samba versions\n          prior to 3.3.13. When handling chained response packets, Samba fails to validate\n          the offset value used when building the next part. By setting this value to a\n          number larger than the destination buffer size, an attacker can corrupt memory.\n          Additionally, setting this value to a value smaller than 'smb_wct' (0x24) will\n          cause the header of the input buffer chunk to be corrupted.\n\n          After close inspection, it appears that 3.0.x versions of Samba are not\n          exploitable. Since they use an \"InputBuffer\" size of 0x20441, an attacker cannot\n          cause memory to be corrupted in an exploitable way. It is possible to corrupt the\n          heap header of the \"InputBuffer\", but it didn't seem possible to get the chunk\n          to be processed again prior to process exit.\n\n          In order to gain code execution, this exploit attempts to overwrite a \"talloc\n          chunk\" destructor function pointer.\n\n          This particular module is capable of exploiting the flaw on x86 Linux systems\n          that do not have the nx memory protection.\n\n          NOTE: It is possible to make exploitation attempts indefinitely since Samba forks\n          for user sessions in the default configuration.",
     "references": [
       "CVE-2010-2063",
       "OSVDB-65518",
@@ -89679,14 +89725,24 @@
       "Linux (Debian5 3.2.5-4lenny6)",
       "Debugging Target"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-15 00:09:09 +0000",
     "path": "/modules/exploits/linux/samba/chain_reply.rb",
     "is_install_path": true,
     "ref_name": "linux/samba/chain_reply",
     "check": false,
     "post_auth": false,
     "default_credential": false,
-    "notes": {},
+    "notes": {
+      "Stability": [
+        "crash-service-restarts"
+      ],
+      "SideEffects": [
+        "ioc-in-logs"
+      ],
+      "Reliability": [
+        "unreliable-session"
+      ]
+    },
     "session_types": false,
     "needs_cleanup": null
   },
@@ -89702,7 +89758,7 @@
       "hdm <x@hdm.io>",
       "bcoles <bcoles@gmail.com>"
     ],
-    "description": "This module triggers an arbitrary shared library load vulnerability\n        in Samba versions 3.5.0 to 4.4.14, 4.5.10, and 4.6.4. This module\n        requires valid credentials, a writeable folder in an accessible share,\n        and knowledge of the server-side path of the writeable folder. In\n        some cases, anonymous access combined with common filesystem locations\n        can be used to automatically exploit this vulnerability.",
+    "description": "This module triggers an arbitrary shared library load vulnerability\n          in Samba versions 3.5.0 to 4.4.14, 4.5.10, and 4.6.4. This module\n          requires valid credentials, a writeable folder in an accessible share,\n          and knowledge of the server-side path of the writeable folder. In\n          some cases, anonymous access combined with common filesystem locations\n          can be used to automatically exploit this vulnerability.",
     "references": [
       "CVE-2017-7494",
       "URL-https://www.samba.org/samba/security/CVE-2017-7494.html"
@@ -89736,14 +89792,24 @@
       "Linux SPARC64",
       "Linux s390x"
     ],
-    "mod_time": "2023-03-05 14:30:47 +0000",
+    "mod_time": "2025-06-15 00:09:09 +0000",
     "path": "/modules/exploits/linux/samba/is_known_pipename.rb",
     "is_install_path": true,
     "ref_name": "linux/samba/is_known_pipename",
     "check": true,
     "post_auth": true,
     "default_credential": false,
-    "notes": {},
+    "notes": {
+      "Stability": [
+        "crash-safe"
+      ],
+      "SideEffects": [
+        "ioc-in-logs"
+      ],
+      "Reliability": [
+        "repeatable-session"
+      ]
+    },
     "session_types": false,
     "needs_cleanup": null
   },
@@ -89759,7 +89825,7 @@
       "Adriano Lima <adriano@risesecurity.org>",
       "hdm <x@hdm.io>"
     ],
-    "description": "This module triggers a heap overflow in the LSA RPC service\n      of the Samba daemon. This module uses the TALLOC chunk overwrite\n      method (credit Ramon and Adriano), which only works with Samba\n      versions 3.0.21-3.0.24. Additionally, this module will not work\n      when the Samba \"log level\" parameter is higher than \"2\".",
+    "description": "This module triggers a heap overflow in the LSA RPC service\n          of the Samba daemon. This module uses the TALLOC chunk overwrite\n          method (credit Ramon and Adriano), which only works with Samba\n          versions 3.0.21-3.0.24. Additionally, this module will not work\n          when the Samba \"log level\" parameter is higher than \"2\".",
     "references": [
       "CVE-2007-2446",
       "OSVDB-34699"
@@ -89786,14 +89852,24 @@
       "Linux Heap Brute Force (OpenWRT MIPS)",
       "DEBUG"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-15 00:09:09 +0000",
     "path": "/modules/exploits/linux/samba/lsa_transnames_heap.rb",
     "is_install_path": true,
     "ref_name": "linux/samba/lsa_transnames_heap",
     "check": true,
     "post_auth": false,
     "default_credential": false,
-    "notes": {},
+    "notes": {
+      "Stability": [
+        "crash-service-restarts"
+      ],
+      "Reliability": [
+        "repeatable-session"
+      ],
+      "SideEffects": [
+        "ioc-in-logs"
+      ]
+    },
     "session_types": false,
     "needs_cleanup": null
   },
@@ -89811,7 +89887,7 @@
       "sinn3r <sinn3r@metasploit.com>",
       "juan vazquez <juan.vazquez@metasploit.com>"
     ],
-    "description": "This module triggers a vulnerability in the LSA RPC service of the Samba daemon\n        because of an error on the PIDL auto-generated code. Making a specially crafted\n        call to SetInformationPolicy to set a PolicyAuditEventsInformation allows to\n        trigger a heap overflow and finally execute arbitrary code with root privileges.\n\n        The module uses brute force to guess the stackpivot/rop chain or the system()\n        address and redirect flow there in order to bypass NX. The start and stop addresses\n        for brute forcing have been calculated empirically. On the other hand the module\n        provides the StartBrute and StopBrute which allow the user to configure his own\n        addresses.",
+    "description": "This module triggers a vulnerability in the LSA RPC service of the Samba daemon\n          because of an error on the PIDL auto-generated code. Making a specially crafted\n          call to SetInformationPolicy to set a PolicyAuditEventsInformation allows to\n          trigger a heap overflow and finally execute arbitrary code with root privileges.\n\n          The module uses brute force to guess the stackpivot/rop chain or the system()\n          address and redirect flow there in order to bypass NX. The start and stop addresses\n          for brute forcing have been calculated empirically. On the other hand the module\n          provides the StartBrute and StopBrute which allow the user to configure his own\n          addresses.",
     "references": [
       "CVE-2012-1182",
       "OSVDB-81303",
@@ -89837,14 +89913,24 @@
       "2:3.5.6~dfsg-3squeeze6 on Debian Squeeze",
       "3.5.10-0.107.el5 on CentOS 5"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-15 00:09:09 +0000",
     "path": "/modules/exploits/linux/samba/setinfopolicy_heap.rb",
     "is_install_path": true,
     "ref_name": "linux/samba/setinfopolicy_heap",
     "check": true,
     "post_auth": false,
     "default_credential": false,
-    "notes": {},
+    "notes": {
+      "Stability": [
+        "crash-service-restarts"
+      ],
+      "Reliability": [
+        "unreliable-session"
+      ],
+      "SideEffects": [
+        "ioc-in-logs"
+      ]
+    },
     "session_types": false,
     "needs_cleanup": null
   },
@@ -89859,7 +89945,7 @@
       "hdm <x@hdm.io>",
       "jduck <jduck@metasploit.com>"
     ],
-    "description": "This exploits the buffer overflow found in Samba versions\n        2.2.0 to 2.2.8. This particular module is capable of\n        exploiting the flaw on x86 Linux systems that do not\n        have the noexec stack option set.\n\n        NOTE: Some older versions of RedHat do not seem to be vulnerable\n        since they apparently do not allow anonymous access to IPC.",
+    "description": "This exploits the buffer overflow found in Samba versions\n          2.2.0 to 2.2.8. This particular module is capable of\n          exploiting the flaw on x86 Linux systems that do not\n          have the noexec stack option set.\n\n          NOTE: Some older versions of RedHat do not seem to be vulnerable\n          since they apparently do not allow anonymous access to IPC.",
     "references": [
       "CVE-2003-0201",
       "OSVDB-4469",
@@ -89880,7 +89966,7 @@
     "targets": [
       "Samba 2.2.x - Bruteforce"
     ],
-    "mod_time": "2025-02-23 18:58:52 +0000",
+    "mod_time": "2025-06-15 00:09:09 +0000",
     "path": "/modules/exploits/linux/samba/trans2open.rb",
     "is_install_path": true,
     "ref_name": "linux/samba/trans2open",
@@ -89890,6 +89976,15 @@
     "notes": {
       "AKA": [
         "ECHOWRECKER"
+      ],
+      "Stability": [
+        "crash-service-restarts"
+      ],
+      "Reliability": [
+        "repeatable-session"
+      ],
+      "SideEffects": [
+        "ioc-in-logs"
       ]
     },
     "session_types": false,
@@ -91275,7 +91370,7 @@
     "targets": [
       "Automatic"
     ],
-    "mod_time": "2025-04-18 01:46:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/mainframe/ftp/ftp_jcl_creds.rb",
     "is_install_path": true,
     "ref_name": "mainframe/ftp/ftp_jcl_creds",
@@ -93199,7 +93294,7 @@
     "targets": [
       "Automatic"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/multi/browser/msfd_rce_browser.rb",
     "is_install_path": true,
     "ref_name": "multi/browser/msfd_rce_browser",
@@ -94158,7 +94253,7 @@
       "RedHat 6.2 (Version wu-2.6.0(1) Mon Feb 28 10:30:36 EST 2000)",
       "Debug"
     ],
-    "mod_time": "2025-05-21 18:27:24 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/multi/ftp/wuftpd_site_exec_format.rb",
     "is_install_path": true,
     "ref_name": "multi/ftp/wuftpd_site_exec_format",
@@ -106363,6 +106458,65 @@
     "session_types": false,
     "needs_cleanup": true
   },
+  "exploit_multi/http/roundcube_auth_rce_cve_2025_49113": {
+    "name": "Roundcube ≤ 1.6.10 Post-Auth RCE via PHP Object Deserialization",
+    "fullname": "exploit/multi/http/roundcube_auth_rce_cve_2025_49113",
+    "aliases": [],
+    "rank": 600,
+    "disclosure_date": "2025-06-02",
+    "type": "exploit",
+    "author": [
+      "Maksim Rogov",
+      "Kirill Firsov"
+    ],
+    "description": "Roundcube Webmail before 1.5.10 and 1.6.x before 1.6.11 allows remote code execution\n          by authenticated users because the _from parameter in a URL is not validated\n          in program/actions/settings/upload.php, leading to PHP Object Deserialization.\n\n          An attacker can execute arbitrary system commands as the web server.",
+    "references": [
+      "CVE-2025-49113",
+      "URL-https://fearsoff.org/research/roundcube"
+    ],
+    "platform": "Linux,Unix",
+    "arch": "",
+    "rport": 80,
+    "autofilter_ports": [
+      80,
+      8080,
+      443,
+      8000,
+      8888,
+      8880,
+      8008,
+      3000,
+      8443
+    ],
+    "autofilter_services": [
+      "http",
+      "https"
+    ],
+    "targets": [
+      "Linux Dropper",
+      "Linux Command"
+    ],
+    "mod_time": "2025-06-11 11:05:33 +0000",
+    "path": "/modules/exploits/multi/http/roundcube_auth_rce_cve_2025_49113.rb",
+    "is_install_path": true,
+    "ref_name": "multi/http/roundcube_auth_rce_cve_2025_49113",
+    "check": true,
+    "post_auth": true,
+    "default_credential": false,
+    "notes": {
+      "Stability": [
+        "crash-safe"
+      ],
+      "SideEffects": [
+        "ioc-in-logs"
+      ],
+      "Reliability": [
+        "repeatable-session"
+      ]
+    },
+    "session_types": false,
+    "needs_cleanup": true
+  },
   "exploit_multi/http/rudder_server_sqli_rce": {
     "name": "Rudder Server SQLI Remote Code Execution",
     "fullname": "exploit/multi/http/rudder_server_sqli_rce",
@@ -109452,7 +109606,7 @@
     "targets": [
       "Automatic"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:01:52 +0000",
     "path": "/modules/exploits/multi/http/uptime_file_upload_2.rb",
     "is_install_path": true,
     "ref_name": "multi/http/uptime_file_upload_2",
@@ -120311,7 +120465,7 @@
     "targets": [
       "Automatic Target"
     ],
-    "mod_time": "2021-02-17 12:33:59 +0000",
+    "mod_time": "2025-06-10 23:01:52 +0000",
     "path": "/modules/exploits/unix/http/pfsense_graph_injection_exec.rb",
     "is_install_path": true,
     "ref_name": "unix/http/pfsense_graph_injection_exec",
@@ -126268,7 +126422,7 @@
       "phpbb <=2.0.10",
       "phpbb <=2.0.15"
     ],
-    "mod_time": "2025-05-30 17:17:54 +0000",
+    "mod_time": "2025-06-12 14:32:12 +0000",
     "path": "/modules/exploits/unix/webapp/phpbb_highlight.rb",
     "is_install_path": true,
     "ref_name": "unix/webapp/phpbb_highlight",
@@ -126280,7 +126434,10 @@
         "crash-safe"
       ],
       "SideEffects": [],
-      "Reliability": []
+      "Reliability": [],
+      "AKA": [
+        "ESMARKCONANT"
+      ]
     },
     "session_types": false,
     "needs_cleanup": null
@@ -139101,7 +139258,7 @@
     "targets": [
       "Windows XP SP0-SP3 / IE 6.0 SP0-SP2"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/browser/orbit_connecting.rb",
     "is_install_path": true,
     "ref_name": "windows/browser/orbit_connecting",
@@ -141687,7 +141844,7 @@
     "targets": [
       "ACDSee 9.0 (Build 1008)"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/acdsee_xpm.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/acdsee_xpm",
@@ -142571,7 +142728,7 @@
     "targets": [
       "Windows XP SP3 with DEP bypass"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/apple_quicktime_pnsize.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/apple_quicktime_pnsize",
@@ -142725,7 +142882,7 @@
     "targets": [
       "Windows Universal"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/audio_wkstn_pls.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/audio_wkstn_pls",
@@ -143202,7 +143359,7 @@
     "targets": [
       "CCMPlayer 1.5"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/ccmplayer_m3u_bof.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/ccmplayer_m3u_bof",
@@ -143355,7 +143512,7 @@
     "targets": [
       "Csound 5.15 / Windows XP SP3 / Windows 7 SP1"
     ],
-    "mod_time": "2023-03-23 10:19:30 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/csound_getnum_bof.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/csound_getnum_bof",
@@ -143660,7 +143817,7 @@
     "targets": [
       "Windows XP SP2"
     ],
-    "mod_time": "2023-03-23 10:19:30 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/digital_music_pad_pls.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/digital_music_pad_pls",
@@ -144183,7 +144340,7 @@
     "targets": [
       "Free Download Manager 3.0 (Build 844)"
     ],
-    "mod_time": "2023-03-23 10:19:30 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/fdm_torrent.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/fdm_torrent",
@@ -144415,7 +144572,7 @@
     "targets": [
       "Windows XP SP3 EN"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/free_mp3_ripper_wav.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/free_mp3_ripper_wav",
@@ -144754,7 +144911,7 @@
     "targets": [
       "HT-MP3Player 1.0"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/ht_mp3player_ht3_bof.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/ht_mp3player_ht3_bof",
@@ -145166,7 +145323,7 @@
     "targets": [
       "Windows Universal DEP & ASLR Bypass"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/magix_musikmaker_16_mmm.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/magix_musikmaker_16_mmm",
@@ -145455,7 +145612,7 @@
     "targets": [
       "Mini-stream RM-MP3 Converter v3.1.2.1.2010.03.30"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/mini_stream_pls_bof.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/mini_stream_pls_bof",
@@ -145490,7 +145647,7 @@
     "targets": [
       "Windows Universal Generic DEP & ASLR Bypass"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/mjm_coreplayer2011_s3m.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/mjm_coreplayer2011_s3m",
@@ -145525,7 +145682,7 @@
     "targets": [
       "Windows Universal Generic DEP & ASLR Bypass"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/mjm_quickplayer_s3m.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/mjm_quickplayer_s3m",
@@ -146278,7 +146435,7 @@
     "targets": [
       "Windows XP SP2 English"
     ],
-    "mod_time": "2021-02-13 04:10:13 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/ms_visual_basic_vbp.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/ms_visual_basic_vbp",
@@ -147127,7 +147284,7 @@
       "WinSrv 2000 SP2 English",
       "WinSrv 2003 Enterprise Edition SP1 (v1023) English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/safenet_softremote_groupname.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/safenet_softremote_groupname",
@@ -147803,7 +147960,7 @@
     "targets": [
       "Windows XP/Vista/Win7/... Generic DEP & ASLR Bypass"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/videospirit_visprj.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/videospirit_visprj",
@@ -148099,7 +148256,7 @@
     "targets": [
       "VUPlayer 2.49"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/vuplayer_cue.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/vuplayer_cue",
@@ -148133,7 +148290,7 @@
     "targets": [
       "VUPlayer 2.49"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/vuplayer_m3u.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/vuplayer_m3u",
@@ -148375,7 +148532,7 @@
       "WinXP SP3 Spanish (bypass DEP)",
       "WinXP SP2/SP3 English  (bypass DEP)"
     ],
-    "mod_time": "2022-01-23 15:28:32 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/wireshark_mpeg_overflow.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/wireshark_mpeg_overflow",
@@ -148414,7 +148571,7 @@
     "targets": [
       "Win32 Universal (Generic DEP & ASLR Bypass)"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/fileformat/wireshark_packet_dect.rb",
     "is_install_path": true,
     "ref_name": "windows/fileformat/wireshark_packet_dect",
@@ -149192,7 +149349,7 @@
       "Windows XP SP3 - English",
       "Windows Server 2003 - English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/ftp/comsnd_ftpd_fmtstr.rb",
     "is_install_path": true,
     "ref_name": "windows/ftp/comsnd_ftpd_fmtstr",
@@ -149995,7 +150152,7 @@
       "httpdx 1.4.6b - Windows XP SP3 English",
       "httpdx 1.5 - Windows XP SP3 English"
     ],
-    "mod_time": "2022-08-08 01:40:15 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/ftp/httpdx_tolog_format.rb",
     "is_install_path": true,
     "ref_name": "windows/ftp/httpdx_tolog_format",
@@ -150803,7 +150960,7 @@
     "targets": [
       "XP Universal"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/ftp/seagull_list_reply.rb",
     "is_install_path": true,
     "ref_name": "windows/ftp/seagull_list_reply",
@@ -151047,7 +151204,7 @@
       "Automatic Targeting",
       "vftpd 1.31 - Windows XP SP3 English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/ftp/vermillion_ftpd_port.rb",
     "is_install_path": true,
     "ref_name": "windows/ftp/vermillion_ftpd_port",
@@ -151930,7 +152087,7 @@
     "targets": [
       "Windows 2000 Pro All - English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/amlibweb_webquerydll_app.rb",
     "is_install_path": true,
     "ref_name": "windows/http/amlibweb_webquerydll_app",
@@ -152103,7 +152260,7 @@
     "targets": [
       "Automatic"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/apache_mod_rewrite_ldap.rb",
     "is_install_path": true,
     "ref_name": "windows/http/apache_mod_rewrite_ldap",
@@ -152338,7 +152495,7 @@
       "BadBlue EE 2.7 Universal",
       "BadBlue 2.72b Universal"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/badblue_passthru.rb",
     "is_install_path": true,
     "ref_name": "windows/http/badblue_passthru",
@@ -152520,7 +152677,7 @@
     "targets": [
       "Windows XP SP3 English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/belkin_bulldog.rb",
     "is_install_path": true,
     "ref_name": "windows/http/belkin_bulldog",
@@ -155420,7 +155577,7 @@
       "HP OpenView Network Node Manager 7.50",
       "HP OpenView Network Node Manager 7.53"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/hp_nnm_getnnmdata_hostname.rb",
     "is_install_path": true,
     "ref_name": "windows/http/hp_nnm_getnnmdata_hostname",
@@ -155468,7 +155625,7 @@
       "HP OpenView Network Node Manager 7.50",
       "HP OpenView Network Node Manager 7.53"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/hp_nnm_getnnmdata_icount.rb",
     "is_install_path": true,
     "ref_name": "windows/http/hp_nnm_getnnmdata_icount",
@@ -155516,7 +155673,7 @@
       "HP OpenView Network Node Manager 7.50",
       "HP OpenView Network Node Manager 7.53"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/hp_nnm_getnnmdata_maxage.rb",
     "is_install_path": true,
     "ref_name": "windows/http/hp_nnm_getnnmdata_maxage",
@@ -156774,7 +156931,7 @@
       "httpdx 1.4 - Windows XP SP3 English",
       "httpdx 1.4 - Windows 2003 SP2 English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/httpdx_handlepeer.rb",
     "is_install_path": true,
     "ref_name": "windows/http/httpdx_handlepeer",
@@ -156827,7 +156984,7 @@
       "httpdx 1.5 - Windows XP SP3 English",
       "Debug target"
     ],
-    "mod_time": "2023-05-30 10:56:41 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/httpdx_tolog_format.rb",
     "is_install_path": true,
     "ref_name": "windows/http/httpdx_tolog_format",
@@ -161913,7 +162070,7 @@
       "Windows 2000 Pro English All",
       "Windows XP Pro SP0/SP1 English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/http/steamcast_useragent.rb",
     "is_install_path": true,
     "ref_name": "windows/http/steamcast_useragent",
@@ -163223,7 +163380,7 @@
     "targets": [
       "Microsoft Windows Server 2003 R2 SP2 x86"
     ],
-    "mod_time": "2024-01-22 19:12:21 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/iis/iis_webdav_scstoragepathfromurl.rb",
     "is_install_path": true,
     "ref_name": "windows/iis/iis_webdav_scstoragepathfromurl",
@@ -169200,7 +169357,7 @@
     "targets": [
       "Windows Universal"
     ],
-    "mod_time": "2025-05-21 10:45:08 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/local/pxeexploit.rb",
     "is_install_path": true,
     "ref_name": "windows/local/pxeexploit",
@@ -170801,7 +170958,7 @@
       "Windows 2000 Pro All English",
       "Windows XP Pro SP0/SP1 English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/misc/bigant_server.rb",
     "is_install_path": true,
     "ref_name": "windows/misc/bigant_server",
@@ -170839,7 +170996,7 @@
       "Windows 2000 Pro All English",
       "Windows XP Pro SP0/SP1 English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/misc/bigant_server_250.rb",
     "is_install_path": true,
     "ref_name": "windows/misc/bigant_server_250",
@@ -173731,7 +173888,7 @@
     "targets": [
       "Windows Universal"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/misc/nettransport.rb",
     "is_install_path": true,
     "ref_name": "windows/misc/nettransport",
@@ -173909,7 +174066,7 @@
     "targets": [
       "POP Peeper v3.4"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/misc/poppeeper_date.rb",
     "is_install_path": true,
     "ref_name": "windows/misc/poppeeper_date",
@@ -173944,7 +174101,7 @@
     "targets": [
       "POP Peeper v3.4"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/misc/poppeeper_uidl.rb",
     "is_install_path": true,
     "ref_name": "windows/misc/poppeeper_uidl",
@@ -174379,7 +174536,7 @@
     "targets": [
       "Windows XP SP3 English"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/misc/talkative_response.rb",
     "is_install_path": true,
     "ref_name": "windows/misc/talkative_response",
@@ -174832,7 +174989,7 @@
     "targets": [
       "Win32 Universal (Generic DEP & ASLR Bypass)"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/misc/wireshark_packet_dect.rb",
     "is_install_path": true,
     "ref_name": "windows/misc/wireshark_packet_dect",
@@ -175736,7 +175893,7 @@
       "Novell GroupWise Messenger 2.0 Client",
       "Novell GroupWise Messenger 1.0 Client"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/novell/groupwisemessenger_client.rb",
     "is_install_path": true,
     "ref_name": "windows/novell/groupwisemessenger_client",
@@ -178032,7 +178189,7 @@
     "targets": [
       "Windows"
     ],
-    "mod_time": "2020-10-02 17:38:06 +0000",
+    "mod_time": "2025-06-10 23:57:52 +0000",
     "path": "/modules/exploits/windows/scada/sunway_force_control_netdbsrv.rb",
     "is_install_path": true,
     "ref_name": "windows/scada/sunway_force_control_netdbsrv",
