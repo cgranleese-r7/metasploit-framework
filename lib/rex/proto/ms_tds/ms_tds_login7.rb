@@ -1,4 +1,6 @@
 require 'rex/text'
+require 'ruby_smb/field/string16'
+require 'rex/proto/ms_tds/ms_tds_login7_password'
 
 module Rex::Proto::MsTds
   # see: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-tds/773a62b6-ee89-4c02-9e5e-344882630aac
